@@ -1,0 +1,405 @@
+import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  getDashboardStats,
+  getLeadFunnelStats,
+  getOutreachStats,
+  getTodaysTasks,
+  getRecentActivity,
+  getBrandPerformance,
+} from "@/lib/actions/dashboard";
+import {
+  Users,
+  Building2,
+  Megaphone,
+  TrendingUp,
+  Send,
+  MessageCircle,
+  Clock,
+  CheckCircle2,
+  ArrowRight,
+  Sparkles,
+  Mail,
+  UserPlus,
+} from "lucide-react";
+
+export default async function DashboardPage() {
+  const [stats, funnel, outreach, tasks, activity, brandPerf] = await Promise.all([
+    getDashboardStats(),
+    getLeadFunnelStats(),
+    getOutreachStats(),
+    getTodaysTasks(),
+    getRecentActivity(),
+    getBrandPerformance(),
+  ]);
+
+  const funnelSteps = [
+    { key: "discovered", label: "Discovered", color: "bg-slate-500" },
+    { key: "contacted", label: "Contacted", color: "bg-blue-500" },
+    { key: "engaged", label: "Engaged", color: "bg-purple-500" },
+    { key: "active", label: "Active", color: "bg-green-500" },
+  ];
+
+  const statusColors: Record<string, string> = {
+    discovered: "bg-slate-100 text-slate-700",
+    researching: "bg-yellow-100 text-yellow-700",
+    qualified: "bg-blue-100 text-blue-700",
+    contacted: "bg-indigo-100 text-indigo-700",
+    engaged: "bg-purple-100 text-purple-700",
+    active: "bg-green-100 text-green-700",
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground mt-1">
+            Your creator outreach command center
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Link href="/brands/new">
+            <Button variant="outline">
+              <Building2 className="h-4 w-4 mr-2" />
+              New Brand
+            </Button>
+          </Link>
+          <Link href="/campaigns/new">
+            <Button>
+              <Megaphone className="h-4 w-4 mr-2" />
+              New Campaign
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      {/* Top Stats */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Creators</p>
+                <p className="text-3xl font-bold">{stats.creators}</p>
+              </div>
+              <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
+                <Users className="h-6 w-6 text-blue-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Active Brands</p>
+                <p className="text-3xl font-bold">{stats.brands}</p>
+              </div>
+              <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center">
+                <Building2 className="h-6 w-6 text-purple-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total Leads</p>
+                <p className="text-3xl font-bold">{stats.totalLeads}</p>
+              </div>
+              <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
+                <UserPlus className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Active Campaigns</p>
+                <p className="text-3xl font-bold">{stats.activeCampaigns}</p>
+              </div>
+              <div className="h-12 w-12 rounded-full bg-orange-100 flex items-center justify-center">
+                <Megaphone className="h-6 w-6 text-orange-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Lead Funnel */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              Lead Funnel
+            </CardTitle>
+            <CardDescription>Your outreach pipeline at a glance</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {funnelSteps.map((step, i) => {
+                const value = funnel[step.key] || 0;
+                const maxValue = Math.max(...funnelSteps.map(s => funnel[s.key] || 0), 1);
+                const width = Math.max((value / maxValue) * 100, 5);
+                
+                return (
+                  <div key={step.key} className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="font-medium">{step.label}</span>
+                      <span className="text-muted-foreground">{value}</span>
+                    </div>
+                    <div className="h-3 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className={`h-full ${step.color} rounded-full transition-all`}
+                        style={{ width: `${width}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            
+            {/* Conversion rate */}
+            <div className="mt-4 pt-4 border-t flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Conversion Rate</span>
+              <span className="text-lg font-semibold">
+                {stats.totalLeads > 0 
+                  ? Math.round(((funnel.active || 0) / stats.totalLeads) * 100)
+                  : 0}%
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Outreach Stats */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5" />
+              Outreach Performance
+            </CardTitle>
+            <CardDescription>Message delivery and engagement</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center p-4 bg-muted/50 rounded-lg">
+                <p className="text-3xl font-bold">{outreach.total}</p>
+                <p className="text-sm text-muted-foreground">Messages Sent</p>
+              </div>
+              <div className="text-center p-4 bg-muted/50 rounded-lg">
+                <p className="text-3xl font-bold">{(outreach as Record<string, number>).replied || 0}</p>
+                <p className="text-sm text-muted-foreground">Replies</p>
+              </div>
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <p className="text-3xl font-bold text-blue-600">{outreach.openRate}%</p>
+                <p className="text-sm text-muted-foreground">Open Rate</p>
+              </div>
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <p className="text-3xl font-bold text-green-600">{outreach.replyRate}%</p>
+                <p className="text-sm text-muted-foreground">Reply Rate</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Today's Tasks */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-yellow-500" />
+              Today&apos;s Tasks
+            </CardTitle>
+            <CardDescription>Your outreach queue for today</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* DMs to Send */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-medium flex items-center gap-2">
+                  <Send className="h-4 w-4 text-blue-500" />
+                  DMs to Send
+                </h4>
+                <Badge variant="secondary">{tasks.toContact.length}</Badge>
+              </div>
+              {tasks.toContact.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-2">No DMs queued - you&apos;re all caught up! 🎉</p>
+              ) : (
+                <div className="space-y-2">
+                  {tasks.toContact.slice(0, 3).map((lead) => (
+                    <Link
+                      key={lead.id}
+                      href={`/brands/${lead.brandId}/send-dms`}
+                      className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors"
+                    >
+                      <div>
+                        <p className="font-medium text-sm">{lead.creatorName}</p>
+                        <p className="text-xs text-muted-foreground">{lead.brandName}</p>
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                    </Link>
+                  ))}
+                  {tasks.toContact.length > 3 && (
+                    <p className="text-sm text-muted-foreground text-center">
+                      +{tasks.toContact.length - 3} more
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Follow-ups */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-medium flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-orange-500" />
+                  Follow-ups Due
+                </h4>
+                <Badge variant="secondary">{tasks.followUps.length}</Badge>
+              </div>
+              {tasks.followUps.length === 0 ? (
+                <p className="text-sm text-muted-foreground py-2">No follow-ups due today</p>
+              ) : (
+                <div className="space-y-2">
+                  {tasks.followUps.slice(0, 3).map((lead) => (
+                    <Link
+                      key={lead.id}
+                      href={`/brands/${lead.brandId}/follow-ups`}
+                      className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors"
+                    >
+                      <div>
+                        <p className="font-medium text-sm">{lead.creatorName}</p>
+                        <p className="text-xs text-muted-foreground">{lead.brandName}</p>
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Recent Activity */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5" />
+              Recent Activity
+            </CardTitle>
+            <CardDescription>Latest updates across your brands</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {activity.recentLeads.length === 0 ? (
+              <p className="text-sm text-muted-foreground py-4 text-center">
+                No recent activity yet. Start by adding creators to a brand!
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {activity.recentLeads.map((lead) => (
+                  <div
+                    key={lead.id}
+                    className="flex items-center justify-between py-2 border-b last:border-0"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-medium">
+                        {lead.creatorName.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">{lead.creatorName}</p>
+                        <p className="text-xs text-muted-foreground">{lead.brandName}</p>
+                      </div>
+                    </div>
+                    <Badge className={statusColors[lead.status] || "bg-gray-100"}>
+                      {lead.status}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Top Brands */}
+      {brandPerf.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              Top Brands by Leads
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-5">
+              {brandPerf.map((brand, i) => (
+                <Link
+                  key={brand.brandId}
+                  href={`/brands/${brand.brandId}`}
+                  className="p-4 rounded-lg border hover:shadow-md transition-shadow text-center"
+                >
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2 text-lg font-bold">
+                    {brand.brandName.charAt(0)}
+                  </div>
+                  <p className="font-medium text-sm truncate">{brand.brandName}</p>
+                  <p className="text-2xl font-bold mt-1">{brand.totalLeads}</p>
+                  <p className="text-xs text-muted-foreground">leads</p>
+                </Link>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Quick Actions */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Quick Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/creators/new">
+              <Button variant="outline">
+                <UserPlus className="h-4 w-4 mr-2" />
+                Add Creator
+              </Button>
+            </Link>
+            <Link href="/brands/new">
+              <Button variant="outline">
+                <Building2 className="h-4 w-4 mr-2" />
+                Add Brand
+              </Button>
+            </Link>
+            <Link href="/campaigns/new">
+              <Button variant="outline">
+                <Megaphone className="h-4 w-4 mr-2" />
+                New Campaign
+              </Button>
+            </Link>
+            <Link href="/creators">
+              <Button variant="ghost">View All Creators</Button>
+            </Link>
+            <Link href="/brands">
+              <Button variant="ghost">View All Brands</Button>
+            </Link>
+            <Link href="/campaigns">
+              <Button variant="ghost">View All Campaigns</Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
