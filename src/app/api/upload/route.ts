@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-
-// Initialize Supabase client for storage
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+import { getOptionalEnv } from "@/lib/env";
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +17,10 @@ export async function POST(request: NextRequest) {
     const extension = file.name.split(".").pop();
     const filename = `${timestamp}-${randomId}.${extension}`;
 
-    // Check if Supabase is configured
+    // Check if Supabase storage is configured
+    const supabaseUrl = getOptionalEnv("NEXT_PUBLIC_SUPABASE_URL");
+    const supabaseServiceKey = getOptionalEnv("SUPABASE_SERVICE_ROLE_KEY");
+
     if (supabaseUrl && supabaseServiceKey) {
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
 

@@ -1,26 +1,39 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
+import { getDatabaseUrl } from "@/lib/env";
 
-// Get connection string from environment
-const connectionString = process.env.DATABASE_URL;
+type DrizzleDb = ReturnType<typeof drizzle<typeof schema>>;
 
-if (!connectionString) {
-  throw new Error("DATABASE_URL is not set");
+let dbInstance: DrizzleDb | null = null;
+
+function createDb() {
+  const client = postgres(getDatabaseUrl(), {
+    prepare: false, // Required for pgbouncer/transaction mode
+    max: 1, // Limit connections in serverless
+  });
+
+  return drizzle(client, { schema });
 }
 
-// Create postgres client
-// Using connection pooling via Supabase's pgbouncer
-const client = postgres(connectionString, {
-  prepare: false, // Required for pgbouncer/transaction mode
-  max: 1, // Limit connections in serverless
-});
+function getDb() {
+  if (!dbInstance) {
+    dbInstance = createDb();
+  }
 
-// Create drizzle instance with schema
-export const db = drizzle(client, { schema });
+  return dbInstance;
+}
+
+// Keep the existing `db.select(...)` call sites, but avoid opening/validating the
+// database connection just because a route module was imported during build.
+export const db = new Proxy({} as DrizzleDb, {
+  get(_target, prop, receiver) {
+    return Reflect.get(getDb(), prop, receiver);
+  },
+});
 
 // Export schema for use in queries
 export { schema };
 
 // Export types
-export type Database = typeof db;
+export type Database = DrizzleDb;

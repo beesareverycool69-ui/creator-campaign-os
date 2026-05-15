@@ -11,6 +11,8 @@ import {
   LogOut
 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/creators", label: "Creators", icon: Users },
