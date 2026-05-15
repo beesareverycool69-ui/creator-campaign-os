@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { MobileNav } from "@/components/layout/mobile-nav";
 import { 
   LayoutDashboard, 
   Users, 
@@ -35,7 +36,7 @@ export default async function AppLayout({
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
-      <aside className="w-64 border-r bg-muted/30 flex flex-col">
+      <aside className="hidden w-64 border-r bg-muted/30 md:flex flex-col">
         {/* Logo */}
         <div className="p-6 border-b">
           <Link href="/dashboard" className="font-bold text-lg">
@@ -81,7 +82,13 @@ export default async function AppLayout({
 
       {/* Main content */}
       <main className="flex-1 overflow-auto">
-        <div className="container mx-auto px-8 py-8 max-w-6xl">
+        <div className="flex items-center gap-3 border-b px-4 py-3 md:hidden">
+          <MobileNav userEmail={user.email} />
+          <Link href="/dashboard" className="font-bold text-base">
+            Creator Campaign OS
+          </Link>
+        </div>
+        <div className="container mx-auto px-4 py-6 max-w-6xl md:px-8 md:py-8">
           {children}
         </div>
       </main>
