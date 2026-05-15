@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getBrandById } from "@/lib/actions/brands";
 import { getLeadsForOutreach } from "@/lib/actions/outreach";
 import { SendDMsQueue } from "@/components/features/outreach/send-dms-queue";
+import { EmptyState } from "@/components/ui/empty-state";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -79,17 +80,12 @@ export default async function SendDMsPage({ params }: Props) {
 
       {/* Queue */}
       {leads.length === 0 ? (
-        <div className="rounded-lg border p-8 text-center">
-          <p className="text-muted-foreground">
-            No leads ready for outreach. Add creators to this brand first.
-          </p>
-          <Link 
-            href={`/brands/${id}/leads`}
-            className="inline-block mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-          >
-            View Leads
-          </Link>
-        </div>
+        <EmptyState
+          title="No DMs ready"
+          description="Add or qualify creators for this brand, then come back to send outreach."
+          actionHref={`/brands/${id}/leads`}
+          actionLabel="View Leads"
+        />
       ) : (
         <SendDMsQueue brandId={id} initialLeads={leads} />
       )}

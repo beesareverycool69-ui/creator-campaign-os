@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   getDashboardStats,
   getLeadFunnelStats,
@@ -235,7 +236,12 @@ export default async function DashboardPage() {
                 <Badge variant="secondary">{tasks.toContact.length}</Badge>
               </div>
               {tasks.toContact.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-2">No DMs queued - you&apos;re all caught up! 🎉</p>
+                <EmptyState
+                  title="No DMs queued"
+                  description="You are caught up. Qualify more creators when you are ready."
+                  actionHref="/brands"
+                  actionLabel="View Brands"
+                />
               ) : (
                 <div className="space-y-2">
                   {tasks.toContact.slice(0, 3).map((lead) => (
@@ -270,7 +276,12 @@ export default async function DashboardPage() {
                 <Badge variant="secondary">{tasks.followUps.length}</Badge>
               </div>
               {tasks.followUps.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-2">No follow-ups due today</p>
+                <EmptyState
+                  title="No follow-ups due"
+                  description="Nothing needs a nudge today."
+                  actionHref="/brands"
+                  actionLabel="View Brands"
+                />
               ) : (
                 <div className="space-y-2">
                   {tasks.followUps.slice(0, 3).map((lead) => (
@@ -303,9 +314,12 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             {activity.recentLeads.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">
-                No recent activity yet. Start by adding creators to a brand!
-              </p>
+              <EmptyState
+                title="No recent activity"
+                description="Add creators to a brand to start building your outreach history."
+                actionHref="/brands"
+                actionLabel="View Brands"
+              />
             ) : (
               <div className="space-y-3">
                 {activity.recentLeads.map((lead) => (

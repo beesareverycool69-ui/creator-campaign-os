@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getBrandById } from "@/lib/actions/brands";
 import { getLeadsForFollowUp, getLeadsForReEngage } from "@/lib/actions/outreach";
 import { FollowUpsQueue } from "@/components/features/outreach/follow-ups-queue";
+import { EmptyState } from "@/components/ui/empty-state";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -78,14 +79,6 @@ export default async function FollowUpsPage({ params, searchParams }: Props) {
         </p>
       </div>
 
-      {/* No follow-ups due today */}
-      {currentLeads.length === 0 && (
-        <div className="rounded-lg bg-green-500/10 border border-green-500/20 p-4 flex items-center gap-2">
-          <span className="text-green-500">✓</span>
-          <span className="text-sm">No follow-ups due today</span>
-        </div>
-      )}
-
       {/* Tabs */}
       <div className="flex gap-2">
         {tabs.map((t) => (
@@ -104,7 +97,14 @@ export default async function FollowUpsPage({ params, searchParams }: Props) {
       </div>
 
       {/* Queue */}
-      {currentLeads.length > 0 && (
+      {currentLeads.length === 0 ? (
+        <EmptyState
+          title="No follow-ups due"
+          description="You are caught up. New follow-ups appear here after outreach timing is met."
+          actionHref={`/brands/${id}/send-dms`}
+          actionLabel="Send DMs"
+        />
+      ) : (
         <>
           <p className="text-sm text-muted-foreground">
             <strong>Upcoming</strong> • Timer is ticking. You can send early if you want.

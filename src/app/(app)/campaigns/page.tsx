@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { CampaignCard } from "@/components/features/campaigns";
 import { getCampaigns } from "@/lib/actions/campaigns";
 
@@ -23,15 +24,12 @@ export default async function CampaignsPage() {
 
       {/* Campaign list */}
       {campaigns.length === 0 ? (
-        <div className="text-center py-12 border rounded-lg">
-          <h3 className="text-lg font-medium mb-2">No campaigns yet</h3>
-          <p className="text-muted-foreground mb-4">
-            Create your first campaign to start working with creators.
-          </p>
-          <Link href="/campaigns/new">
-            <Button>+ New Campaign</Button>
-          </Link>
-        </div>
+        <EmptyState
+          title="No campaigns yet"
+          description="Create a campaign when you are ready to manage creator deliverables."
+          actionHref="/campaigns/new"
+          actionLabel="+ New Campaign"
+        />
       ) : (
         <div className="grid gap-4">
           {campaigns.map((campaign) => (

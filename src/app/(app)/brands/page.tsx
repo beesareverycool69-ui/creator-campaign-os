@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { BrandCard } from "@/components/features/brands";
 import { getBrands } from "@/lib/actions/brands";
 
@@ -23,15 +24,12 @@ export default async function BrandsPage() {
 
       {/* Brand list */}
       {brands.length === 0 ? (
-        <div className="text-center py-12 border rounded-lg">
-          <h3 className="text-lg font-medium mb-2">No brands yet</h3>
-          <p className="text-muted-foreground mb-4">
-            Add your first brand to start managing creator relationships.
-          </p>
-          <Link href="/brands/new">
-            <Button>+ Add Brand</Button>
-          </Link>
-        </div>
+        <EmptyState
+          title="No brands yet"
+          description="Add your first brand to start building creator outreach lists."
+          actionHref="/brands/new"
+          actionLabel="+ Add Brand"
+        />
       ) : (
         <div className="grid gap-4">
           {brands.map((brand) => (

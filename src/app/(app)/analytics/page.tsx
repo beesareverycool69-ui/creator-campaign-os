@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   getOverallStats,
   getTopCreators,
@@ -152,9 +153,12 @@ export default async function AnalyticsPage() {
         </CardHeader>
         <CardContent>
           {dailyStats.length === 0 ? (
-            <div className="h-48 flex items-center justify-center text-muted-foreground">
-              No conversion data yet. Connect your store webhook to start tracking!
-            </div>
+            <EmptyState
+              title="No revenue data yet"
+              description="Conversions will appear here once affiliate tracking starts."
+              actionHref="/campaigns"
+              actionLabel="View Campaigns"
+            />
           ) : (
             <div className="h-48 flex items-end gap-1">
               {dailyStats.map((day, i) => (
@@ -191,9 +195,12 @@ export default async function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             {topCreators.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">
-                No conversions tracked yet
-              </p>
+              <EmptyState
+                title="No creator performance yet"
+                description="Creators will rank here after tracked conversions."
+                actionHref="/campaigns"
+                actionLabel="View Campaigns"
+              />
             ) : (
               <div className="space-y-3">
                 {topCreators.map((creator, i) => (
@@ -238,9 +245,12 @@ export default async function AnalyticsPage() {
           </CardHeader>
           <CardContent>
             {campaignPerf.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">
-                No campaigns yet
-              </p>
+              <EmptyState
+                title="No campaign performance yet"
+                description="Create a campaign and add creators to start tracking results."
+                actionHref="/campaigns/new"
+                actionLabel="+ New Campaign"
+              />
             ) : (
               <div className="space-y-3">
                 {campaignPerf.slice(0, 5).map((campaign) => (

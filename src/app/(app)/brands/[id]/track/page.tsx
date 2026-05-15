@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getBrandById } from "@/lib/actions/brands";
 import { getBrandCreators, getLeadStatusCounts } from "@/lib/actions/brand-creators";
 import { TrackList } from "@/components/features/outreach/track-list";
+import { EmptyState } from "@/components/ui/empty-state";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -129,11 +130,12 @@ export default async function TrackPage({ params, searchParams }: Props) {
       <div>
         <p className="text-sm text-muted-foreground mb-4">{leads.length} leads</p>
         {leads.length === 0 ? (
-          <div className="rounded-lg border p-8 text-center">
-            <p className="text-muted-foreground">
-              No leads in this status.
-            </p>
-          </div>
+          <EmptyState
+            title="No leads here"
+            description="Responses will show up in this tab as you track outreach."
+            actionHref={`/brands/${id}/send-dms`}
+            actionLabel="Send DMs"
+          />
         ) : (
           <TrackList brandId={id} leads={leads} currentTab={tab} />
         )}
