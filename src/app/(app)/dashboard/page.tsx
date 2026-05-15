@@ -10,6 +10,7 @@ import {
   getTodaysTasks,
   getRecentActivity,
   getBrandPerformance,
+  getSetupProgress,
 } from "@/lib/actions/dashboard";
 import {
   Users,
@@ -27,13 +28,14 @@ import {
 } from "lucide-react";
 
 export default async function DashboardPage() {
-  const [stats, funnel, outreach, tasks, activity, brandPerf] = await Promise.all([
+  const [stats, funnel, outreach, tasks, activity, brandPerf, setup] = await Promise.all([
     getDashboardStats(),
     getLeadFunnelStats(),
     getOutreachStats(),
     getTodaysTasks(),
     getRecentActivity(),
     getBrandPerformance(),
+    getSetupProgress(),
   ]);
 
   const funnelSteps = [
@@ -51,6 +53,45 @@ export default async function DashboardPage() {
     engaged: "bg-purple-100 text-purple-700",
     active: "bg-green-100 text-green-700",
   };
+
+  const setupSteps = [
+    {
+      label: "Create your first brand",
+      description: "Add the brand you want to run outreach for.",
+      complete: setup.hasBrand,
+      href: setup.hasBrand && setup.firstBrandId ? `/brands/${setup.firstBrandId}` : "/brands/new",
+      action: setup.hasBrand ? "View Brand" : "Create Brand",
+    },
+    {
+      label: "Add products",
+      description: "Prepare the products creators may receive or promote.",
+      complete: setup.hasProducts,
+      href: setup.firstBrandId ? `/brands/${setup.firstBrandId}/settings` : "/brands/new",
+      action: setup.hasProducts ? "View Settings" : "Open Settings",
+    },
+    {
+      label: "Find creators",
+      description: "Build a lead list for your brand.",
+      complete: setup.hasCreators,
+      href: setup.firstBrandId ? `/brands/${setup.firstBrandId}/leads` : "/brands/new",
+      action: setup.hasCreators ? "View Leads" : "Find Creators",
+    },
+    {
+      label: "Send outreach",
+      description: "Start DMs once leads are ready.",
+      complete: setup.hasOutreach,
+      href: setup.firstBrandId ? `/brands/${setup.firstBrandId}/send-dms` : "/brands/new",
+      action: setup.hasOutreach ? "View Outreach" : "Send DMs",
+    },
+    {
+      label: "Start a campaign",
+      description: "Move accepted creators into a campaign workflow.",
+      complete: setup.hasCampaign,
+      href: "/campaigns/new",
+      action: setup.hasCampaign ? "View Campaigns" : "New Campaign",
+    },
+  ];
+  const setupComplete = setupSteps.every((step) => step.complete);
 
   return (
     <div className="space-y-6">
@@ -77,6 +118,49 @@ export default async function DashboardPage() {
           </Link>
         </div>
       </div>
+
+      {!setupComplete && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-yellow-500" />
+              Get set up
+            </CardTitle>
+            <CardDescription>
+              Follow these steps to launch your first creator outreach workflow.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 md:grid-cols-5">
+              {setupSteps.map((step, index) => (
+                <Link
+                  key={step.label}
+                  href={step.href}
+                  className="rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold ${
+                      step.complete ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"
+                    }`}>
+                      {step.complete ? <CheckCircle2 className="h-4 w-4" /> : index + 1}
+                    </div>
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Step {index + 1}
+                    </span>
+                  </div>
+                  <h3 className="font-medium text-sm">{step.label}</h3>
+                  <p className="text-xs text-muted-foreground mt-1 min-h-8">
+                    {step.description}
+                  </p>
+                  <div className="mt-3 text-xs font-medium text-primary">
+                    {step.action} →
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Top Stats */}
       <div className="grid gap-4 md:grid-cols-4">

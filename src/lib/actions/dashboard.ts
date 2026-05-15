@@ -9,6 +9,7 @@ import {
   outreaches,
   contents,
   campaignCreators,
+  products,
 } from "@/lib/db/schema";
 import { eq, sql, and, gte, lte, count, desc } from "drizzle-orm";
 
@@ -166,6 +167,32 @@ export async function getRecentActivity() {
   return {
     recentLeads,
     recentContent,
+  };
+}
+
+export async function getSetupProgress() {
+  const [firstBrand, productCount, leadCount, outreachCount, campaignCount] = await Promise.all([
+    db
+      .select({ id: brands.id, name: brands.name })
+      .from(brands)
+      .orderBy(desc(brands.createdAt))
+      .limit(1),
+    db.select({ count: count() }).from(products),
+    db.select({ count: count() }).from(brandCreators),
+    db.select({ count: count() }).from(outreaches),
+    db.select({ count: count() }).from(campaigns),
+  ]);
+
+  const brand = firstBrand[0] || null;
+
+  return {
+    firstBrandId: brand?.id || null,
+    firstBrandName: brand?.name || null,
+    hasBrand: !!brand,
+    hasProducts: (productCount[0]?.count || 0) > 0,
+    hasCreators: (leadCount[0]?.count || 0) > 0,
+    hasOutreach: (outreachCount[0]?.count || 0) > 0,
+    hasCampaign: (campaignCount[0]?.count || 0) > 0,
   };
 }
 
