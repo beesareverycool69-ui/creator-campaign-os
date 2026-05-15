@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
 import { PlatformBadge } from "@/components/features/creators/platform-badge";
 import {
   LeadStatusBadge,
@@ -45,6 +46,7 @@ type LeadRowProps = {
 
 export function LeadRow({ brandCreator, followUpDaysThreshold = 3 }: LeadRowProps) {
   const router = useRouter();
+  const { success, error } = useToast();
   const [status, setStatus] = useState<LeadStatus>(brandCreator.status);
   const [updating, setUpdating] = useState(false);
 
@@ -73,9 +75,11 @@ export function LeadRow({ brandCreator, followUpDaysThreshold = 3 }: LeadRowProp
     try {
       await updateLeadStatus(brandCreator.id, newStatus);
       setStatus(newStatus);
+      success("Lead status updated", `Status changed to ${newStatus}.`);
       router.refresh();
-    } catch (error) {
-      console.error("Failed to update status:", error);
+    } catch (err) {
+      console.error("Failed to update status:", err);
+      error("Failed to update status", err instanceof Error ? err.message : "Please try again.");
       // Revert on error
       setStatus(brandCreator.status);
     } finally {
@@ -91,8 +95,9 @@ export function LeadRow({ brandCreator, followUpDaysThreshold = 3 }: LeadRowProp
       if (result.success) {
         setOutreachId(result.outreachId);
         setOutreachMessage(result.message);
+        success("DM generated", `Message ready for ${creator.name}.`);
       } else {
-        alert(`Failed to generate message: ${result.error}`);
+        error("Failed to generate message", result.error);
         setOutreachOpen(false);
       }
     });
@@ -103,14 +108,19 @@ export function LeadRow({ brandCreator, followUpDaysThreshold = 3 }: LeadRowProp
     setSaved(false);
     startSaving(async () => {
       const result = await updateOutreachMessageAction(outreachId, outreachMessage);
-      if (result.success) setSaved(true);
-      else alert(`Failed to save: ${result.error}`);
+      if (result.success) {
+        setSaved(true);
+        success("Draft saved", "Outreach message updated.");
+      } else {
+        error("Failed to save", result.error);
+      }
     });
   }
 
   function handleCopy() {
     if (!outreachMessage) return;
     navigator.clipboard.writeText(outreachMessage);
+    success("Copied", "DM copied to clipboard.");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -123,8 +133,9 @@ export function LeadRow({ brandCreator, followUpDaysThreshold = 3 }: LeadRowProp
       if (result.success) {
         setFollowUpId(result.outreachId);
         setFollowUpMessage(result.message);
+        success("Follow-up generated", `Message ready for ${creator.name}.`);
       } else {
-        alert(`Failed to generate follow-up: ${result.error}`);
+        error("Failed to generate follow-up", result.error);
         setFollowUpOpen(false);
       }
     });
@@ -135,14 +146,19 @@ export function LeadRow({ brandCreator, followUpDaysThreshold = 3 }: LeadRowProp
     setFollowUpSaved(false);
     startSavingFollowUp(async () => {
       const result = await updateOutreachMessageAction(followUpId, followUpMessage);
-      if (result.success) setFollowUpSaved(true);
-      else alert(`Failed to save: ${result.error}`);
+      if (result.success) {
+        setFollowUpSaved(true);
+        success("Draft saved", "Follow-up message updated.");
+      } else {
+        error("Failed to save", result.error);
+      }
     });
   }
 
   function handleCopyFollowUp() {
     if (!followUpMessage) return;
     navigator.clipboard.writeText(followUpMessage);
+    success("Copied", "Follow-up copied to clipboard.");
     setFollowUpCopied(true);
     setTimeout(() => setFollowUpCopied(false), 2000);
   }

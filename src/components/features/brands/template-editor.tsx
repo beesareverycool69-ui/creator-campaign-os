@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/toast";
 import {
   Plus,
   Pencil,
@@ -51,6 +52,7 @@ const CHANNEL_OPTIONS = [
 ];
 
 export function TemplateEditor({ brandId, templates }: TemplateEditorProps) {
+  const { success, error } = useToast();
   const [isCreating, setIsCreating] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -81,9 +83,11 @@ export function TemplateEditor({ brandId, templates }: TemplateEditorProps) {
         subject: channel === "email" ? subject : undefined,
         body,
       });
+      success("Template created", "Message template saved.");
       resetForm();
-    } catch (error) {
-      console.error("Failed to create template:", error);
+    } catch (err) {
+      console.error("Failed to create template:", err);
+      error("Failed to create template", err instanceof Error ? err.message : "Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -99,9 +103,11 @@ export function TemplateEditor({ brandId, templates }: TemplateEditorProps) {
         subject: channel === "email" ? subject : undefined,
         body,
       });
+      success("Template updated", "Changes saved.");
       resetForm();
-    } catch (error) {
-      console.error("Failed to update template:", error);
+    } catch (err) {
+      console.error("Failed to update template:", err);
+      error("Failed to update template", err instanceof Error ? err.message : "Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -112,8 +118,10 @@ export function TemplateEditor({ brandId, templates }: TemplateEditorProps) {
     try {
       await deleteTemplate(id);
       setDeletingId(null);
-    } catch (error) {
-      console.error("Failed to delete template:", error);
+      success("Template deleted", "Message template removed.");
+    } catch (err) {
+      console.error("Failed to delete template:", err);
+      error("Failed to delete template", err instanceof Error ? err.message : "Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -134,8 +142,10 @@ export function TemplateEditor({ brandId, templates }: TemplateEditorProps) {
       for (const template of Object.values(DEFAULT_TEMPLATES)) {
         await createTemplate(brandId, template);
       }
-    } catch (error) {
-      console.error("Failed to load defaults:", error);
+      success("Default templates loaded", "Starter templates are ready.");
+    } catch (err) {
+      console.error("Failed to load defaults:", err);
+      error("Failed to load defaults", err instanceof Error ? err.message : "Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -351,7 +361,10 @@ export function TemplateEditor({ brandId, templates }: TemplateEditorProps) {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => navigator.clipboard.writeText(template.body)}
+                          onClick={() => {
+                            navigator.clipboard.writeText(template.body);
+                            success("Copied", "Template copied to clipboard.");
+                          }}
                           title="Copy"
                         >
                           <Copy className="h-4 w-4" />

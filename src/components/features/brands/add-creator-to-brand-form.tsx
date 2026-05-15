@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { useToast } from "@/components/ui/toast";
 import { addCreatorToBrand, LeadStatus } from "@/lib/actions/brand-creators";
 import { getLeadStatusOptions } from "./lead-status-badge";
 
@@ -37,6 +38,7 @@ export function AddCreatorToBrandForm({
   availableCreators,
 }: AddCreatorToBrandFormProps) {
   const router = useRouter();
+  const { success, error: showError } = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -60,9 +62,12 @@ export function AddCreatorToBrandForm({
       });
 
       setIsOpen(false);
+      success("Creator added", "The creator was added to this brand.");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to add creator");
+      const message = err instanceof Error ? err.message : "Failed to add creator";
+      setError(message);
+      showError("Failed to add creator", message);
     } finally {
       setLoading(false);
     }

@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/toast";
 import { 
   generateFollowUpAction,
   markFollowUpSentAction,
@@ -54,6 +55,7 @@ function FollowUpCard({
   followUpType: "fu1" | "fu2" | "reengage";
   onComplete: () => void;
 }) {
+  const { success, error } = useToast();
   const [generatedMessage, setGeneratedMessage] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -64,24 +66,38 @@ function FollowUpCard({
 
   const handleGenerate = async () => {
     setIsGenerating(true);
-    const result = await generateFollowUpAction(lead.id);
-    if (result.success) {
-      setGeneratedMessage(result.message);
+    try {
+      const result = await generateFollowUpAction(lead.id);
+      if (result.success) {
+        setGeneratedMessage(result.message);
+        success("Follow-up generated", "Message ready to send.");
+      } else {
+        error("Failed to generate follow-up", result.error);
+      }
+    } catch (err) {
+      error("Failed to generate follow-up", err instanceof Error ? err.message : "Please try again.");
+    } finally {
+      setIsGenerating(false);
     }
-    setIsGenerating(false);
   };
 
   const handleCopy = async () => {
     if (!generatedMessage) return;
     await navigator.clipboard.writeText(generatedMessage);
+    success("Copied", "Follow-up copied to clipboard.");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleSendEarly = () => {
     startTransition(async () => {
-      await markFollowUpSentAction(lead.id, generatedMessage || undefined);
-      onComplete();
+      try {
+        await markFollowUpSentAction(lead.id, generatedMessage || undefined);
+        success("Follow-up marked sent", "Lead follow-up saved.");
+        onComplete();
+      } catch (err) {
+        error("Failed to mark follow-up sent", err instanceof Error ? err.message : "Please try again.");
+      }
     });
   };
 

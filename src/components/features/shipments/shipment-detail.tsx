@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
+import { useToast } from "@/components/ui/toast";
 import {
   ShipmentStatusBadge,
   ShipmentStatus,
@@ -58,6 +59,7 @@ const CARRIERS = [
 
 export function ShipmentDetail({ shipment }: ShipmentDetailProps) {
   const router = useRouter();
+  const { success, error: showError } = useToast();
   const [status, setStatus] = useState<ShipmentStatus>(
     shipment.status as ShipmentStatus
   );
@@ -83,9 +85,12 @@ export function ShipmentDetail({ shipment }: ShipmentDetailProps) {
     try {
       await updateShipmentStatus(shipment.id, newStatus);
       setStatus(newStatus);
+      success("Shipment status updated", `Status changed to ${newStatus}.`);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update status");
+      const message = err instanceof Error ? err.message : "Failed to update status";
+      setError(message);
+      showError("Failed to update shipment", message);
       setStatus(shipment.status as ShipmentStatus);
     } finally {
       setUpdating(false);
@@ -96,7 +101,9 @@ export function ShipmentDetail({ shipment }: ShipmentDetailProps) {
     e.preventDefault();
 
     if (!trackingNumber || !carrier) {
-      setError("Please enter both tracking number and carrier");
+      const message = "Please enter both tracking number and carrier";
+      setError(message);
+      showError("Tracking info required", message);
       return;
     }
 
@@ -106,11 +113,12 @@ export function ShipmentDetail({ shipment }: ShipmentDetailProps) {
     try {
       await updateTrackingInfo(shipment.id, trackingNumber, carrier);
       setShowTrackingForm(false);
+      success("Tracking updated", "Shipment tracking saved.");
       router.refresh();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to update tracking"
-      );
+      const message = err instanceof Error ? err.message : "Failed to update tracking";
+      setError(message);
+      showError("Failed to update tracking", message);
     } finally {
       setSavingTracking(false);
     }

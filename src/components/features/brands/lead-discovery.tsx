@@ -26,6 +26,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils/cn";
 
 interface DiscoveredCreator {
@@ -49,6 +50,7 @@ interface LeadDiscoveryProps {
 type TabType = "external" | "csv" | "ocr";
 
 export function LeadDiscovery({ brandId, onAddCreators }: LeadDiscoveryProps) {
+  const { success, error } = useToast();
   const [activeTab, setActiveTab] = useState<TabType>("external");
   const [isLoading, setIsLoading] = useState(false);
   const [discoveredCreators, setDiscoveredCreators] = useState<DiscoveredCreator[]>([]);
@@ -98,13 +100,15 @@ export function LeadDiscovery({ brandId, onAddCreators }: LeadDiscoveryProps) {
         setDiscoveredCreators(
           data.creators.map((c: DiscoveredCreator) => ({ ...c, selected: true }))
         );
+        success("Discovery complete", `Found ${data.creators.length} creator${data.creators.length !== 1 ? "s" : ""}.`);
       } else {
-        const error = await response.json();
-        console.error("Discovery failed:", error);
-        alert(error.error || "Discovery failed");
+        const result = await response.json();
+        console.error("Discovery failed:", result);
+        error("Discovery failed", result.error || "Please try again.");
       }
-    } catch (error) {
-      console.error("Discovery failed:", error);
+    } catch (err) {
+      console.error("Discovery failed:", err);
+      error("Discovery failed", err instanceof Error ? err.message : "Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -144,6 +148,10 @@ export function LeadDiscovery({ brandId, onAddCreators }: LeadDiscoveryProps) {
       }
 
       setDiscoveredCreators(creators);
+      success("CSV parsed", `Found ${creators.length} creator${creators.length !== 1 ? "s" : ""}.`);
+    } catch (err) {
+      console.error("CSV parse failed:", err);
+      error("CSV parse failed", err instanceof Error ? err.message : "Please check the format and try again.");
     } finally {
       setIsLoading(false);
     }
@@ -174,9 +182,14 @@ export function LeadDiscovery({ brandId, onAddCreators }: LeadDiscoveryProps) {
         setDiscoveredCreators(
           data.creators.map((c: DiscoveredCreator) => ({ ...c, selected: true }))
         );
+        success("OCR complete", `Found ${data.creators.length} creator${data.creators.length !== 1 ? "s" : ""}.`);
+      } else {
+        const result = await response.json();
+        error("OCR failed", result.error || "Please try another screenshot.");
       }
-    } catch (error) {
-      console.error("OCR failed:", error);
+    } catch (err) {
+      console.error("OCR failed:", err);
+      error("OCR failed", err instanceof Error ? err.message : "Please try another screenshot.");
     } finally {
       setIsLoading(false);
     }
@@ -203,10 +216,15 @@ export function LeadDiscovery({ brandId, onAddCreators }: LeadDiscoveryProps) {
       if (response.ok) {
         onAddCreators?.(selected);
         setDiscoveredCreators([]);
+        success("Creators added", `Added ${selected.length} creator${selected.length !== 1 ? "s" : ""} to leads.`);
         window.location.reload();
+      } else {
+        const result = await response.json();
+        error("Import failed", result.error || "Could not add the selected creators.");
       }
-    } catch (error) {
-      console.error("Failed to import creators:", error);
+    } catch (err) {
+      console.error("Failed to import creators:", err);
+      error("Import failed", err instanceof Error ? err.message : "Could not add the selected creators.");
     } finally {
       setIsLoading(false);
     }

@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/toast";
 import { 
   generateOutreachAction, 
   markDMSentAction, 
@@ -20,6 +21,7 @@ type Props = {
 };
 
 export function SendDMsQueue({ brandId, initialLeads }: Props) {
+  const { success, error } = useToast();
   const [leads, setLeads] = useState(initialLeads);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [generatedMessage, setGeneratedMessage] = useState<string | null>(null);
@@ -48,11 +50,19 @@ export function SendDMsQueue({ brandId, initialLeads }: Props) {
 
   const handlePersonalize = async () => {
     setIsGenerating(true);
-    const result = await generateOutreachAction(currentLead.id);
-    if (result.success) {
-      setGeneratedMessage(result.message);
+    try {
+      const result = await generateOutreachAction(currentLead.id);
+      if (result.success) {
+        setGeneratedMessage(result.message);
+        success("DM generated", "Personalized message ready.");
+      } else {
+        error("Failed to generate DM", result.error);
+      }
+    } catch (err) {
+      error("Failed to generate DM", err instanceof Error ? err.message : "Please try again.");
+    } finally {
+      setIsGenerating(false);
     }
-    setIsGenerating(false);
   };
 
   const handleCopy = async (type: "dm" | "comment") => {
@@ -60,21 +70,32 @@ export function SendDMsQueue({ brandId, initialLeads }: Props) {
     if (!text) return;
     
     await navigator.clipboard.writeText(text);
+    success("Copied", type === "dm" ? "DM copied to clipboard." : "Comment copied to clipboard.");
     setCopied(type);
     setTimeout(() => setCopied(null), 2000);
   };
 
   const handleDMSent = () => {
     startTransition(async () => {
-      await markDMSentAction(currentLead.id, generatedMessage || undefined);
-      setDmSent(true);
+      try {
+        await markDMSentAction(currentLead.id, generatedMessage || undefined);
+        setDmSent(true);
+        success("DM marked sent", "Lead moved forward in outreach.");
+      } catch (err) {
+        error("Failed to mark DM sent", err instanceof Error ? err.message : "Please try again.");
+      }
     });
   };
 
   const handleCommented = () => {
     startTransition(async () => {
-      await markCommentedAction(currentLead.id, comment);
-      setCommented(true);
+      try {
+        await markCommentedAction(currentLead.id, comment);
+        setCommented(true);
+        success("Comment marked", "Comment activity saved.");
+      } catch (err) {
+        error("Failed to mark comment", err instanceof Error ? err.message : "Please try again.");
+      }
     });
   };
 
@@ -90,12 +111,17 @@ export function SendDMsQueue({ brandId, initialLeads }: Props) {
 
   const handleSkip = () => {
     startTransition(async () => {
-      await skipLeadAction(currentLead.id);
-      setLeads(leads.filter((_, i) => i !== currentIndex));
-      setGeneratedMessage(null);
-      setDmSent(false);
-      setCommented(false);
-      setCopied(null);
+      try {
+        await skipLeadAction(currentLead.id);
+        setLeads(leads.filter((_, i) => i !== currentIndex));
+        setGeneratedMessage(null);
+        setDmSent(false);
+        setCommented(false);
+        setCopied(null);
+        success("Lead skipped", "This lead was removed from the queue.");
+      } catch (err) {
+        error("Failed to skip lead", err instanceof Error ? err.message : "Please try again.");
+      }
     });
   };
 

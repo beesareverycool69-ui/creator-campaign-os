@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/toast";
 import { analyzeBrandAction } from "@/lib/actions/brands";
 import type { BrandAnalysis } from "@/lib/db/schema";
 
@@ -20,13 +21,16 @@ export function BrandAnalysisCard({
   analysis,
   analyzedAt,
 }: Props) {
+  const { success, error } = useToast();
   const [isPending, startTransition] = useTransition();
 
   function handleAnalyze() {
     startTransition(async () => {
       const result = await analyzeBrandAction(brandId);
-      if (!result.success) {
-        alert(`Analysis failed: ${result.error}`);
+      if (result.success) {
+        success("Brand analyzed", "Creator profile updated.");
+      } else {
+        error("Analysis failed", result.error);
       }
     });
   }

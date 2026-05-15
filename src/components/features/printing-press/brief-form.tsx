@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/toast";
 import { generateBriefAction, saveBriefAction } from "@/lib/actions/briefs";
 import { Loader2, Sparkles, Download, Copy, Check, FileText, Lock } from "lucide-react";
 
@@ -42,6 +43,7 @@ type Props = {
 };
 
 export function BriefForm({ brandId, brand, brandCreatorId, creator }: Props) {
+  const { success, error } = useToast();
   const [isPending, startTransition] = useTransition();
   const [isGenerating, setIsGenerating] = useState(false);
   const [briefGenerated, setBriefGenerated] = useState(false);
@@ -83,6 +85,9 @@ export function BriefForm({ brandId, brand, brandCreatorId, creator }: Props) {
     if (result.success) {
       setGeneratedBrief(result.brief);
       setBriefGenerated(true);
+      success("Brief generated", "Creator brief is ready.");
+    } else {
+      error("Failed to generate brief", result.error || "Please try again.");
     }
     
     setIsGenerating(false);
@@ -91,6 +96,7 @@ export function BriefForm({ brandId, brand, brandCreatorId, creator }: Props) {
   const handleCopy = async () => {
     if (!generatedBrief) return;
     await navigator.clipboard.writeText(generatedBrief);
+    success("Copied", "Brief copied to clipboard.");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

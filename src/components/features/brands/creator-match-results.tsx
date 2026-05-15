@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select } from "@/components/ui/select";
+import { useToast } from "@/components/ui/toast";
 import { matchCreatorsAction, addCreatorToBrandWithScore } from "@/lib/actions/brands";
 import type { MatchCreatorsResult } from "@/lib/actions/brands";
 
@@ -24,6 +25,7 @@ function scoreColor(score: number) {
 }
 
 function MatchRow({ match, brandId }: { match: Match; brandId: string }) {
+  const { success, error } = useToast();
   const [isPending, startTransition] = useTransition();
   const [added, setAdded] = useState(false);
 
@@ -32,8 +34,9 @@ function MatchRow({ match, brandId }: { match: Match; brandId: string }) {
       try {
         await addCreatorToBrandWithScore(brandId, match.creatorId, match.fitScore);
         setAdded(true);
+        success("Creator added", `${match.name} was added to this brand.`);
       } catch (err) {
-        alert(err instanceof Error ? err.message : "Failed to add creator.");
+        error("Failed to add creator", err instanceof Error ? err.message : "Please try again.");
       }
     });
   }
@@ -76,6 +79,7 @@ function MatchRow({ match, brandId }: { match: Match; brandId: string }) {
 }
 
 export function CreatorMatchResults({ brandId, hasAnalysis }: Props) {
+  const { success, error: showError } = useToast();
   const [isPending, startTransition] = useTransition();
   const [matches, setMatches] = useState<Match[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -88,8 +92,10 @@ export function CreatorMatchResults({ brandId, hasAnalysis }: Props) {
       const result = await matchCreatorsAction(brandId, limit);
       if (result.success) {
         setMatches(result.matches);
+        success("Matching complete", `Scored ${result.matches.length} creator${result.matches.length !== 1 ? "s" : ""}.`);
       } else {
         setError(result.error);
+        showError("Matching failed", result.error);
       }
     });
   }

@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/components/ui/toast";
 import { createShipment } from "@/lib/actions/shipments";
 
 type Address = {
@@ -53,6 +54,7 @@ export function ShipmentForm({
   products,
 }: ShipmentFormProps) {
   const router = useRouter();
+  const { success, error: showError } = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedProducts, setSelectedProducts] = useState<
@@ -106,12 +108,13 @@ export function ShipmentForm({
             : undefined,
       });
 
+      success("Shipment created", "Shipment record is ready.");
       router.push(`/campaigns/${campaignId}/creators/${campaignCreatorId}/shipment`);
       router.refresh();
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to create shipment"
-      );
+      const message = err instanceof Error ? err.message : "Failed to create shipment";
+      setError(message);
+      showError("Failed to create shipment", message);
       setLoading(false);
     }
   }

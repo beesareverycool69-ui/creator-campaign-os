@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
+import { useToast } from "@/components/ui/toast";
 import {
   AgreementStatusBadge,
   AgreementStatus,
@@ -36,6 +37,7 @@ type AgreementDetailProps = {
 
 export function AgreementDetail({ agreement }: AgreementDetailProps) {
   const router = useRouter();
+  const { success, error: showError } = useToast();
   const [status, setStatus] = useState<AgreementStatus>(
     agreement.status as AgreementStatus
   );
@@ -60,9 +62,12 @@ export function AgreementDetail({ agreement }: AgreementDetailProps) {
     try {
       await updateAgreementStatus(agreement.id, newStatus);
       setStatus(newStatus);
+      success("Agreement status updated", `Status changed to ${newStatus}.`);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update status");
+      const message = err instanceof Error ? err.message : "Failed to update status";
+      setError(message);
+      showError("Failed to update agreement", message);
       setStatus(agreement.status as AgreementStatus);
     } finally {
       setUpdating(false);
@@ -77,9 +82,12 @@ export function AgreementDetail({ agreement }: AgreementDetailProps) {
       const url = await generateAgreementPDF(agreement.id);
       // Open in new tab
       window.open(url, "_blank");
+      success("PDF generated", "Agreement opened in a new tab.");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to generate PDF");
+      const message = err instanceof Error ? err.message : "Failed to generate PDF";
+      setError(message);
+      showError("Failed to generate PDF", message);
     } finally {
       setGenerating(false);
     }

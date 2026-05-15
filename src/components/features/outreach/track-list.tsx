@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/toast";
 import { updateLeadStatus, type BrandCreatorWithDetails } from "@/lib/actions/brand-creators";
 import { Check, X, ExternalLink, Clock } from "lucide-react";
 
@@ -39,6 +40,7 @@ function TrackCard({
   currentTab: string;
 }) {
   const router = useRouter();
+  const { success, error } = useToast();
   const [isPending, startTransition] = useTransition();
   const [showBriefPrompt, setShowBriefPrompt] = useState(false);
 
@@ -48,15 +50,25 @@ function TrackCard({
 
   const handleAccept = () => {
     startTransition(async () => {
-      await updateLeadStatus(lead.id, "active");
-      setShowBriefPrompt(true);
+      try {
+        await updateLeadStatus(lead.id, "active");
+        success("Lead accepted", "Creator moved to active partnerships.");
+        setShowBriefPrompt(true);
+      } catch (err) {
+        error("Failed to update lead", err instanceof Error ? err.message : "Please try again.");
+      }
     });
   };
 
   const handleDecline = () => {
     startTransition(async () => {
-      await updateLeadStatus(lead.id, "churned");
-      router.refresh();
+      try {
+        await updateLeadStatus(lead.id, "churned");
+        success("Lead declined", "Lead moved to declined.");
+        router.refresh();
+      } catch (err) {
+        error("Failed to update lead", err instanceof Error ? err.message : "Please try again.");
+      }
     });
   };
 
