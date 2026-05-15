@@ -63,6 +63,7 @@ function FollowUpCard({
 
   const primaryPlatform = lead.creator.platforms[0];
   const handle = primaryPlatform?.handle;
+  const profileUrl = getProfileUrl(primaryPlatform);
 
   const handleGenerate = async () => {
     setIsGenerating(true);
@@ -143,14 +144,28 @@ function FollowUpCard({
             </div>
           </div>
 
-          <Button 
-            onClick={handleSendEarly}
-            disabled={isPending}
-            variant="outline"
-            className="bg-orange-500/10 border-orange-500/30 text-orange-500 hover:bg-orange-500/20"
-          >
-            Send Early
-          </Button>
+          <div className="flex gap-2">
+            {profileUrl ? (
+              <a href={profileUrl} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" type="button">
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Open Profile
+                </Button>
+              </a>
+            ) : (
+              <Button variant="outline" type="button" disabled>
+                No profile linked
+              </Button>
+            )}
+            <Button 
+              onClick={handleSendEarly}
+              disabled={isPending}
+              variant="outline"
+              className="bg-orange-500/10 border-orange-500/30 text-orange-500 hover:bg-orange-500/20"
+            >
+              Send Early
+            </Button>
+          </div>
         </div>
 
         {/* Expandable message section */}
@@ -180,6 +195,18 @@ function FollowUpCard({
                   </>
                 )}
               </Button>
+              {profileUrl ? (
+                <a href={profileUrl} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="sm" type="button">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Open Profile
+                  </Button>
+                </a>
+              ) : (
+                <Button variant="outline" size="sm" type="button" disabled>
+                  No profile linked
+                </Button>
+              )}
               <Button 
                 size="sm"
                 onClick={handleSendEarly}
@@ -215,4 +242,24 @@ function FollowUpCard({
       </CardContent>
     </Card>
   );
+}
+
+function getProfileUrl(platform?: { platformId: string; handle: string | null } | null) {
+  const handle = platform?.handle?.replace(/^@/, "");
+  if (!platform || !handle) return null;
+
+  switch (platform.platformId) {
+    case "instagram":
+      return `https://instagram.com/${handle}`;
+    case "tiktok":
+      return `https://tiktok.com/@${handle}`;
+    case "youtube":
+      return `https://youtube.com/@${handle}`;
+    case "twitter":
+    case "x":
+    case "x_twitter":
+      return `https://x.com/${handle}`;
+    default:
+      return null;
+  }
 }

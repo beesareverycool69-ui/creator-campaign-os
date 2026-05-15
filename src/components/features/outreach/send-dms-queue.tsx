@@ -47,6 +47,7 @@ export function SendDMsQueue({ brandId, initialLeads }: Props) {
   const primaryPlatform = currentLead.creator.platforms[0];
   const followerCount = primaryPlatform?.followerCount;
   const handle = primaryPlatform?.handle;
+  const profileUrl = getProfileUrl(primaryPlatform);
 
   const handlePersonalize = async () => {
     setIsGenerating(true);
@@ -156,14 +157,16 @@ export function SendDMsQueue({ brandId, initialLeads }: Props) {
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-xl font-semibold">{handle ? `@${handle}` : currentLead.creator.name}</h3>
-                  <a 
-                    href={`https://instagram.com/${handle}`} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
+                  {profileUrl && (
+                    <a 
+                      href={profileUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  )}
                 </div>
                 <p className="text-sm text-muted-foreground">{currentLead.creator.name}</p>
                 <div className="flex items-center gap-2 mt-1">
@@ -179,14 +182,18 @@ export function SendDMsQueue({ brandId, initialLeads }: Props) {
                 </div>
               </div>
             </div>
-            <a 
-              href={`https://instagram.com/${handle}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-primary hover:underline"
-            >
-              Profile →
-            </a>
+            {profileUrl ? (
+              <a 
+                href={profileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-primary hover:underline"
+              >
+                Open Profile →
+              </a>
+            ) : (
+              <span className="text-sm text-muted-foreground">No profile linked</span>
+            )}
           </div>
 
           {/* Bio */}
@@ -243,10 +250,22 @@ export function SendDMsQueue({ brandId, initialLeads }: Props) {
                     ) : (
                       <>
                         <Copy className="h-4 w-4 mr-2" />
-                        Copy
+                        Copy DM
                       </>
                     )}
                   </Button>
+                  {profileUrl ? (
+                    <a href={profileUrl} target="_blank" rel="noopener noreferrer">
+                      <Button variant="outline" size="sm" type="button">
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Open Profile
+                      </Button>
+                    </a>
+                  ) : (
+                    <Button variant="outline" size="sm" type="button" disabled>
+                      No profile linked
+                    </Button>
+                  )}
                 </div>
               </div>
             ) : (
@@ -346,4 +365,24 @@ export function SendDMsQueue({ brandId, initialLeads }: Props) {
       </Card>
     </div>
   );
+}
+
+function getProfileUrl(platform?: { platformId: string; handle: string | null } | null) {
+  const handle = platform?.handle?.replace(/^@/, "");
+  if (!platform || !handle) return null;
+
+  switch (platform.platformId) {
+    case "instagram":
+      return `https://instagram.com/${handle}`;
+    case "tiktok":
+      return `https://tiktok.com/@${handle}`;
+    case "youtube":
+      return `https://youtube.com/@${handle}`;
+    case "twitter":
+    case "x":
+    case "x_twitter":
+      return `https://x.com/${handle}`;
+    default:
+      return null;
+  }
 }
