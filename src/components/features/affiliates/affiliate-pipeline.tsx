@@ -11,6 +11,7 @@ import { Package, Clock, FileVideo, CheckCircle, Play, ExternalLink, Copy } from
 type Props = {
   brandId: string;
   creators: BrandCreatorWithDetails[];
+  uploadUrlsByBrandCreatorId: Record<string, string>;
 };
 
 type PipelineStage = "ship" | "awaiting" | "review" | "ready" | "posted";
@@ -24,7 +25,7 @@ type CreatorWithStage = BrandCreatorWithDetails & {
   tier?: "gold" | "silver" | "bronze";
 };
 
-export function AffiliatePipeline({ brandId, creators }: Props) {
+export function AffiliatePipeline({ brandId, creators, uploadUrlsByBrandCreatorId }: Props) {
   // Parse stage from notes (simplified - would use proper DB field)
   const getStage = (c: BrandCreatorWithDetails): PipelineStage => {
     const notes = c.notes || "";
@@ -77,6 +78,7 @@ export function AffiliatePipeline({ brandId, creators }: Props) {
                   creator={creator} 
                   stage={column.id}
                   brandId={brandId}
+                  uploadUrl={uploadUrlsByBrandCreatorId[creator.id]}
                 />
               ))}
 
@@ -96,11 +98,13 @@ export function AffiliatePipeline({ brandId, creators }: Props) {
 function PipelineCard({ 
   creator, 
   stage,
-  brandId 
+  brandId,
+  uploadUrl,
 }: { 
   creator: CreatorWithStage; 
   stage: PipelineStage;
   brandId: string;
+  uploadUrl?: string;
 }) {
   const [trackingNumber, setTrackingNumber] = useState("");
   const [showUploadLink, setShowUploadLink] = useState(false);
@@ -114,7 +118,6 @@ function PipelineCard({
     bronze: "bg-orange-700/20 text-orange-700 border-orange-700/30",
   };
 
-  const uploadLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/upload/${creator.id}`;
 
   return (
     <Card className="bg-card/50">
@@ -177,18 +180,19 @@ function PipelineCard({
               size="sm" 
               variant="outline" 
               className="w-full h-7 text-xs"
+              disabled={!uploadUrl}
               onClick={() => setShowUploadLink(!showUploadLink)}
             >
-              Copy Upload Link
+              {uploadUrl ? "Copy Upload Link" : "No Upload Link"}
             </Button>
-            {showUploadLink && (
+            {showUploadLink && uploadUrl && (
               <div className="flex items-center gap-1 p-2 bg-muted rounded text-xs">
-                <code className="flex-1 truncate">{uploadLink}</code>
+                <code className="flex-1 truncate">{uploadUrl}</code>
                 <Button 
                   size="sm" 
                   variant="ghost" 
                   className="h-6 w-6 p-0"
-                  onClick={() => navigator.clipboard.writeText(uploadLink)}
+                  onClick={() => navigator.clipboard.writeText(uploadUrl)}
                 >
                   <Copy className="h-3 w-3" />
                 </Button>

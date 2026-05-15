@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getBrandById } from "@/lib/actions/brands";
 import { getBrandCreators } from "@/lib/actions/brand-creators";
 import { AffiliatePipeline } from "@/components/features/affiliates/affiliate-pipeline";
+import { getPortalUrlsForBrandCreators } from "@/lib/actions/creator-portal";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -15,6 +16,10 @@ export default async function AffiliatesPage({ params }: Props) {
     getBrandById(id),
     getBrandCreators(id, "active"),
   ]);
+
+  const uploadUrlsByBrandCreatorId = await getPortalUrlsForBrandCreators(
+    activeCreators.map((creator) => creator.id)
+  );
 
   if (!brand) {
     notFound();
@@ -116,6 +121,7 @@ export default async function AffiliatesPage({ params }: Props) {
       <AffiliatePipeline 
         brandId={id}
         creators={activeCreators}
+        uploadUrlsByBrandCreatorId={uploadUrlsByBrandCreatorId}
       />
     </div>
   );

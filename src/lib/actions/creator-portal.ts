@@ -5,7 +5,7 @@ import { campaignCreators, contents } from "@/lib/db/schema";
 import { brandCreators, brands } from "@/lib/db/schema";
 import { creators } from "@/lib/db/schema";
 import { campaigns } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { createHmac } from "crypto";
 
@@ -104,8 +104,31 @@ export async function submitContent(
   return content;
 }
 
-export async function getPortalUrl(campaignCreatorId: string) {
+function buildPortalUrl(campaignCreatorId: string) {
   const token = generateTokenSync(campaignCreatorId);
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   return `${baseUrl}/creator-portal/${token}`;
+}
+
+export async function getPortalUrl(campaignCreatorId: string) {
+  return buildPortalUrl(campaignCreatorId);
+}
+
+export async function getPortalUrlsForBrandCreators(brandCreatorIds: string[]) {
+  if (brandCreatorIds.length === 0) {
+    return {} as Record<string, string>;
+  }
+
+  const rows = await db
+    .select({
+      id: campaignCreators.id,
+      brandCreatorId: campaignCreators.brandCreatorId,
+    })
+    .from(campaignCreators)
+    .where(inArray(campaignCreators.brandCreatorId, brandCreatorIds));
+
+  return rows.reduce<Record<string, string>>((urls, row) => {
+    urls[row.brandCreatorId] = buildPortalUrl(row.id);
+    return urls;
+  }, {});
 }
