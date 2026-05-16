@@ -9,3 +9,4 @@ export { CreatorMatchResults } from "./creator-match-results";
 export { LeadList } from "./lead-list";
 export { LeadDiscovery } from "./lead-discovery";
 export { TemplateEditor } from "./template-editor";
+export { ProductManager } from "./product-manager";

@@ -66,8 +66,8 @@ export default async function DashboardPage() {
       label: "Add products",
       description: "Prepare the products creators may receive or promote.",
       complete: setup.hasProducts,
-      href: setup.firstBrandId ? `/brands/${setup.firstBrandId}/settings` : "/brands/new",
-      action: setup.hasProducts ? "View Settings" : "Open Settings",
+      href: setup.firstBrandId ? `/brands/${setup.firstBrandId}#products` : "/brands/new",
+      action: setup.hasProducts ? "View Products" : "Add Product",
     },
     {
       label: "Find creators",

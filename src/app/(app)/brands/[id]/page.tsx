@@ -9,6 +9,7 @@ import {
   AddCreatorToBrandForm,
   BrandAnalysisCard,
   CreatorMatchResults,
+  ProductManager,
 } from "@/components/features/brands";
 import { getBrandById } from "@/lib/actions/brands";
 import {
@@ -16,6 +17,7 @@ import {
   getLeadStatusCounts,
 } from "@/lib/actions/brand-creators";
 import { getCreators } from "@/lib/actions/creators";
+import { getBrandProducts } from "@/lib/actions/shipments";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -24,11 +26,12 @@ type Props = {
 export default async function BrandPage({ params }: Props) {
   const { id } = await params;
 
-  const [brand, brandCreators, statusCounts, allCreators] = await Promise.all([
+  const [brand, brandCreators, statusCounts, allCreators, products] = await Promise.all([
     getBrandById(id),
     getBrandCreators(id),
     getLeadStatusCounts(id),
     getCreators(),
+    getBrandProducts(id),
   ]);
 
   if (!brand) {
@@ -220,6 +223,9 @@ export default async function BrandPage({ params }: Props) {
           )}
         </div>
       )}
+
+      {/* Products */}
+      <ProductManager brandId={id} products={products} />
 
       {/* Brand Analysis */}
       <BrandAnalysisCard
