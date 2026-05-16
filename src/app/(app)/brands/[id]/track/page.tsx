@@ -4,6 +4,8 @@ import { getBrandById } from "@/lib/actions/brands";
 import { getBrandCreators, getLeadStatusCounts } from "@/lib/actions/brand-creators";
 import { TrackList } from "@/components/features/outreach/track-list";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
+import { getCampaigns } from "@/lib/actions/campaigns";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -14,9 +16,10 @@ export default async function TrackPage({ params, searchParams }: Props) {
   const { id } = await params;
   const { tab = "pending" } = await searchParams;
   
-  const [brand, statusCounts] = await Promise.all([
+  const [brand, statusCounts, campaigns] = await Promise.all([
     getBrandById(id),
     getLeadStatusCounts(id),
+    getCampaigns(id),
   ]);
 
   if (!brand) {
@@ -38,6 +41,7 @@ export default async function TrackPage({ params, searchParams }: Props) {
     { id: "accepted", label: "Accepted", count: acceptedCount },
     { id: "declined", label: "Declined", count: declinedCount },
   ];
+  const firstCampaign = campaigns[0];
 
   return (
     <div className="space-y-6">
@@ -83,9 +87,28 @@ export default async function TrackPage({ params, searchParams }: Props) {
           </span>
         </div>
         <p className="text-xs text-muted-foreground mt-3">
-          <strong>How it works:</strong> When a lead responds, tap <strong>Accepted</strong> to move them to your partner pipeline or <strong>Declined</strong> to start the 90-day cooldown. Accepted leads move to Affiliates for campaign management.
+          <strong>How it works:</strong> When a lead responds, tap <strong>Accepted</strong> or <strong>Declined</strong>. Accepted leads are ready to add to a campaign, where they become campaign creators before onboarding.
         </p>
       </div>
+
+      {acceptedCount > 0 && (
+        <div className="rounded-lg border p-4 flex items-center justify-between gap-4">
+          <div>
+            <p className="font-medium">Ready for campaign onboarding</p>
+            <p className="text-sm text-muted-foreground">
+              Add accepted leads to a campaign first, then move them into onboarding from the campaign page.
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Link href={firstCampaign ? `/campaigns/${firstCampaign.id}` : "/campaigns/new"}>
+              <Button variant="outline">Add to Campaign</Button>
+            </Link>
+            <Link href="/campaigns/new">
+              <Button>Create Campaign</Button>
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-2">
@@ -137,7 +160,12 @@ export default async function TrackPage({ params, searchParams }: Props) {
             actionLabel="Send DMs"
           />
         ) : (
-          <TrackList brandId={id} leads={leads} currentTab={tab} />
+          <TrackList
+            brandId={id}
+            leads={leads}
+            currentTab={tab}
+            firstCampaignId={firstCampaign?.id}
+          />
         )}
       </div>
     </div>

@@ -18,6 +18,7 @@ import {
 } from "@/lib/actions/brand-creators";
 import { getCreators } from "@/lib/actions/creators";
 import { getBrandProducts } from "@/lib/actions/shipments";
+import { getCampaigns } from "@/lib/actions/campaigns";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -26,12 +27,13 @@ type Props = {
 export default async function BrandPage({ params }: Props) {
   const { id } = await params;
 
-  const [brand, brandCreators, statusCounts, allCreators, products] = await Promise.all([
+  const [brand, brandCreators, statusCounts, allCreators, products, campaigns] = await Promise.all([
     getBrandById(id),
     getBrandCreators(id),
     getLeadStatusCounts(id),
     getCreators(),
     getBrandProducts(id),
+    getCampaigns(id),
   ]);
 
   if (!brand) {
@@ -53,6 +55,8 @@ export default async function BrandPage({ params }: Props) {
     "engaged",
     "active",
   ] as const;
+  const acceptedCount = statusCounts["active"] || 0;
+  const firstCampaign = campaigns[0];
 
   return (
     <div className="space-y-6">
@@ -222,6 +226,27 @@ export default async function BrandPage({ params }: Props) {
             <span>Blacklisted: {statusCounts["blacklisted"]}</span>
           )}
         </div>
+      )}
+
+      {acceptedCount > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Accepted leads are ready for campaigns</CardTitle>
+          </CardHeader>
+          <CardContent className="flex items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground">
+              Add accepted leads to a campaign first, then move them into onboarding from the campaign page.
+            </p>
+            <div className="flex gap-2">
+              <Link href={firstCampaign ? `/campaigns/${firstCampaign.id}` : "/campaigns/new"}>
+                <Button variant="outline">Add to Campaign</Button>
+              </Link>
+              <Link href="/campaigns/new">
+                <Button>Create Campaign</Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Products */}

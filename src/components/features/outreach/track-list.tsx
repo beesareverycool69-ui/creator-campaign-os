@@ -13,9 +13,10 @@ type Props = {
   brandId: string;
   leads: BrandCreatorWithDetails[];
   currentTab: string;
+  firstCampaignId?: string;
 };
 
-export function TrackList({ brandId, leads, currentTab }: Props) {
+export function TrackList({ brandId, leads, currentTab, firstCampaignId }: Props) {
   return (
     <div className="space-y-3">
       {leads.map((lead) => (
@@ -24,6 +25,7 @@ export function TrackList({ brandId, leads, currentTab }: Props) {
           brandId={brandId}
           lead={lead} 
           currentTab={currentTab}
+          firstCampaignId={firstCampaignId}
         />
       ))}
     </div>
@@ -33,11 +35,13 @@ export function TrackList({ brandId, leads, currentTab }: Props) {
 function TrackCard({ 
   brandId,
   lead, 
-  currentTab 
-}: { 
+  currentTab,
+  firstCampaignId,
+}: {
   brandId: string;
-  lead: BrandCreatorWithDetails; 
+  lead: BrandCreatorWithDetails;
   currentTab: string;
+  firstCampaignId?: string;
 }) {
   const router = useRouter();
   const { success, error } = useToast();
@@ -53,7 +57,7 @@ function TrackCard({
     startTransition(async () => {
       try {
         await updateLeadStatus(lead.id, "active");
-        success("Lead accepted", "Creator moved to active partnerships.");
+        success("Lead accepted", "Creator is ready to add to a campaign.");
         setShowBriefPrompt(true);
       } catch (err) {
         error("Failed to update lead", err instanceof Error ? err.message : "Please try again.");
@@ -104,14 +108,14 @@ function TrackCard({
               </div>
               <div>
                 <p className="font-medium">@{handle} accepted!</p>
-                <p className="text-sm text-muted-foreground">Their first campaign is ready in The Printing Press</p>
+                <p className="text-sm text-muted-foreground">Add this creator to a campaign before onboarding.</p>
               </div>
             </div>
             <Button 
-              onClick={() => router.push(`/brands/${brandId}/printing-press`)}
+              onClick={() => router.push(firstCampaignId ? `/campaigns/${firstCampaignId}` : "/campaigns/new")}
               className="bg-green-500 hover:bg-green-600"
             >
-              Generate Content Brief →
+              {firstCampaignId ? "Add to Campaign →" : "Create Campaign →"}
             </Button>
           </div>
         </CardContent>
@@ -198,12 +202,17 @@ function TrackCard({
             )}
 
             {currentTab === "accepted" && (
-              <Button 
-                onClick={() => router.push(`/brands/${brandId}/printing-press`)}
-                variant="outline"
-              >
-                View Campaign →
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => router.push(firstCampaignId ? `/campaigns/${firstCampaignId}` : "/campaigns/new")}
+                  variant="outline"
+                >
+                  Add to Campaign
+                </Button>
+                <Button onClick={() => router.push("/campaigns/new")}>
+                  Create Campaign
+                </Button>
+              </div>
             )}
 
             {currentTab === "declined" && daysSinceContact && (
