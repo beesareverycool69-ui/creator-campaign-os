@@ -39,6 +39,7 @@ export function CampaignForm({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const lockBrand = Boolean(pendingBrandCreatorId && defaultBrandId);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -86,10 +87,12 @@ export function CampaignForm({
           {/* Brand - required */}
           <div className="space-y-2">
             <Label htmlFor="brandId">Brand *</Label>
+            {lockBrand && <input type="hidden" name="brandId" value={defaultBrandId} />}
             <Select
               id="brandId"
-              name="brandId"
-              required
+              name={lockBrand ? undefined : "brandId"}
+              required={!lockBrand}
+              disabled={lockBrand}
               defaultValue={defaultBrandId || ""}
             >
               <option value="">Select brand...</option>
@@ -103,7 +106,7 @@ export function CampaignForm({
 
           {pendingBrandCreatorId && (
             <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm text-muted-foreground">
-              After this campaign is created, the accepted creator will be added automatically.
+              After this campaign is created, the accepted creator will be added automatically. The brand is locked so the creator and campaign stay connected correctly.
             </div>
           )}
 
