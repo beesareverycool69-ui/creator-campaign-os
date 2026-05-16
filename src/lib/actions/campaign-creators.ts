@@ -205,9 +205,14 @@ export async function getAvailableBrandCreatorsForCampaign(
 
   const existingIds = new Set(existingInCampaign.map((cc) => cc.brandCreatorId));
 
-  // Filter out those already in campaign
+  // Filter out those already in campaign, with accepted/active leads first
   return allBrandCreators
     .filter((bc) => !existingIds.has(bc.id))
+    .sort((a, b) => {
+      if (a.status === "active" && b.status !== "active") return -1;
+      if (a.status !== "active" && b.status === "active") return 1;
+      return b.createdAt.getTime() - a.createdAt.getTime();
+    })
     .map((bc) => ({
       id: bc.id,
       status: bc.status,

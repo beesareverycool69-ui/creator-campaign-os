@@ -105,7 +105,7 @@ export function AddCreatorToCampaignForm({
 
             return (
               <option key={bc.id} value={bc.id}>
-                {bc.creator.name}
+                {bc.creator.name} [{formatStatus(bc.status)}]
                 {primaryPlatform &&
                   ` (@${primaryPlatform.handle}${
                     followers ? ` • ${formatFollowers(followers)}` : ""
@@ -115,7 +115,7 @@ export function AddCreatorToCampaignForm({
           })}
         </Select>
         <p className="text-xs text-muted-foreground">
-          Only creators already linked to this brand are shown.
+          Accepted creators appear first. Other brand-linked creators are still available if you need to add them manually.
         </p>
       </div>
 
@@ -146,4 +146,9 @@ function formatFollowers(count: number): string {
     return `${(count / 1000).toFixed(1)}K`;
   }
   return count.toString();
+}
+
+function formatStatus(status: string): string {
+  if (status === "active") return "Accepted";
+  return status.charAt(0).toUpperCase() + status.slice(1);
 }
