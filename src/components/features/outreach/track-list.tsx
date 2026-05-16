@@ -17,6 +17,11 @@ type Props = {
 };
 
 export function TrackList({ brandId, leads, currentTab, firstCampaignId }: Props) {
+  const campaignHref = (brandCreatorId: string) =>
+    firstCampaignId
+      ? `/campaigns/${firstCampaignId}?brandCreatorId=${brandCreatorId}`
+      : "/campaigns/new";
+
   return (
     <div className="space-y-3">
       {leads.map((lead) => (
@@ -26,6 +31,7 @@ export function TrackList({ brandId, leads, currentTab, firstCampaignId }: Props
           lead={lead} 
           currentTab={currentTab}
           firstCampaignId={firstCampaignId}
+          campaignHref={campaignHref(lead.id)}
         />
       ))}
     </div>
@@ -37,11 +43,13 @@ function TrackCard({
   lead, 
   currentTab,
   firstCampaignId,
+  campaignHref,
 }: {
   brandId: string;
   lead: BrandCreatorWithDetails;
   currentTab: string;
   firstCampaignId?: string;
+  campaignHref: string;
 }) {
   const router = useRouter();
   const { success, error } = useToast();
@@ -112,7 +120,7 @@ function TrackCard({
               </div>
             </div>
             <Button 
-              onClick={() => router.push(firstCampaignId ? `/campaigns/${firstCampaignId}` : "/campaigns/new")}
+              onClick={() => router.push(campaignHref)}
               className="bg-green-500 hover:bg-green-600"
             >
               {firstCampaignId ? "Add to Campaign →" : "Create Campaign →"}
@@ -204,7 +212,7 @@ function TrackCard({
             {currentTab === "accepted" && (
               <div className="flex gap-2">
                 <Button
-                  onClick={() => router.push(firstCampaignId ? `/campaigns/${firstCampaignId}` : "/campaigns/new")}
+                  onClick={() => router.push(campaignHref)}
                   variant="outline"
                 >
                   Add to Campaign

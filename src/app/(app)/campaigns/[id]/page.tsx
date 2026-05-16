@@ -17,10 +17,12 @@ import { getCampaignContentSummary } from "@/lib/actions/content";
 
 type Props = {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ brandCreatorId?: string }>;
 };
 
-export default async function CampaignPage({ params }: Props) {
+export default async function CampaignPage({ params, searchParams }: Props) {
   const { id } = await params;
+  const { brandCreatorId } = await searchParams;
 
   const [campaign, campaignCreators, contentSummary] = await Promise.all([
     getCampaignById(id),
@@ -96,6 +98,7 @@ export default async function CampaignPage({ params }: Props) {
         <AddCreatorToCampaignForm
           campaignId={id}
           availableCreators={availableCreators}
+          preselectedBrandCreatorId={brandCreatorId}
         />
       </div>
 

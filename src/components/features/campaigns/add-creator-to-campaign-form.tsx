@@ -25,16 +25,22 @@ type AvailableBrandCreator = {
 type AddCreatorToCampaignFormProps = {
   campaignId: string;
   availableCreators: AvailableBrandCreator[];
+  preselectedBrandCreatorId?: string;
 };
 
 export function AddCreatorToCampaignForm({
   campaignId,
   availableCreators,
+  preselectedBrandCreatorId,
 }: AddCreatorToCampaignFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const hasPreselectedCreator = Boolean(
+    preselectedBrandCreatorId &&
+      availableCreators.some((bc) => bc.id === preselectedBrandCreatorId)
+  );
+  const [isOpen, setIsOpen] = useState(hasPreselectedCreator);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -86,7 +92,12 @@ export function AddCreatorToCampaignForm({
     >
       <div className="space-y-2">
         <Label htmlFor="brandCreatorId">Select Creator *</Label>
-        <Select id="brandCreatorId" name="brandCreatorId" required>
+        <Select
+          id="brandCreatorId"
+          name="brandCreatorId"
+          required
+          defaultValue={hasPreselectedCreator ? preselectedBrandCreatorId : ""}
+        >
           <option value="">Choose a creator...</option>
           {availableCreators.map((bc) => {
             const primaryPlatform = bc.creator.platforms[0];
