@@ -26,12 +26,14 @@ type AddCreatorToCampaignFormProps = {
   campaignId: string;
   availableCreators: AvailableBrandCreator[];
   preselectedBrandCreatorId?: string;
+  defaultOpen?: boolean;
 };
 
 export function AddCreatorToCampaignForm({
   campaignId,
   availableCreators,
   preselectedBrandCreatorId,
+  defaultOpen = false,
 }: AddCreatorToCampaignFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -40,7 +42,7 @@ export function AddCreatorToCampaignForm({
     preselectedBrandCreatorId &&
       availableCreators.some((bc) => bc.id === preselectedBrandCreatorId)
   );
-  const [isOpen, setIsOpen] = useState(hasPreselectedCreator);
+  const [isOpen, setIsOpen] = useState(defaultOpen || hasPreselectedCreator);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();

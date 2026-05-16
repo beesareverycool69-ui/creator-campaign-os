@@ -4,6 +4,7 @@ import { getBrandById } from "@/lib/actions/brands";
 import { getBrandCreators } from "@/lib/actions/brand-creators";
 import { AffiliatePipeline } from "@/components/features/affiliates/affiliate-pipeline";
 import { getPortalUrlsForBrandCreators } from "@/lib/actions/creator-portal";
+import { getCampaigns } from "@/lib/actions/campaigns";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -12,9 +13,10 @@ type Props = {
 export default async function AffiliatesPage({ params }: Props) {
   const { id } = await params;
   
-  const [brand, activeCreators] = await Promise.all([
+  const [brand, activeCreators, campaigns] = await Promise.all([
     getBrandById(id),
     getBrandCreators(id, "active"),
+    getCampaigns(id),
   ]);
 
   const uploadUrlsByBrandCreatorId = await getPortalUrlsForBrandCreators(
@@ -24,6 +26,8 @@ export default async function AffiliatesPage({ params }: Props) {
   if (!brand) {
     notFound();
   }
+
+  const firstCampaign = campaigns[0];
 
   // Calculate stats from notes (simplified - would use proper status field in production)
   const shipped = activeCreators.filter(c => c.notes?.includes("[SHIPPED]") && !c.notes?.includes("[DELIVERED]"));
@@ -65,6 +69,21 @@ export default async function AffiliatesPage({ params }: Props) {
         <button className="px-4 py-2 border rounded-md text-sm hover:bg-muted">
           Export CSV
         </button>
+      </div>
+
+      <div className="rounded-lg border border-purple-500/20 bg-purple-500/5 p-4 flex items-center justify-between gap-4">
+        <div>
+          <p className="font-medium">Campaigns are now the main partnership workspace</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Manage creator onboarding, shipment, content, posting, and completion from campaign pages. This Affiliates page is legacy brand-level tooling.
+          </p>
+        </div>
+        <Link
+          href={firstCampaign ? `/campaigns/${firstCampaign.id}` : `/campaigns/new?brandId=${id}`}
+          className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm hover:bg-primary/90 shrink-0"
+        >
+          {firstCampaign ? "Open Campaign" : "Create Campaign"}
+        </Link>
       </div>
 
       {/* Stats */}

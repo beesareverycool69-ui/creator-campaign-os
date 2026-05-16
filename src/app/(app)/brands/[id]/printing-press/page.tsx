@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getBrandById } from "@/lib/actions/brands";
 import { getBrandCreators } from "@/lib/actions/brand-creators";
+import { getCampaigns } from "@/lib/actions/campaigns";
 import { PrintingPressQueue } from "@/components/features/printing-press/printing-press-queue";
 
 type Props = {
@@ -14,9 +15,10 @@ type Props = {
 export default async function PrintingPressPage({ params }: Props) {
   const { id } = await params;
   
-  const [brand, activeCreators] = await Promise.all([
+  const [brand, activeCreators, campaigns] = await Promise.all([
     getBrandById(id),
     getBrandCreators(id, "active"),
+    getCampaigns(id),
   ]);
 
   if (!brand) {
@@ -27,6 +29,7 @@ export default async function PrintingPressPage({ params }: Props) {
   const needsBrief = activeCreators.filter(c => !c.notes?.includes("[BRIEF_SENT]"));
   const briefsSent = activeCreators.filter(c => c.notes?.includes("[BRIEF_SENT]") && !c.notes?.includes("[POSTED]"));
   const posted = activeCreators.filter(c => c.notes?.includes("[POSTED]"));
+  const firstCampaign = campaigns[0];
 
   return (
     <div className="space-y-6">
@@ -55,6 +58,20 @@ export default async function PrintingPressPage({ params }: Props) {
           </p>
         </div>
       </div>
+
+      <Card className="border-purple-500/20 bg-purple-500/5">
+        <CardContent className="flex items-center justify-between gap-4 pt-6">
+          <div>
+            <p className="font-medium">Campaigns are now the main post-acceptance workspace</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Use campaign pages for agreements, shipment, content review, posting, and completion. This Printing Press page is legacy brand-level tooling.
+            </p>
+          </div>
+          <Link href={firstCampaign ? `/campaigns/${firstCampaign.id}` : `/campaigns/new?brandId=${id}`}>
+            <Button>{firstCampaign ? "Open Campaign" : "Create Campaign"}</Button>
+          </Link>
+        </CardContent>
+      </Card>
 
       {/* Stats */}
       <div className="flex gap-6 text-sm">

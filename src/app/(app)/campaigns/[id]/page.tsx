@@ -17,12 +17,12 @@ import { getCampaignContentSummary } from "@/lib/actions/content";
 
 type Props = {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ brandCreatorId?: string }>;
+  searchParams: Promise<{ brandCreatorId?: string; addCreator?: string }>;
 };
 
 export default async function CampaignPage({ params, searchParams }: Props) {
   const { id } = await params;
-  const { brandCreatorId } = await searchParams;
+  const { brandCreatorId, addCreator } = await searchParams;
 
   const [campaign, campaignCreators, contentSummary] = await Promise.all([
     getCampaignById(id),
@@ -39,6 +39,48 @@ export default async function CampaignPage({ params, searchParams }: Props) {
     campaign.brand.id,
     id
   );
+
+  const nextActionCreator = campaignCreators.find((creator) =>
+    ["accepted", "onboarding", "ready", "shipped", "creating", "in_review", "approved", "posting"].includes(
+      creator.status
+    )
+  );
+
+  const commandCenterSteps = [
+    {
+      label: "Add accepted creators",
+      description: "Bring accepted brand leads into this campaign as campaign creators.",
+      count: campaign.totalCreators,
+      action: "Add Creator",
+      href: `/campaigns/${id}?addCreator=1`,
+    },
+    {
+      label: "Onboard",
+      description: "Move accepted creators through agreement, shipment, and readiness.",
+      count:
+        (campaign.statusCounts.accepted || 0) +
+        (campaign.statusCounts.onboarding || 0) +
+        (campaign.statusCounts.ready || 0),
+      action: nextActionCreator ? "Open Creator" : "Review Pipeline",
+      href: nextActionCreator
+        ? `/campaigns/${id}/creators/${nextActionCreator.id}`
+        : `/campaigns/${id}`,
+    },
+    {
+      label: "Manage content",
+      description: "Track creation, reviews, approvals, posting, and completion.",
+      count:
+        (campaign.statusCounts.creating || 0) +
+        (campaign.statusCounts.in_review || 0) +
+        (campaign.statusCounts.approved || 0) +
+        (campaign.statusCounts.posting || 0) +
+        (campaign.statusCounts.posted || 0),
+      action: nextActionCreator ? "Open Creator" : "Review Content",
+      href: nextActionCreator
+        ? `/campaigns/${id}/creators/${nextActionCreator.id}`
+        : `/campaigns/${id}`,
+    },
+  ];
 
   return (
     <div className="space-y-6">
@@ -99,8 +141,39 @@ export default async function CampaignPage({ params, searchParams }: Props) {
           campaignId={id}
           availableCreators={availableCreators}
           preselectedBrandCreatorId={brandCreatorId}
+          defaultOpen={addCreator === "1"}
         />
       </div>
+
+      {/* Campaign command center */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Campaign command center</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-3">
+            {commandCenterSteps.map((step) => (
+              <div key={step.label} className="rounded-lg border p-4 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-medium">{step.label}</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {step.description}
+                    </p>
+                  </div>
+                  <div className="text-2xl font-bold">{step.count}</div>
+                </div>
+                <Link href={step.href}>
+                  <Button variant="outline" size="sm">{step.action}</Button>
+                </Link>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground mt-4">
+            Campaigns are the source of truth after a lead is accepted: add creators here, then manage agreements, shipment, content review, posting, and completion from each campaign creator page.
+          </p>
+        </CardContent>
+      </Card>
 
       {/* Stats row */}
       <div className="grid grid-cols-4 md:grid-cols-8 gap-4">

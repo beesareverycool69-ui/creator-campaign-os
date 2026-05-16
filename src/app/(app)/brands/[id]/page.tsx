@@ -164,16 +164,16 @@ export default async function BrandPage({ params }: Props) {
           </Card>
         </Link>
 
-        <Link href={`/brands/${id}/printing-press`} className="block">
+        <Link href={firstCampaign ? `/campaigns/${firstCampaign.id}` : `/campaigns/new?brandId=${id}`} className="block">
           <Card className="hover:border-primary/50 transition-colors cursor-pointer">
             <CardContent className="pt-4 pb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
-                  <span className="text-purple-500 text-lg">🖨️</span>
+                  <span className="text-purple-500 text-lg">🚀</span>
                 </div>
                 <div>
-                  <p className="font-medium">Printing Press</p>
-                  <p className="text-xs text-muted-foreground">Briefs & Agreements</p>
+                  <p className="font-medium">Campaigns</p>
+                  <p className="text-xs text-muted-foreground">Onboarding & content</p>
                 </div>
               </div>
             </CardContent>
