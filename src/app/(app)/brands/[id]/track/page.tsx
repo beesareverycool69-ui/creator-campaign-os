@@ -100,10 +100,10 @@ export default async function TrackPage({ params, searchParams }: Props) {
             </p>
           </div>
           <div className="flex gap-2">
-            <Link href={firstCampaign ? `/campaigns/${firstCampaign.id}` : "/campaigns/new"}>
+            <Link href={firstCampaign ? `/campaigns/${firstCampaign.id}` : `/campaigns/new?brandId=${id}`}>
               <Button variant="outline">Add to Campaign</Button>
             </Link>
-            <Link href="/campaigns/new">
+            <Link href={`/campaigns/new?brandId=${id}`}>
               <Button>Create Campaign</Button>
             </Link>
           </div>

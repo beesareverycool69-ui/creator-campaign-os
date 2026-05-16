@@ -20,7 +20,7 @@ export function TrackList({ brandId, leads, currentTab, firstCampaignId }: Props
   const campaignHref = (brandCreatorId: string) =>
     firstCampaignId
       ? `/campaigns/${firstCampaignId}?brandCreatorId=${brandCreatorId}`
-      : "/campaigns/new";
+      : `/campaigns/new?brandId=${brandId}&brandCreatorId=${brandCreatorId}`;
 
   return (
     <div className="space-y-3">

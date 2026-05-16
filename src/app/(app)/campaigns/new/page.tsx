@@ -3,11 +3,11 @@ import { CampaignForm } from "@/components/features/campaigns";
 import { getBrands } from "@/lib/actions/brands";
 
 type Props = {
-  searchParams: Promise<{ brandId?: string }>;
+  searchParams: Promise<{ brandId?: string; brandCreatorId?: string }>;
 };
 
 export default async function NewCampaignPage({ searchParams }: Props) {
-  const { brandId } = await searchParams;
+  const { brandId, brandCreatorId } = await searchParams;
   const brands = await getBrands();
 
   return (
@@ -47,6 +47,7 @@ export default async function NewCampaignPage({ searchParams }: Props) {
         <CampaignForm
           brands={brands.map((b) => ({ id: b.id, name: b.name }))}
           defaultBrandId={brandId}
+          pendingBrandCreatorId={brandCreatorId}
         />
       )}
     </div>

@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createCampaign } from "@/lib/actions/campaigns";
+import { addCreatorToCampaign } from "@/lib/actions/campaign-creators";
 
 type Brand = {
   id: string;
@@ -18,6 +19,7 @@ type Brand = {
 type CampaignFormProps = {
   brands: Brand[];
   defaultBrandId?: string;
+  pendingBrandCreatorId?: string;
 };
 
 const OBJECTIVES = [
@@ -29,7 +31,11 @@ const OBJECTIVES = [
   { value: "other", label: "Other" },
 ];
 
-export function CampaignForm({ brands, defaultBrandId }: CampaignFormProps) {
+export function CampaignForm({
+  brands,
+  defaultBrandId,
+  pendingBrandCreatorId,
+}: CampaignFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +59,13 @@ export function CampaignForm({ brands, defaultBrandId }: CampaignFormProps) {
           ? parseInt(formData.get("targetCreatorCount") as string)
           : undefined,
       });
+
+      if (pendingBrandCreatorId) {
+        await addCreatorToCampaign({
+          campaignId: campaign.id,
+          brandCreatorId: pendingBrandCreatorId,
+        });
+      }
 
       router.push(`/campaigns/${campaign.id}`);
     } catch (err) {
@@ -87,6 +100,12 @@ export function CampaignForm({ brands, defaultBrandId }: CampaignFormProps) {
               ))}
             </Select>
           </div>
+
+          {pendingBrandCreatorId && (
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm text-muted-foreground">
+              After this campaign is created, the accepted creator will be added automatically.
+            </div>
+          )}
 
           {/* Name - required */}
           <div className="space-y-2">

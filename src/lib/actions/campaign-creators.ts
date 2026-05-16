@@ -6,6 +6,7 @@ import {
   brandCreators,
   creators,
   creatorPlatforms,
+  campaigns,
 } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -229,13 +230,26 @@ export async function getAvailableBrandCreatorsForCampaign(
  * IMPORTANT: Takes brandCreatorId, not raw creatorId
  */
 export async function addCreatorToCampaign(input: AddCreatorToCampaignInput) {
-  // Verify the brand creator exists
-  const brandCreator = await db.query.brandCreators.findFirst({
-    where: eq(brandCreators.id, input.brandCreatorId),
-  });
+  // Verify the campaign and brand creator exist and belong to the same brand
+  const [campaign, brandCreator] = await Promise.all([
+    db.query.campaigns.findFirst({
+      where: eq(campaigns.id, input.campaignId),
+    }),
+    db.query.brandCreators.findFirst({
+      where: eq(brandCreators.id, input.brandCreatorId),
+    }),
+  ]);
+
+  if (!campaign) {
+    throw new Error("Campaign not found");
+  }
 
   if (!brandCreator) {
     throw new Error("BrandCreator not found");
+  }
+
+  if (campaign.brandId !== brandCreator.brandId) {
+    throw new Error("Creator must belong to the same brand as the campaign");
   }
 
   // Check if already in campaign
@@ -268,6 +282,8 @@ export async function addCreatorToCampaign(input: AddCreatorToCampaignInput) {
     .returning();
 
   revalidatePath(`/campaigns/${input.campaignId}`);
+  revalidatePath(`/brands/${brandCreator.brandId}`);
+  revalidatePath(`/brands/${brandCreator.brandId}/track`);
 
   return newCampaignCreator;
 }

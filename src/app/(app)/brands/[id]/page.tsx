@@ -238,10 +238,10 @@ export default async function BrandPage({ params }: Props) {
               Add accepted leads to a campaign first, then move them into onboarding from the campaign page.
             </p>
             <div className="flex gap-2">
-              <Link href={firstCampaign ? `/campaigns/${firstCampaign.id}` : "/campaigns/new"}>
+              <Link href={firstCampaign ? `/campaigns/${firstCampaign.id}` : `/campaigns/new?brandId=${id}`}>
                 <Button variant="outline">Add to Campaign</Button>
               </Link>
-              <Link href="/campaigns/new">
+              <Link href={`/campaigns/new?brandId=${id}`}>
                 <Button>Create Campaign</Button>
               </Link>
             </div>
