@@ -87,7 +87,11 @@ export default async function DashboardPage() {
       label: "Start a campaign",
       description: "Move accepted creators into a campaign workflow.",
       complete: setup.hasCampaign,
-      href: "/campaigns/new",
+      href: setup.hasCampaign
+        ? "/campaigns"
+        : setup.firstBrandId
+          ? `/campaigns/new?brandId=${setup.firstBrandId}`
+          : "/campaigns/new",
       action: setup.hasCampaign ? "View Campaigns" : "New Campaign",
     },
   ];
