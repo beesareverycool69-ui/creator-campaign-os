@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
+import { requireOwnedCampaignCreator, requireUser } from "@/lib/auth/access";
 import {
   affiliateConversions,
   affiliateClicks,
@@ -61,6 +62,8 @@ export interface PendingConversion {
 }
 
 export async function getOverallStats(): Promise<ConversionStats> {
+  const user = await requireUser();
+
   const [stats] = await db
     .select({
       totalRevenue: sql<number>`COALESCE(SUM(CAST(${affiliateConversions.orderValue} AS DECIMAL)), 0)`,
@@ -68,11 +71,26 @@ export async function getOverallStats(): Promise<ConversionStats> {
       totalConversions: count(),
     })
     .from(affiliateConversions)
-    .where(eq(affiliateConversions.status, "confirmed"));
+    .innerJoin(
+      campaignCreators,
+      eq(affiliateConversions.campaignCreatorId, campaignCreators.id)
+    )
+    .innerJoin(campaigns, eq(campaignCreators.campaignId, campaigns.id))
+    .innerJoin(brands, eq(campaigns.brandId, brands.id))
+    .where(
+      and(
+        eq(affiliateConversions.status, "confirmed"),
+        eq(brands.userId, user.id)
+      )
+    );
 
   const [clickStats] = await db
     .select({ totalClicks: count() })
-    .from(affiliateClicks);
+    .from(affiliateClicks)
+    .innerJoin(campaignCreators, eq(affiliateClicks.campaignCreatorId, campaignCreators.id))
+    .innerJoin(campaigns, eq(campaignCreators.campaignId, campaigns.id))
+    .innerJoin(brands, eq(campaigns.brandId, brands.id))
+    .where(eq(brands.userId, user.id));
 
   const totalConversions = stats?.totalConversions || 0;
   const totalClicks = clickStats?.totalClicks || 0;
@@ -91,6 +109,8 @@ export async function getOverallStats(): Promise<ConversionStats> {
 }
 
 export async function getTopCreators(limit = 10): Promise<CreatorPerformance[]> {
+  const user = await requireUser();
+
   // Get confirmed conversion stats grouped by campaign creator
   const conversionStats = await db
     .select({
@@ -100,7 +120,18 @@ export async function getTopCreators(limit = 10): Promise<CreatorPerformance[]> 
       commission: sql<number>`COALESCE(SUM(CAST(${affiliateConversions.commission} AS DECIMAL)), 0)`,
     })
     .from(affiliateConversions)
-    .where(eq(affiliateConversions.status, "confirmed"))
+    .innerJoin(
+      campaignCreators,
+      eq(affiliateConversions.campaignCreatorId, campaignCreators.id)
+    )
+    .innerJoin(campaigns, eq(campaignCreators.campaignId, campaigns.id))
+    .innerJoin(brands, eq(campaigns.brandId, brands.id))
+    .where(
+      and(
+        eq(affiliateConversions.status, "confirmed"),
+        eq(brands.userId, user.id)
+      )
+    )
     .groupBy(affiliateConversions.campaignCreatorId)
     .orderBy(desc(sql`SUM(CAST(${affiliateConversions.orderValue} AS DECIMAL))`))
     .limit(limit);
@@ -112,6 +143,10 @@ export async function getTopCreators(limit = 10): Promise<CreatorPerformance[]> 
       clicks: count(),
     })
     .from(affiliateClicks)
+    .innerJoin(campaignCreators, eq(affiliateClicks.campaignCreatorId, campaignCreators.id))
+    .innerJoin(campaigns, eq(campaignCreators.campaignId, campaigns.id))
+    .innerJoin(brands, eq(campaigns.brandId, brands.id))
+    .where(eq(brands.userId, user.id))
     .groupBy(affiliateClicks.campaignCreatorId);
 
   const clickMap = new Map(clickStats.map(c => [c.campaignCreatorId, c.clicks]));
@@ -127,9 +162,11 @@ export async function getTopCreators(limit = 10): Promise<CreatorPerformance[]> 
         affiliateCode: campaignCreators.affiliateCode,
       })
       .from(campaignCreators)
+      .innerJoin(campaigns, eq(campaignCreators.campaignId, campaigns.id))
+      .innerJoin(brands, eq(campaigns.brandId, brands.id))
       .innerJoin(brandCreators, eq(campaignCreators.brandCreatorId, brandCreators.id))
       .innerJoin(creators, eq(brandCreators.creatorId, creators.id))
-      .where(eq(campaignCreators.id, stat.campaignCreatorId))
+      .where(and(eq(campaignCreators.id, stat.campaignCreatorId), eq(brands.userId, user.id)))
       .limit(1);
 
     if (details) {
@@ -150,6 +187,8 @@ export async function getTopCreators(limit = 10): Promise<CreatorPerformance[]> 
 }
 
 export async function getCampaignPerformance(): Promise<CampaignPerformance[]> {
+  const user = await requireUser();
+
   const campaignList = await db
     .select({
       id: campaigns.id,
@@ -157,6 +196,8 @@ export async function getCampaignPerformance(): Promise<CampaignPerformance[]> {
       brandId: campaigns.brandId,
     })
     .from(campaigns)
+    .innerJoin(brands, eq(campaigns.brandId, brands.id))
+    .where(eq(brands.userId, user.id))
     .orderBy(desc(campaigns.createdAt));
 
   const results: CampaignPerformance[] = [];
@@ -166,7 +207,7 @@ export async function getCampaignPerformance(): Promise<CampaignPerformance[]> {
     const [brand] = await db
       .select({ name: brands.name })
       .from(brands)
-      .where(eq(brands.id, campaign.brandId))
+      .where(and(eq(brands.id, campaign.brandId), eq(brands.userId, user.id)))
       .limit(1);
 
     // Get creator count
@@ -209,6 +250,8 @@ export async function getCampaignPerformance(): Promise<CampaignPerformance[]> {
 }
 
 export async function getDailyStats(days = 30): Promise<DailyStats[]> {
+  const user = await requireUser();
+
   const startDate = new Date();
   startDate.setDate(startDate.getDate() - days);
 
@@ -219,10 +262,17 @@ export async function getDailyStats(days = 30): Promise<DailyStats[]> {
       revenue: sql<number>`COALESCE(SUM(CAST(${affiliateConversions.orderValue} AS DECIMAL)), 0)`,
     })
     .from(affiliateConversions)
+    .innerJoin(
+      campaignCreators,
+      eq(affiliateConversions.campaignCreatorId, campaignCreators.id)
+    )
+    .innerJoin(campaigns, eq(campaignCreators.campaignId, campaigns.id))
+    .innerJoin(brands, eq(campaigns.brandId, brands.id))
     .where(
       and(
         gte(affiliateConversions.convertedAt, startDate),
-        eq(affiliateConversions.status, "confirmed")
+        eq(affiliateConversions.status, "confirmed"),
+        eq(brands.userId, user.id)
       )
     )
     .groupBy(sql`DATE(${affiliateConversions.convertedAt})`)
@@ -236,6 +286,8 @@ export async function getDailyStats(days = 30): Promise<DailyStats[]> {
 }
 
 export async function getPendingConversions(): Promise<PendingConversion[]> {
+  const user = await requireUser();
+
   const pendingConversions = await db
     .select({
       id: affiliateConversions.id,
@@ -256,7 +308,13 @@ export async function getPendingConversions(): Promise<PendingConversion[]> {
     .innerJoin(brandCreators, eq(campaignCreators.brandCreatorId, brandCreators.id))
     .innerJoin(creators, eq(brandCreators.creatorId, creators.id))
     .innerJoin(campaigns, eq(campaignCreators.campaignId, campaigns.id))
-    .where(eq(affiliateConversions.status, "pending"))
+    .innerJoin(brands, eq(campaigns.brandId, brands.id))
+    .where(
+      and(
+        eq(affiliateConversions.status, "pending"),
+        eq(brands.userId, user.id)
+      )
+    )
     .orderBy(desc(affiliateConversions.convertedAt));
 
   return pendingConversions.map((conversion) => ({
@@ -274,6 +332,29 @@ export async function updateConversionStatus(formData: FormData) {
     throw new Error("Invalid conversion status update");
   }
 
+  const user = await requireUser();
+  const [conversion] = await db
+    .select({ id: affiliateConversions.id })
+    .from(affiliateConversions)
+    .innerJoin(
+      campaignCreators,
+      eq(affiliateConversions.campaignCreatorId, campaignCreators.id)
+    )
+    .innerJoin(campaigns, eq(campaignCreators.campaignId, campaigns.id))
+    .innerJoin(brands, eq(campaigns.brandId, brands.id))
+    .where(
+      and(
+        eq(affiliateConversions.id, id),
+        eq(affiliateConversions.status, "pending"),
+        eq(brands.userId, user.id)
+      )
+    )
+    .limit(1);
+
+  if (!conversion) {
+    throw new Error("Conversion not found");
+  }
+
   await db
     .update(affiliateConversions)
     .set({ status })
@@ -288,6 +369,8 @@ export async function updateConversionStatus(formData: FormData) {
 }
 
 export async function getCreatorStats(campaignCreatorId: string) {
+  await requireOwnedCampaignCreator(campaignCreatorId);
+
   // Get basic info
   const [info] = await db
     .select({
