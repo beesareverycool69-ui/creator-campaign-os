@@ -1,7 +1,8 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { outreachTemplates } from "@/lib/db/schema";
+import { requireOwnedBrand, requireUser } from "@/lib/auth/access";
+import { brands, outreachTemplates } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -9,6 +10,8 @@ export type OutreachTemplate = typeof outreachTemplates.$inferSelect;
 export type NewOutreachTemplate = typeof outreachTemplates.$inferInsert;
 
 export async function getTemplatesByBrand(brandId: string) {
+  await requireOwnedBrand(brandId);
+
   return db
     .select()
     .from(outreachTemplates)
@@ -17,12 +20,15 @@ export async function getTemplatesByBrand(brandId: string) {
 }
 
 export async function getTemplateById(id: string) {
+  const user = await requireUser();
+
   const [template] = await db
-    .select()
+    .select({ template: outreachTemplates })
     .from(outreachTemplates)
-    .where(eq(outreachTemplates.id, id))
+    .innerJoin(brands, eq(outreachTemplates.brandId, brands.id))
+    .where(and(eq(outreachTemplates.id, id), eq(brands.userId, user.id)))
     .limit(1);
-  return template;
+  return template?.template;
 }
 
 export async function createTemplate(
@@ -34,6 +40,8 @@ export async function createTemplate(
     body: string;
   }
 ) {
+  await requireOwnedBrand(brandId);
+
   const [template] = await db
     .insert(outreachTemplates)
     .values({
@@ -58,6 +66,12 @@ export async function updateTemplate(
     body?: string;
   }
 ) {
+  const existing = await getTemplateById(id);
+
+  if (!existing) {
+    throw new Error("Template not found");
+  }
+
   const [template] = await db
     .update(outreachTemplates)
     .set({
@@ -74,6 +88,12 @@ export async function updateTemplate(
 }
 
 export async function deleteTemplate(id: string) {
+  const existing = await getTemplateById(id);
+
+  if (!existing) {
+    throw new Error("Template not found");
+  }
+
   const [template] = await db
     .delete(outreachTemplates)
     .where(eq(outreachTemplates.id, id))

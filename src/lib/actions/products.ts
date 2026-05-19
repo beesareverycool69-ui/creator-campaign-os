@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { requireOwnedBrand } from "@/lib/auth/access";
 import { products } from "@/lib/db/schema";
 import { revalidatePath } from "next/cache";
 
@@ -15,6 +16,8 @@ export type CreateProductInput = {
 };
 
 export async function createProduct(input: CreateProductInput) {
+  await requireOwnedBrand(input.brandId);
+
   if (!input.name.trim()) {
     throw new Error("Product name is required");
   }

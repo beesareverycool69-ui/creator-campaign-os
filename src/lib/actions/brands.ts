@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { brands, brandCreators } from "@/lib/db/schema";
-import { requireUser } from "@/lib/auth/access";
+import { requireOwnedBrand, requireUser } from "@/lib/auth/access";
 import { and, eq, count } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { analyzeBrand } from "@/lib/ai/analyze-brand";
@@ -219,6 +219,8 @@ export async function addCreatorToBrandWithScore(
   creatorId: string,
   fitScore?: number
 ) {
+  await requireOwnedBrand(brandId);
+
   const { brandCreators: brandCreatorsTable } = await import("@/lib/db/schema");
   const { and } = await import("drizzle-orm");
 
