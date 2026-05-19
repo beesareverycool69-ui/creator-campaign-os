@@ -331,7 +331,7 @@ export default async function AnalyticsPage() {
           </div>
 
           <p className="text-sm text-muted-foreground">
-            💡 Once connected, conversions appear here automatically when customers use creator promo codes.
+            💡 Once connected, conversions appear here automatically when customers use creator promo codes. Pending conversions are kept out of revenue totals until confirmed.
           </p>
         </CardContent>
       </Card>

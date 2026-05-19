@@ -78,7 +78,7 @@ export async function getOverallStats(): Promise<ConversionStats> {
 }
 
 export async function getTopCreators(limit = 10): Promise<CreatorPerformance[]> {
-  // Get conversion stats grouped by campaign creator
+  // Get confirmed conversion stats grouped by campaign creator
   const conversionStats = await db
     .select({
       campaignCreatorId: affiliateConversions.campaignCreatorId,
@@ -87,6 +87,7 @@ export async function getTopCreators(limit = 10): Promise<CreatorPerformance[]> 
       commission: sql<number>`COALESCE(SUM(CAST(${affiliateConversions.commission} AS DECIMAL)), 0)`,
     })
     .from(affiliateConversions)
+    .where(eq(affiliateConversions.status, "confirmed"))
     .groupBy(affiliateConversions.campaignCreatorId)
     .orderBy(desc(sql`SUM(CAST(${affiliateConversions.orderValue} AS DECIMAL))`))
     .limit(limit);
@@ -161,7 +162,7 @@ export async function getCampaignPerformance(): Promise<CampaignPerformance[]> {
       .from(campaignCreators)
       .where(eq(campaignCreators.campaignId, campaign.id));
 
-    // Get conversion stats for this campaign
+    // Get confirmed conversion stats for this campaign
     const [convStats] = await db
       .select({
         conversions: count(),
@@ -173,7 +174,12 @@ export async function getCampaignPerformance(): Promise<CampaignPerformance[]> {
         campaignCreators,
         eq(affiliateConversions.campaignCreatorId, campaignCreators.id)
       )
-      .where(eq(campaignCreators.campaignId, campaign.id));
+      .where(
+        and(
+          eq(campaignCreators.campaignId, campaign.id),
+          eq(affiliateConversions.status, "confirmed")
+        )
+      );
 
     results.push({
       campaignId: campaign.id,
@@ -200,7 +206,12 @@ export async function getDailyStats(days = 30): Promise<DailyStats[]> {
       revenue: sql<number>`COALESCE(SUM(CAST(${affiliateConversions.orderValue} AS DECIMAL)), 0)`,
     })
     .from(affiliateConversions)
-    .where(gte(affiliateConversions.convertedAt, startDate))
+    .where(
+      and(
+        gte(affiliateConversions.convertedAt, startDate),
+        eq(affiliateConversions.status, "confirmed")
+      )
+    )
     .groupBy(sql`DATE(${affiliateConversions.convertedAt})`)
     .orderBy(sql`DATE(${affiliateConversions.convertedAt})`);
 
@@ -229,7 +240,7 @@ export async function getCreatorStats(campaignCreatorId: string) {
     .where(eq(campaignCreators.id, campaignCreatorId))
     .limit(1);
 
-  // Get conversion stats
+  // Get confirmed conversion stats
   const [convStats] = await db
     .select({
       conversions: count(),
@@ -237,7 +248,12 @@ export async function getCreatorStats(campaignCreatorId: string) {
       commission: sql<number>`COALESCE(SUM(CAST(${affiliateConversions.commission} AS DECIMAL)), 0)`,
     })
     .from(affiliateConversions)
-    .where(eq(affiliateConversions.campaignCreatorId, campaignCreatorId));
+    .where(
+      and(
+        eq(affiliateConversions.campaignCreatorId, campaignCreatorId),
+        eq(affiliateConversions.status, "confirmed")
+      )
+    );
 
   // Get click stats
   const [clickStats] = await db
