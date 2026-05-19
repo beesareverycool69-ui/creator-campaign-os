@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { requireUser } from "@/lib/auth/access";
 import { 
   brandCreators, 
   brands, 
@@ -14,13 +15,33 @@ import {
 import { eq, sql, and, lte, count, desc, inArray } from "drizzle-orm";
 
 export async function getDashboardStats() {
+  const user = await requireUser();
+
   // Get overall counts
-  const creatorCount = await db.select({ count: count() }).from(creators);
-  const brandCount = await db.select({ count: count() }).from(brands);
-  const campaignCount = await db.select({ count: count() }).from(campaigns).where(
-    sql`${campaigns.status} IN ('active', 'recruiting')`
-  );
-  const leadCount = await db.select({ count: count() }).from(brandCreators);
+  const creatorCount = await db
+    .select({ count: sql<number>`COUNT(DISTINCT ${brandCreators.creatorId})` })
+    .from(brandCreators)
+    .innerJoin(brands, eq(brandCreators.brandId, brands.id))
+    .where(eq(brands.userId, user.id));
+  const brandCount = await db
+    .select({ count: count() })
+    .from(brands)
+    .where(eq(brands.userId, user.id));
+  const campaignCount = await db
+    .select({ count: count() })
+    .from(campaigns)
+    .innerJoin(brands, eq(campaigns.brandId, brands.id))
+    .where(
+      and(
+        eq(brands.userId, user.id),
+        sql`${campaigns.status} IN ('active', 'recruiting')`
+      )
+    );
+  const leadCount = await db
+    .select({ count: count() })
+    .from(brandCreators)
+    .innerJoin(brands, eq(brandCreators.brandId, brands.id))
+    .where(eq(brands.userId, user.id));
 
   return {
     creators: creatorCount[0]?.count || 0,
@@ -31,6 +52,8 @@ export async function getDashboardStats() {
 }
 
 export async function getLeadFunnelStats() {
+  const user = await requireUser();
+
   // Get counts by status for all brands
   const statusCounts = await db
     .select({
@@ -38,6 +61,8 @@ export async function getLeadFunnelStats() {
       count: count(),
     })
     .from(brandCreators)
+    .innerJoin(brands, eq(brandCreators.brandId, brands.id))
+    .where(eq(brands.userId, user.id))
     .groupBy(brandCreators.status);
 
   const funnel: Record<string, number> = {};
@@ -49,6 +74,8 @@ export async function getLeadFunnelStats() {
 }
 
 export async function getOutreachStats() {
+  const user = await requireUser();
+
   // Get outreach counts by status
   const stats = await db
     .select({
@@ -56,6 +83,9 @@ export async function getOutreachStats() {
       count: count(),
     })
     .from(outreaches)
+    .innerJoin(brandCreators, eq(outreaches.brandCreatorId, brandCreators.id))
+    .innerJoin(brands, eq(brandCreators.brandId, brands.id))
+    .where(eq(brands.userId, user.id))
     .groupBy(outreaches.status);
 
   const result: Record<string, number> = {};
@@ -89,6 +119,8 @@ export async function getOutreachStats() {
 }
 
 export async function getTodaysTasks() {
+  const user = await requireUser();
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const tomorrow = new Date(today);
@@ -107,7 +139,9 @@ export async function getTodaysTasks() {
     .from(brandCreators)
     .innerJoin(brands, eq(brandCreators.brandId, brands.id))
     .innerJoin(creators, eq(brandCreators.creatorId, creators.id))
-    .where(eq(brandCreators.status, "discovered"))
+    .where(
+      and(eq(brandCreators.status, "discovered"), eq(brands.userId, user.id))
+    )
     .limit(10);
 
   // Get follow-ups due (contacted 3+ days ago with no response)
@@ -129,6 +163,7 @@ export async function getTodaysTasks() {
     .innerJoin(creators, eq(brandCreators.creatorId, creators.id))
     .where(
       and(
+        eq(brands.userId, user.id),
         eq(brandCreators.status, "contacted"),
         lte(brandCreators.lastContactedAt, threeDaysAgo)
       )
@@ -142,6 +177,8 @@ export async function getTodaysTasks() {
 }
 
 export async function getRecentActivity() {
+  const user = await requireUser();
+
   // Get recent brand-creator status changes
   const recentLeads = await db
     .select({
@@ -154,6 +191,7 @@ export async function getRecentActivity() {
     .from(brandCreators)
     .innerJoin(brands, eq(brandCreators.brandId, brands.id))
     .innerJoin(creators, eq(brandCreators.creatorId, creators.id))
+    .where(eq(brands.userId, user.id))
     .orderBy(desc(brandCreators.updatedAt))
     .limit(10);
 
@@ -166,6 +204,10 @@ export async function getRecentActivity() {
       createdAt: contents.createdAt,
     })
     .from(contents)
+    .innerJoin(campaignCreators, eq(contents.campaignCreatorId, campaignCreators.id))
+    .innerJoin(campaigns, eq(campaignCreators.campaignId, campaigns.id))
+    .innerJoin(brands, eq(campaigns.brandId, brands.id))
+    .where(eq(brands.userId, user.id))
     .orderBy(desc(contents.createdAt))
     .limit(5);
 
@@ -176,15 +218,35 @@ export async function getRecentActivity() {
 }
 
 export async function getSetupProgress() {
+  const user = await requireUser();
+
   const firstBrand = await db
     .select({ id: brands.id, name: brands.name })
     .from(brands)
+    .where(eq(brands.userId, user.id))
     .orderBy(desc(brands.createdAt))
     .limit(1);
-  const productCount = await db.select({ count: count() }).from(products);
-  const leadCount = await db.select({ count: count() }).from(brandCreators);
-  const outreachCount = await db.select({ count: count() }).from(outreaches);
-  const campaignCount = await db.select({ count: count() }).from(campaigns);
+  const productCount = await db
+    .select({ count: count() })
+    .from(products)
+    .innerJoin(brands, eq(products.brandId, brands.id))
+    .where(eq(brands.userId, user.id));
+  const leadCount = await db
+    .select({ count: count() })
+    .from(brandCreators)
+    .innerJoin(brands, eq(brandCreators.brandId, brands.id))
+    .where(eq(brands.userId, user.id));
+  const outreachCount = await db
+    .select({ count: count() })
+    .from(outreaches)
+    .innerJoin(brandCreators, eq(outreaches.brandCreatorId, brandCreators.id))
+    .innerJoin(brands, eq(brandCreators.brandId, brands.id))
+    .where(eq(brands.userId, user.id));
+  const campaignCount = await db
+    .select({ count: count() })
+    .from(campaigns)
+    .innerJoin(brands, eq(campaigns.brandId, brands.id))
+    .where(eq(brands.userId, user.id));
 
   const brand = firstBrand[0] || null;
   const [nextOutreachBrand] = await db
@@ -197,6 +259,7 @@ export async function getSetupProgress() {
     .innerJoin(brandCreators, eq(brands.id, brandCreators.brandId))
     .where(
       and(
+        eq(brands.userId, user.id),
         inArray(brandCreators.status, ["discovered", "researching", "qualified"]),
         eq(brandCreators.doNotContact, false)
       )
@@ -220,6 +283,8 @@ export async function getSetupProgress() {
 }
 
 export async function getBrandPerformance() {
+  const user = await requireUser();
+
   // Get performance metrics per brand
   const brandStats = await db
     .select({
@@ -229,6 +294,7 @@ export async function getBrandPerformance() {
     })
     .from(brands)
     .leftJoin(brandCreators, eq(brands.id, brandCreators.brandId))
+    .where(eq(brands.userId, user.id))
     .groupBy(brands.id, brands.name)
     .orderBy(desc(count(brandCreators.id)))
     .limit(5);
