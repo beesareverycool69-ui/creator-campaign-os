@@ -89,10 +89,8 @@ export default async function CreatorPage({ params }: Props) {
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold">
-              {creator.addresses.length}
-            </div>
-            <p className="text-sm text-muted-foreground">Addresses</p>
+            <div className="text-2xl font-bold">Brand-scoped</div>
+            <p className="text-sm text-muted-foreground">Private details</p>
           </CardContent>
         </Card>
       </div>
@@ -151,38 +149,7 @@ export default async function CreatorPage({ params }: Props) {
         </CardContent>
       </Card>
 
-      {/* Addresses */}
-      {creator.addresses.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Shipping Addresses</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {creator.addresses.map((address) => (
-                <div key={address.id} className="p-3 border rounded-lg">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-medium">{address.label || "Address"}</span>
-                    {address.isDefault && (
-                      <Badge variant="secondary">Default</Badge>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {address.recipientName}
-                    <br />
-                    {address.street1}
-                    {address.street2 && <>, {address.street2}</>}
-                    <br />
-                    {address.city}, {address.state} {address.postalCode}
-                    <br />
-                    {address.country}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Shipping addresses are shown only in owned brand/campaign shipment flows. */}
     </div>
   );
 }

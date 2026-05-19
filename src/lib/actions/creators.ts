@@ -1,9 +1,10 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { creators, creatorPlatforms, addresses } from "@/lib/db/schema";
+import { creators, creatorPlatforms } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { requireUser } from "@/lib/auth/access";
 
 // =============================================================================
 // TYPES
@@ -37,6 +38,8 @@ export type AddCreatorPlatformInput = {
  * Get all creators with their platforms
  */
 export async function getCreators() {
+  await requireUser();
+
   const result = await db.query.creators.findMany({
     with: {
       platforms: true,
@@ -48,14 +51,16 @@ export async function getCreators() {
 }
 
 /**
- * Get a single creator by ID with platforms and addresses
+ * Get a single creator by ID with public identity/platform data.
+ * Shipping addresses are intentionally not returned from this global identity helper.
  */
 export async function getCreatorById(id: string) {
+  await requireUser();
+
   const result = await db.query.creators.findFirst({
     where: eq(creators.id, id),
     with: {
       platforms: true,
-      addresses: true,
     },
   });
 
@@ -70,6 +75,8 @@ export async function getCreatorById(id: string) {
  * Create a new creator
  */
 export async function createCreator(input: CreateCreatorInput) {
+  await requireUser();
+
   const [newCreator] = await db
     .insert(creators)
     .values({
@@ -93,6 +100,8 @@ export async function createCreator(input: CreateCreatorInput) {
  * Add a platform to a creator
  */
 export async function addCreatorPlatform(input: AddCreatorPlatformInput) {
+  await requireUser();
+
   const [newPlatform] = await db
     .insert(creatorPlatforms)
     .values({

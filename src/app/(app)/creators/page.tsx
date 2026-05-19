@@ -12,9 +12,9 @@ export default async function CreatorsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Creators</h1>
+          <h1 className="text-3xl font-bold">Creator Identity Directory</h1>
           <p className="text-muted-foreground mt-1">
-            Manage your creator database
+            Low-level creator identities. Brand-specific creator lists live inside each brand.
           </p>
         </div>
         <Link href="/creators/new">
@@ -26,7 +26,7 @@ export default async function CreatorsPage() {
       {creators.length === 0 ? (
         <EmptyState
           title="No creators yet"
-          description="Add creators once, then attach them to brands and campaigns."
+          description="Add low-level creator identities here, then attach them to brand-specific creator lists."
           actionHref="/creators/new"
           actionLabel="+ Add Creator"
         />
