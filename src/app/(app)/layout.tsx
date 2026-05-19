@@ -4,7 +4,6 @@ import { createClient } from "@/lib/supabase/server";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { 
   LayoutDashboard, 
-  Users, 
   Building2, 
   Megaphone,
   BarChart3,
@@ -15,7 +14,6 @@ export const dynamic = "force-dynamic";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/creators", label: "Creators", icon: Users },
   { href: "/brands", label: "Brands", icon: Building2 },
   { href: "/campaigns", label: "Campaigns", icon: Megaphone },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },

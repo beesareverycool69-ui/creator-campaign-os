@@ -503,12 +503,6 @@ export default async function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-3">
-            <Link href="/creators/new">
-              <Button variant="outline">
-                <UserPlus className="h-4 w-4 mr-2" />
-                Add Creator
-              </Button>
-            </Link>
             <Link href="/brands/new">
               <Button variant="outline">
                 <Building2 className="h-4 w-4 mr-2" />
@@ -520,9 +514,6 @@ export default async function DashboardPage() {
                 <Megaphone className="h-4 w-4 mr-2" />
                 New Campaign
               </Button>
-            </Link>
-            <Link href="/creators">
-              <Button variant="ghost">View All Creators</Button>
             </Link>
             <Link href="/brands">
               <Button variant="ghost">View All Brands</Button>

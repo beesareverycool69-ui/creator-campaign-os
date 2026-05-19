@@ -75,9 +75,6 @@ export default async function AnalyticsPage() {
             Track your affiliate performance and ROI
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline">Export Report</Button>
-        </div>
       </div>
 
       {/* Top Stats */}

@@ -247,7 +247,7 @@ export function LeadDiscovery({ brandId, onAddCreators }: LeadDiscoveryProps) {
           Discover Creators
         </CardTitle>
         <CardDescription>
-          Find new creators by searching the web, importing CSV, or scanning screenshots
+          Find new creators by searching the web, importing CSV, or scanning screenshots. CSV import works without AI; web search/OCR require API keys.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -341,7 +341,7 @@ export function LeadDiscovery({ brandId, onAddCreators }: LeadDiscoveryProps) {
             </Button>
 
             <p className="text-xs text-muted-foreground">
-              💡 Searches across Instagram, TikTok, and YouTube to find real creator profiles matching your criteria.
+              💡 Requires Brave Search and Anthropic keys. If discovery is not configured, use CSV Import to add creator handles manually.
             </p>
           </div>
         )}
@@ -391,7 +391,7 @@ export function LeadDiscovery({ brandId, onAddCreators }: LeadDiscoveryProps) {
               </div>
             )}
             <p className="text-xs text-muted-foreground">
-              Upload a screenshot from Instagram, TikTok, or any social platform. AI will extract creator handles.
+              Upload a screenshot from Instagram, TikTok, or any social platform. Requires Anthropic; use CSV Import if AI is not configured.
             </p>
             <Button onClick={handleOCRProcess} disabled={isLoading || !ocrFile} className="w-full">
               {isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}

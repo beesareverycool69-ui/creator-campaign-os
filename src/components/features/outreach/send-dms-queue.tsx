@@ -207,7 +207,10 @@ export function SendDMsQueue({ brandId, initialLeads }: Props) {
           {/* DM Message section */}
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium">1. DM Message</p>
+              <div>
+                <p className="text-sm font-medium">1. DM Message</p>
+                <p className="text-xs text-muted-foreground">Personalization requires Anthropic. If unavailable, write or paste a DM manually.</p>
+              </div>
               <Button 
                 variant="outline" 
                 size="sm" 
@@ -270,7 +273,7 @@ export function SendDMsQueue({ brandId, initialLeads }: Props) {
               </div>
             ) : (
               <p className="text-sm text-muted-foreground italic">
-                Click "Personalize" to generate a custom message for this creator
+                Click "Personalize" to generate a custom message, or write/paste one manually if AI is not configured
               </p>
             )}
           </div>

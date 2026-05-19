@@ -129,26 +129,6 @@ export default async function TrackPage({ params, searchParams }: Props) {
         ))}
       </div>
 
-      {/* Search and filters */}
-      <div className="flex items-center gap-4">
-        <input 
-          type="text"
-          placeholder="Search by name or handle..."
-          className="flex-1 px-3 py-2 rounded-md border bg-background text-sm"
-        />
-        <div className="flex gap-2">
-          <button className="px-3 py-1.5 text-xs rounded-md bg-muted">All</button>
-          <button className="px-3 py-1.5 text-xs rounded-md bg-muted">DM Sent</button>
-          <button className="px-3 py-1.5 text-xs rounded-md bg-muted">Follow-up 1</button>
-          <button className="px-3 py-1.5 text-xs rounded-md bg-muted">Follow-up 2</button>
-        </div>
-        <div className="flex gap-2">
-          <button className="px-3 py-1.5 text-xs rounded-md border">Newest</button>
-          <button className="px-3 py-1.5 text-xs rounded-md border">Oldest</button>
-          <button className="px-3 py-1.5 text-xs rounded-md border">A-Z</button>
-        </div>
-      </div>
-
       {/* List */}
       <div>
         <p className="text-sm text-muted-foreground mb-4">{leads.length} leads</p>

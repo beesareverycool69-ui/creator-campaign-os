@@ -9,13 +9,11 @@ import {
   LogOut,
   Megaphone,
   Menu,
-  Users,
   X,
 } from "lucide-react";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/creators", label: "Creators", icon: Users },
   { href: "/brands", label: "Brands", icon: Building2 },
   { href: "/campaigns", label: "Campaigns", icon: Megaphone },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
