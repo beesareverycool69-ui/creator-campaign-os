@@ -8,6 +8,8 @@ import {
   getTopCreators,
   getCampaignPerformance,
   getDailyStats,
+  getPendingConversions,
+  updateConversionStatus,
 } from "@/lib/actions/analytics";
 import {
   DollarSign,
@@ -34,12 +36,21 @@ function formatNumber(num: number): string {
   return new Intl.NumberFormat("en-US").format(num);
 }
 
+function formatDate(date: Date): string {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
+
 export default async function AnalyticsPage() {
-  const [stats, topCreators, campaignPerf, dailyStats] = await Promise.all([
+  const [stats, topCreators, campaignPerf, dailyStats, pendingConversions] = await Promise.all([
     getOverallStats(),
     getTopCreators(10),
     getCampaignPerformance(),
     getDailyStats(30),
+    getPendingConversions(),
   ]);
 
   // Calculate trend (compare last 7 days to previous 7 days)
@@ -142,6 +153,69 @@ export default async function AnalyticsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Pending Conversions */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Pending Conversions</CardTitle>
+          <CardDescription>Review webhook conversions before they count toward revenue totals.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {pendingConversions.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No pending conversions to review.</p>
+          ) : (
+            <div className="space-y-3">
+              {pendingConversions.map((conversion) => (
+                <div
+                  key={conversion.id}
+                  className="flex flex-col gap-3 rounded-lg border p-3 md:flex-row md:items-center md:justify-between"
+                >
+                  <div className="grid gap-1 text-sm md:grid-cols-3 md:gap-x-6">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Order</p>
+                      <p className="font-medium">{conversion.orderId}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Creator</p>
+                      <p className="font-medium">{conversion.creatorName}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Campaign</p>
+                      <p className="font-medium">{conversion.campaignName}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Code</p>
+                      <p className="font-medium">{conversion.affiliateCode || "No code"}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Value / Commission</p>
+                      <p className="font-medium">
+                        {formatCurrency(conversion.orderValue)} / {formatCurrency(conversion.commission)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Converted</p>
+                      <p className="font-medium">{formatDate(conversion.convertedAt)}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 md:shrink-0">
+                    <form action={updateConversionStatus}>
+                      <input type="hidden" name="id" value={conversion.id} />
+                      <input type="hidden" name="status" value="confirmed" />
+                      <Button size="sm" type="submit">Confirm</Button>
+                    </form>
+                    <form action={updateConversionStatus}>
+                      <input type="hidden" name="id" value={conversion.id} />
+                      <input type="hidden" name="status" value="rejected" />
+                      <Button size="sm" variant="outline" type="submit">Reject</Button>
+                    </form>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Revenue Chart */}
       <Card>

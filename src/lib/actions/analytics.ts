@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import {
   affiliateConversions,
@@ -45,6 +46,18 @@ export interface DailyStats {
   date: string;
   conversions: number;
   revenue: number;
+}
+
+export interface PendingConversion {
+  id: string;
+  orderId: string;
+  creatorName: string;
+  campaignName: string;
+  affiliateCode: string | null;
+  orderValue: number;
+  commission: number;
+  currency: string | null;
+  convertedAt: Date;
 }
 
 export async function getOverallStats(): Promise<ConversionStats> {
@@ -220,6 +233,58 @@ export async function getDailyStats(days = 30): Promise<DailyStats[]> {
     conversions: d.conversions,
     revenue: Number(d.revenue),
   }));
+}
+
+export async function getPendingConversions(): Promise<PendingConversion[]> {
+  const pendingConversions = await db
+    .select({
+      id: affiliateConversions.id,
+      orderId: affiliateConversions.orderId,
+      creatorName: creators.name,
+      campaignName: campaigns.name,
+      affiliateCode: campaignCreators.affiliateCode,
+      orderValue: affiliateConversions.orderValue,
+      commission: affiliateConversions.commission,
+      currency: affiliateConversions.currency,
+      convertedAt: affiliateConversions.convertedAt,
+    })
+    .from(affiliateConversions)
+    .innerJoin(
+      campaignCreators,
+      eq(affiliateConversions.campaignCreatorId, campaignCreators.id)
+    )
+    .innerJoin(brandCreators, eq(campaignCreators.brandCreatorId, brandCreators.id))
+    .innerJoin(creators, eq(brandCreators.creatorId, creators.id))
+    .innerJoin(campaigns, eq(campaignCreators.campaignId, campaigns.id))
+    .where(eq(affiliateConversions.status, "pending"))
+    .orderBy(desc(affiliateConversions.convertedAt));
+
+  return pendingConversions.map((conversion) => ({
+    ...conversion,
+    orderValue: Number(conversion.orderValue),
+    commission: Number(conversion.commission),
+  }));
+}
+
+export async function updateConversionStatus(formData: FormData) {
+  const id = formData.get("id")?.toString();
+  const status = formData.get("status")?.toString();
+
+  if (!id || (status !== "confirmed" && status !== "rejected")) {
+    throw new Error("Invalid conversion status update");
+  }
+
+  await db
+    .update(affiliateConversions)
+    .set({ status })
+    .where(
+      and(
+        eq(affiliateConversions.id, id),
+        eq(affiliateConversions.status, "pending")
+      )
+    );
+
+  revalidatePath("/analytics");
 }
 
 export async function getCreatorStats(campaignCreatorId: string) {
