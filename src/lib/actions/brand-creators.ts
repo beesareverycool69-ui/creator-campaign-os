@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { brandCreators, creators, creatorPlatforms } from "@/lib/db/schema";
+import { requireOwnedBrand, requireOwnedBrandCreator } from "@/lib/auth/access";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -66,6 +67,8 @@ export async function getBrandCreators(
   brandId: string,
   statusFilter?: LeadStatus
 ): Promise<BrandCreatorWithDetails[]> {
+  await requireOwnedBrand(brandId);
+
   // Build where clause
   const whereClause = statusFilter
     ? and(
@@ -117,6 +120,8 @@ export async function getBrandCreators(
  * Get a single brand-creator relationship
  */
 export async function getBrandCreatorById(id: string) {
+  await requireOwnedBrandCreator(id);
+
   const result = await db.query.brandCreators.findFirst({
     where: eq(brandCreators.id, id),
     with: {
@@ -159,6 +164,8 @@ export async function getLeadStatusCounts(brandId: string) {
  * Add a creator to a brand (create BrandCreator record)
  */
 export async function addCreatorToBrand(input: AddCreatorToBrandInput) {
+  await requireOwnedBrand(input.brandId);
+
   // Check if relationship already exists
   const existing = await db.query.brandCreators.findFirst({
     where: and(
@@ -193,6 +200,8 @@ export async function addCreatorToBrand(input: AddCreatorToBrandInput) {
  * Update the lead status of a brand-creator relationship
  */
 export async function updateLeadStatus(id: string, status: LeadStatus) {
+  await requireOwnedBrandCreator(id);
+
   const now = new Date();
 
   // Build update object based on status
@@ -239,6 +248,8 @@ export async function updateLeadStatus(id: string, status: LeadStatus) {
  * Update notes for a brand-creator relationship
  */
 export async function updateBrandCreatorNotes(id: string, notes: string) {
+  await requireOwnedBrandCreator(id);
+
   const [updated] = await db
     .update(brandCreators)
     .set({
@@ -270,6 +281,8 @@ const STAGE_TAG: Record<PipelineStage, string> = {
  * Stages are tracked as tags in the notes field.
  */
 export async function advancePipelineStage(id: string, stage: PipelineStage) {
+  await requireOwnedBrandCreator(id);
+
   const existing = await db.query.brandCreators.findFirst({
     where: eq(brandCreators.id, id),
     columns: { notes: true, brandId: true },

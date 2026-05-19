@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { outreaches, creatorPlatforms, brandCreators } from "@/lib/db/schema";
+import { requireOwnedBrand, requireOwnedBrandCreator } from "@/lib/auth/access";
 import { eq, inArray, and, or, isNull, lte } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { generateOutreachMessage } from "@/lib/ai/generate-outreach";
@@ -50,6 +51,8 @@ export type UpdateOutreachResult =
  * Get leads ready for initial outreach (not yet contacted)
  */
 export async function getLeadsForOutreach(brandId: string): Promise<OutreachLead[]> {
+  await requireOwnedBrand(brandId);
+
   const result = await db.query.brandCreators.findMany({
     where: and(
       eq(brandCreators.brandId, brandId),
@@ -365,12 +368,12 @@ export async function markDMSentAction(
 ): Promise<MarkOutreachResult> {
   const now = new Date();
   
-  const brandCreator = await db.query.brandCreators.findFirst({
-    where: (bc, { eq }) => eq(bc.id, brandCreatorId),
-    columns: { brandId: true, firstContactedAt: true },
-  });
-
-  if (!brandCreator) return { success: false, error: "Record not found." };
+  let brandCreator;
+  try {
+    brandCreator = await requireOwnedBrandCreator(brandCreatorId);
+  } catch {
+    return { success: false, error: "Record not found." };
+  }
 
   // Update brand creator status
   await db
@@ -410,12 +413,12 @@ export async function markCommentedAction(
 ): Promise<MarkOutreachResult> {
   const now = new Date();
   
-  const brandCreator = await db.query.brandCreators.findFirst({
-    where: (bc, { eq }) => eq(bc.id, brandCreatorId),
-    columns: { brandId: true },
-  });
-
-  if (!brandCreator) return { success: false, error: "Record not found." };
+  let brandCreator;
+  try {
+    brandCreator = await requireOwnedBrandCreator(brandCreatorId);
+  } catch {
+    return { success: false, error: "Record not found." };
+  }
 
   // Create outreach record for the comment
   if (comment) {
@@ -440,12 +443,12 @@ export async function skipLeadAction(
   brandCreatorId: string,
   reason?: string
 ): Promise<MarkOutreachResult> {
-  const brandCreator = await db.query.brandCreators.findFirst({
-    where: (bc, { eq }) => eq(bc.id, brandCreatorId),
-    columns: { brandId: true, notes: true },
-  });
-
-  if (!brandCreator) return { success: false, error: "Record not found." };
+  let brandCreator;
+  try {
+    brandCreator = await requireOwnedBrandCreator(brandCreatorId);
+  } catch {
+    return { success: false, error: "Record not found." };
+  }
 
   const notes = reason 
     ? `${brandCreator.notes ? brandCreator.notes + "\n" : ""}Skipped: ${reason}`
@@ -475,12 +478,12 @@ export async function markFollowUpSentAction(
 ): Promise<MarkOutreachResult> {
   const now = new Date();
   
-  const brandCreator = await db.query.brandCreators.findFirst({
-    where: (bc, { eq }) => eq(bc.id, brandCreatorId),
-    columns: { brandId: true },
-  });
-
-  if (!brandCreator) return { success: false, error: "Record not found." };
+  let brandCreator;
+  try {
+    brandCreator = await requireOwnedBrandCreator(brandCreatorId);
+  } catch {
+    return { success: false, error: "Record not found." };
+  }
 
   // Update last contacted timestamp
   await db
