@@ -19,6 +19,11 @@ interface ContentListProps {
 
 const statusConfig = {
   pending: {
+    label: "Pending",
+    color: "bg-yellow-100 text-yellow-800",
+    icon: Clock,
+  },
+  submitted: {
     label: "Pending Review",
     color: "bg-yellow-100 text-yellow-800",
     icon: Clock,

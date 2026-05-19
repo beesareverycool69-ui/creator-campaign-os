@@ -96,11 +96,21 @@ export async function submitContent(
       title: data.title,
       caption: data.caption,
       fileUrls: data.fileUrls,
-      status: "pending",
+      status: "submitted",
     })
     .returning();
 
+  const cc = await db.query.campaignCreators.findFirst({
+    where: eq(campaignCreators.id, campaignCreatorId),
+    columns: { campaignId: true },
+  });
+
   revalidatePath(`/creator-portal/${token}`);
+  if (cc) {
+    revalidatePath(`/campaigns/${cc.campaignId}/creators/${campaignCreatorId}/content`);
+    revalidatePath(`/campaigns/${cc.campaignId}/creators/${campaignCreatorId}`);
+    revalidatePath(`/campaigns/${cc.campaignId}`);
+  }
   return content;
 }
 
