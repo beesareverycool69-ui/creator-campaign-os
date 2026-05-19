@@ -74,6 +74,8 @@ export async function getShipment(campaignCreatorId: string) {
  * Get shipment by ID with related data
  */
 export async function getShipmentById(id: string) {
+  await requireOwnedShipment(id);
+
   const result = await db.query.shipments.findFirst({
     where: eq(shipments.id, id),
     with: {
