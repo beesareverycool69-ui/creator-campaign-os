@@ -96,6 +96,8 @@ export async function getLeadsForFollowUp(
   brandId: string,
   followUpNumber: 1 | 2
 ): Promise<FollowUpLead[]> {
+  await requireOwnedBrand(brandId);
+
   const now = new Date();
   const daysThreshold = followUpNumber === 1 ? 3 : 8; // FU1 after 3 days, FU2 after 8 days total
   const cutoffDate = new Date(now.getTime() - daysThreshold * 24 * 60 * 60 * 1000);
@@ -149,6 +151,8 @@ export async function getLeadsForFollowUp(
  * Get leads ready for re-engagement (declined/ghosted 90+ days ago)
  */
 export async function getLeadsForReEngage(brandId: string): Promise<FollowUpLead[]> {
+  await requireOwnedBrand(brandId);
+
   const now = new Date();
   const cutoffDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
 
@@ -208,6 +212,12 @@ export async function getLeadsForReEngage(brandId: string): Promise<FollowUpLead
 export async function generateOutreachAction(
   brandCreatorId: string
 ): Promise<GenerateOutreachResult> {
+  try {
+    await requireOwnedBrandCreator(brandCreatorId);
+  } catch {
+    return { success: false, error: "Record not found." };
+  }
+
   // Fetch everything we need
   const brandCreator = await db.query.brandCreators.findFirst({
     where: (bc, { eq }) => eq(bc.id, brandCreatorId),
@@ -267,6 +277,19 @@ export async function updateOutreachMessageAction(
 ): Promise<UpdateOutreachResult> {
   if (!message.trim()) return { success: false, error: "Message cannot be empty." };
 
+  const outreach = await db.query.outreaches.findFirst({
+    where: eq(outreaches.id, outreachId),
+    columns: { brandCreatorId: true },
+  });
+
+  if (!outreach?.brandCreatorId) return { success: false, error: "Record not found." };
+
+  try {
+    await requireOwnedBrandCreator(outreach.brandCreatorId);
+  } catch {
+    return { success: false, error: "Record not found." };
+  }
+
   await db
     .update(outreaches)
     .set({ message: message.trim(), updatedAt: new Date() })
@@ -287,6 +310,12 @@ export async function generateFollowUpAction(
   brandCreatorId: string
 ): Promise<GenerateFollowUpResult> {
   const { desc } = await import("drizzle-orm");
+
+  try {
+    await requireOwnedBrandCreator(brandCreatorId);
+  } catch {
+    return { success: false, error: "Record not found." };
+  }
 
   const brandCreator = await db.query.brandCreators.findFirst({
     where: (bc, { eq }) => eq(bc.id, brandCreatorId),
