@@ -7,7 +7,11 @@ import {
   contentMetrics,
   campaignCreators,
 } from "@/lib/db/schema";
-import { requireOwnedCampaignCreator, requireOwnedContent } from "@/lib/auth/access";
+import {
+  requireOwnedCampaign,
+  requireOwnedCampaignCreator,
+  requireOwnedContent,
+} from "@/lib/auth/access";
 import { eq, desc, count, and, inArray, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -149,6 +153,8 @@ export async function getContentById(id: string) {
  * Get content summary stats for a campaign creator
  */
 export async function getContentStats(campaignCreatorId: string) {
+  await requireOwnedCampaignCreator(campaignCreatorId);
+
   const allContent = await db.query.contents.findMany({
     where: eq(contents.campaignCreatorId, campaignCreatorId),
     columns: {
@@ -178,6 +184,8 @@ export async function getContentStats(campaignCreatorId: string) {
  * Get content summary across all creators in a campaign
  */
 export async function getCampaignContentSummary(campaignId: string) {
+  await requireOwnedCampaign(campaignId);
+
   // Get all campaign creators for this campaign
   const creators = await db.query.campaignCreators.findMany({
     where: eq(campaignCreators.campaignId, campaignId),
@@ -280,6 +288,8 @@ export async function updateContentStatus(id: string, status: ContentStatus) {
  * Request revision with feedback
  */
 export async function requestRevision(id: string, feedback: string, fileUrls?: string[]) {
+  await requireOwnedContent(id);
+
   const content = await db.query.contents.findFirst({
     where: eq(contents.id, id),
   });
@@ -390,6 +400,8 @@ export async function markAsPosted(
  * Mark content as live (verified as still up)
  */
 export async function markAsLive(id: string) {
+  await requireOwnedContent(id);
+
   const [updated] = await db
     .update(contents)
     .set({
@@ -466,6 +478,8 @@ export async function updateContent(
     notes: string;
   }>
 ) {
+  await requireOwnedContent(id);
+
   const [updated] = await db
     .update(contents)
     .set({
