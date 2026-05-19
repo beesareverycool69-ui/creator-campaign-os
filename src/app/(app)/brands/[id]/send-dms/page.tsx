@@ -56,7 +56,7 @@ export default async function SendDMsPage({ params }: Props) {
       </div>
 
       {/* Progress bar */}
-      <div className="rounded-lg border p-4 bg-muted/30">
+      <div className="rounded-lg border p-4 bg-card/70">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium">Today's DMs: {sentToday} / {dailyLimit}</span>
           <span className="text-sm text-muted-foreground">{leads.length} in queue</span>
@@ -70,7 +70,7 @@ export default async function SendDMsPage({ params }: Props) {
       </div>
 
       {/* How it works */}
-      <div className="rounded-lg border p-4 bg-muted/30">
+      <div className="rounded-lg border p-4 bg-card/70">
         <p className="text-sm">
           <strong>How it works:</strong> Copy the DM, send it on Instagram, then tap{" "}
           <strong>DM Sent</strong>. Comment on their latest post and tap{" "}

@@ -198,7 +198,7 @@ export function SendDMsQueue({ brandId, initialLeads }: Props) {
 
           {/* Bio */}
           {currentLead.creator.bio && (
-            <div className="mb-6 p-3 bg-muted/50 rounded-lg">
+            <div className="mb-6 p-3 bg-card/70 rounded-lg">
               <p className="text-sm font-medium mb-1">Bio</p>
               <p className="text-sm text-muted-foreground">{currentLead.creator.bio}</p>
             </div>
