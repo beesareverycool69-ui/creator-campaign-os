@@ -60,6 +60,8 @@ export async function getAgreement(campaignCreatorId: string) {
  * Get agreement by ID with related data
  */
 export async function getAgreementById(id: string) {
+  await requireOwnedAgreement(id);
+
   const result = await db.query.agreements.findFirst({
     where: eq(agreements.id, id),
     with: {
