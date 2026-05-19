@@ -1,10 +1,23 @@
 import { createHmac } from "crypto";
 
-// Simple token generation - in production use a proper JWT or signed token
-const SECRET = process.env.PORTAL_SECRET || "creator-portal-secret-change-me";
+const DEVELOPMENT_PORTAL_SECRET = "creator-portal-secret-change-me";
+
+function getPortalSecret() {
+  const secret = process.env.PORTAL_SECRET;
+
+  if (secret) {
+    return secret;
+  }
+
+  if (process.env.NODE_ENV === "production" || process.env.VERCEL_ENV === "production") {
+    throw new Error("PORTAL_SECRET is required in production");
+  }
+
+  return DEVELOPMENT_PORTAL_SECRET;
+}
 
 export function generatePortalToken(campaignCreatorId: string): string {
-  const hmac = createHmac("sha256", SECRET);
+  const hmac = createHmac("sha256", getPortalSecret());
   hmac.update(campaignCreatorId);
   const signature = hmac.digest("hex").substring(0, 16);
   return `${campaignCreatorId}-${signature}`;
