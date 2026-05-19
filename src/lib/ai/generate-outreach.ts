@@ -22,6 +22,10 @@ export type OutreachContext = {
 };
 
 export async function generateOutreachMessage(ctx: OutreachContext): Promise<string> {
+  if (!process.env.ANTHROPIC_API_KEY?.trim()) {
+    throw new Error("AI personalization is not configured yet.");
+  }
+
   const { brand, creator } = ctx;
 
   const primaryPlatform = creator.platforms[0];
