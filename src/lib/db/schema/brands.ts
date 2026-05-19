@@ -7,6 +7,7 @@ import {
   boolean,
   integer,
   jsonb,
+  index,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { brandCreatorStatusEnum } from "./enums";
@@ -33,6 +34,7 @@ export type BrandAnalysis = {
 // =============================================================================
 export const brands = pgTable("brands", {
   id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull(),
   
   // Identity
   name: varchar("name", { length: 255 }).notNull(),
@@ -50,7 +52,9 @@ export const brands = pgTable("brands", {
   // Timestamps
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => ({
+  userIdIdx: index("brands_user_id_idx").on(table.userId),
+}));
 
 // =============================================================================
 // BRAND CREATOR (Brand-level relationship with a creator)

@@ -2,7 +2,8 @@
 
 import { db } from "@/lib/db";
 import { brands, brandCreators } from "@/lib/db/schema";
-import { eq, count } from "drizzle-orm";
+import { requireUser } from "@/lib/auth/access";
+import { and, eq, count } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { analyzeBrand } from "@/lib/ai/analyze-brand";
 import { matchCreators } from "@/lib/ai/match-creators";
@@ -27,6 +28,8 @@ export type CreateBrandInput = {
  * Get all brands with creator count
  */
 export async function getBrands() {
+  const user = await requireUser();
+
   const result = await db
     .select({
       id: brands.id,
@@ -39,6 +42,7 @@ export async function getBrands() {
     })
     .from(brands)
     .leftJoin(brandCreators, eq(brands.id, brandCreators.brandId))
+    .where(eq(brands.userId, user.id))
     .groupBy(brands.id)
     .orderBy(brands.createdAt);
 
@@ -49,6 +53,8 @@ export async function getBrands() {
  * Get a single brand by ID with creator count
  */
 export async function getBrandById(id: string) {
+  const user = await requireUser();
+
   const [brand] = await db
     .select({
       id: brands.id,
@@ -63,7 +69,7 @@ export async function getBrandById(id: string) {
       updatedAt: brands.updatedAt,
     })
     .from(brands)
-    .where(eq(brands.id, id));
+    .where(and(eq(brands.id, id), eq(brands.userId, user.id)));
 
   if (!brand) return null;
 
@@ -87,9 +93,12 @@ export async function getBrandById(id: string) {
  * Create a new brand
  */
 export async function createBrand(input: CreateBrandInput) {
+  const user = await requireUser();
+
   const [newBrand] = await db
     .insert(brands)
     .values({
+      userId: user.id,
       name: input.name,
       website: input.website || null,
       industry: input.industry || null,

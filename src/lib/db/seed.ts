@@ -25,6 +25,7 @@ if (!connectionString) {
 
 const client = postgres(connectionString, { prepare: false, max: 1 });
 const db = drizzle(client, { schema });
+const seedUserId = process.env.SEED_USER_ID || "9d3e413d-3aef-4ea8-9019-6c94ec66e523";
 
 async function seed() {
   console.log("🌱 Starting seed...\n");
@@ -57,6 +58,7 @@ async function seed() {
     const [brand] = await db
       .insert(schema.brands)
       .values({
+        userId: seedUserId,
         name: "Acme Fitness Co",
         website: "https://acmefitness.example.com",
         industry: "Fitness & Wellness",
