@@ -76,10 +76,7 @@ export function AddCreatorToBrandForm({
   if (availableCreators.length === 0 && !isOpen) {
     return (
       <div className="text-sm text-muted-foreground">
-        No creators available to add.{" "}
-        <a href="/creators/new" className="text-primary hover:underline">
-          Create one first
-        </a>
+        No existing identities available. Use this brand&apos;s Leads page to import creator handles with CSV or discovery.
       </div>
     );
   }

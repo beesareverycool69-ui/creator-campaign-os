@@ -57,7 +57,7 @@ export default async function ContentListPage({ params }: Props) {
         </div>
 
         <Link href={`/campaigns/${campaignId}/creators/${creatorId}/content/new`}>
-          <Button>+ Submit Content</Button>
+          <Button>+ Internal Upload</Button>
         </Link>
       </div>
 
@@ -91,10 +91,10 @@ export default async function ContentListPage({ params }: Props) {
           <p className="text-4xl mb-4">📹</p>
           <h3 className="text-lg font-medium mb-2">No content yet</h3>
           <p className="text-muted-foreground mb-4">
-            Submit your first piece of content for review.
+            Send the creator their portal link for uploads, or add content manually with internal upload.
           </p>
           <Link href={`/campaigns/${campaignId}/creators/${creatorId}/content/new`}>
-            <Button>Submit Content</Button>
+            <Button>Internal Upload</Button>
           </Link>
         </div>
       ) : (

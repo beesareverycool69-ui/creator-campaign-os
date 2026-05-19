@@ -18,9 +18,10 @@ import { Copy, Check, Sparkles, Send, MessageSquare, X, Loader2, ExternalLink } 
 type Props = {
   brandId: string;
   initialLeads: OutreachLead[];
+  aiConfigured: boolean;
 };
 
-export function SendDMsQueue({ brandId, initialLeads }: Props) {
+export function SendDMsQueue({ brandId, initialLeads, aiConfigured }: Props) {
   const { success, error } = useToast();
   const [leads, setLeads] = useState(initialLeads);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -50,6 +51,7 @@ export function SendDMsQueue({ brandId, initialLeads }: Props) {
   const profileUrl = getProfileUrl(primaryPlatform);
 
   const handlePersonalize = async () => {
+    if (!aiConfigured) return;
     setIsGenerating(true);
     try {
       const result = await generateOutreachAction(currentLead.id);
@@ -215,7 +217,7 @@ export function SendDMsQueue({ brandId, initialLeads }: Props) {
                 variant="outline" 
                 size="sm" 
                 onClick={handlePersonalize}
-                disabled={isGenerating}
+                disabled={isGenerating || !aiConfigured}
               >
                 {isGenerating ? (
                   <>
@@ -225,7 +227,7 @@ export function SendDMsQueue({ brandId, initialLeads }: Props) {
                 ) : (
                   <>
                     <Sparkles className="h-4 w-4 mr-2" />
-                    Personalize
+                    {aiConfigured ? "Personalize" : "AI Not Configured"}
                   </>
                 )}
               </Button>
@@ -272,9 +274,13 @@ export function SendDMsQueue({ brandId, initialLeads }: Props) {
                 </div>
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground italic">
-                Click "Personalize" to generate a custom message, or write/paste one manually if AI is not configured
-              </p>
+              <Textarea
+                value={generatedMessage || ""}
+                onChange={(e) => setGeneratedMessage(e.target.value)}
+                rows={5}
+                className="resize-none"
+                placeholder="Write or paste the DM here. AI personalization is optional."
+              />
             )}
           </div>
 

@@ -45,11 +45,15 @@ interface DiscoveredCreator {
 interface LeadDiscoveryProps {
   brandId: string;
   onAddCreators?: (creators: DiscoveredCreator[]) => void;
+  aiConfig?: {
+    anthropic: boolean;
+    brave: boolean;
+  };
 }
 
 type TabType = "external" | "csv" | "ocr";
 
-export function LeadDiscovery({ brandId, onAddCreators }: LeadDiscoveryProps) {
+export function LeadDiscovery({ brandId, onAddCreators, aiConfig }: LeadDiscoveryProps) {
   const { success, error } = useToast();
   const [activeTab, setActiveTab] = useState<TabType>("external");
   const [isLoading, setIsLoading] = useState(false);
@@ -68,6 +72,9 @@ export function LeadDiscovery({ brandId, onAddCreators }: LeadDiscoveryProps) {
   const [ocrFile, setOcrFile] = useState<File | null>(null);
   const [ocrPreview, setOcrPreview] = useState<string | null>(null);
 
+  const webSearchConfigured = !!aiConfig?.anthropic && !!aiConfig?.brave;
+  const ocrConfigured = !!aiConfig?.anthropic;
+
   const followerRanges = {
     any: { min: undefined, max: undefined },
     nano: { min: 1000, max: 10000 },
@@ -77,7 +84,7 @@ export function LeadDiscovery({ brandId, onAddCreators }: LeadDiscoveryProps) {
   };
 
   const handleExternalDiscover = async () => {
-    if (!keywords.trim()) return;
+    if (!keywords.trim() || !webSearchConfigured) return;
     setIsLoading(true);
 
     try {
@@ -167,7 +174,7 @@ export function LeadDiscovery({ brandId, onAddCreators }: LeadDiscoveryProps) {
   };
 
   const handleOCRProcess = async () => {
-    if (!ocrFile) return;
+    if (!ocrFile || !ocrConfigured) return;
     setIsLoading(true);
 
     try {
@@ -335,9 +342,9 @@ export function LeadDiscovery({ brandId, onAddCreators }: LeadDiscoveryProps) {
               </div>
             </div>
 
-            <Button onClick={handleExternalDiscover} disabled={isLoading || !keywords.trim()} className="w-full">
+            <Button onClick={handleExternalDiscover} disabled={isLoading || !keywords.trim() || !webSearchConfigured} className="w-full">
               {isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Search className="h-4 w-4 mr-2" />}
-              {isLoading ? "Searching the web..." : "Find Creators"}
+              {isLoading ? "Searching the web..." : webSearchConfigured ? "Find Creators" : "AI Web Search Not Configured"}
             </Button>
 
             <p className="text-xs text-muted-foreground">
@@ -393,9 +400,9 @@ export function LeadDiscovery({ brandId, onAddCreators }: LeadDiscoveryProps) {
             <p className="text-xs text-muted-foreground">
               Upload a screenshot from Instagram, TikTok, or any social platform. Requires Anthropic; use CSV Import if AI is not configured.
             </p>
-            <Button onClick={handleOCRProcess} disabled={isLoading || !ocrFile} className="w-full">
+            <Button onClick={handleOCRProcess} disabled={isLoading || !ocrFile || !ocrConfigured} className="w-full">
               {isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
-              {isLoading ? "Processing..." : "Extract Creators"}
+              {isLoading ? "Processing..." : ocrConfigured ? "Extract Creators" : "AI OCR Not Configured"}
             </Button>
           </div>
         )}

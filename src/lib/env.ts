@@ -60,3 +60,8 @@ export function getSupabaseBrowserEnv() {
 export function getDatabaseUrl() {
   return getRequiredEnv("DATABASE_URL");
 }
+
+export function isConfiguredEnv(name: EnvName) {
+  const value = getOptionalEnv(name);
+  return !!value && value !== "***" && !value.includes("your_") && !value.includes("change-me");
+}

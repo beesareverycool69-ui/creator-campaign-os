@@ -19,6 +19,7 @@ import {
 import { getCreators } from "@/lib/actions/creators";
 import { getBrandProducts } from "@/lib/actions/shipments";
 import { getCampaigns } from "@/lib/actions/campaigns";
+import { isConfiguredEnv } from "@/lib/env";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -57,6 +58,7 @@ export default async function BrandPage({ params }: Props) {
   ] as const;
   const acceptedCount = statusCounts["active"] || 0;
   const firstCampaign = campaigns[0];
+  const anthropicConfigured = isConfiguredEnv("ANTHROPIC_API_KEY");
 
   return (
     <div className="space-y-6">
@@ -258,12 +260,14 @@ export default async function BrandPage({ params }: Props) {
         hasWebsite={!!brand.website}
         analysis={brand.brandAnalysis}
         analyzedAt={brand.analyzedAt}
+        aiConfigured={anthropicConfigured}
       />
 
       {/* Creator Matching */}
       <CreatorMatchResults
         brandId={id}
         hasAnalysis={!!brand.brandAnalysis}
+        aiConfigured={anthropicConfigured}
       />
 
       {/* Recent Leads */}

@@ -15,6 +15,7 @@ import {
   getLeadStatusCounts,
 } from "@/lib/actions/brand-creators";
 import { getCreators } from "@/lib/actions/creators";
+import { isConfiguredEnv } from "@/lib/env";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -94,7 +95,13 @@ export default async function BrandLeadsPage({ params, searchParams }: Props) {
       </div>
 
       {/* Discovery section */}
-      <LeadDiscovery brandId={id} />
+      <LeadDiscovery
+        brandId={id}
+        aiConfig={{
+          anthropic: isConfiguredEnv("ANTHROPIC_API_KEY"),
+          brave: isConfiguredEnv("BRAVE_API_KEY"),
+        }}
+      />
 
       {/* Status filter tabs */}
       <div className="flex flex-wrap gap-2">

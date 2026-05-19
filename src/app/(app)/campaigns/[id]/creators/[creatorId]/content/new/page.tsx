@@ -52,14 +52,14 @@ export default async function NewContentPage({ params }: Props) {
           Content
         </Link>
         <span>/</span>
-        <span>New</span>
+        <span>Internal Upload</span>
       </div>
 
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">Submit Content</h1>
+        <h1 className="text-3xl font-bold">Internal Content Upload</h1>
         <p className="text-muted-foreground">
-          Upload content for {campaign.name}
+          Creator-facing uploads should use the portal link. Use this only for manual/internal uploads for {campaign.name}.
         </p>
       </div>
 

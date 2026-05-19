@@ -16,6 +16,7 @@ type Match = Extract<MatchCreatorsResult, { success: true }>["matches"][number];
 type Props = {
   brandId: string;
   hasAnalysis: boolean;
+  aiConfigured: boolean;
 };
 
 function scoreColor(score: number) {
@@ -78,7 +79,7 @@ function MatchRow({ match, brandId }: { match: Match; brandId: string }) {
   );
 }
 
-export function CreatorMatchResults({ brandId, hasAnalysis }: Props) {
+export function CreatorMatchResults({ brandId, hasAnalysis, aiConfigured }: Props) {
   const { success, error: showError } = useToast();
   const [isPending, startTransition] = useTransition();
   const [matches, setMatches] = useState<Match[] | null>(null);
@@ -86,6 +87,7 @@ export function CreatorMatchResults({ brandId, hasAnalysis }: Props) {
   const [limit, setLimit] = useState<number>(10);
 
   function handleMatch() {
+    if (!aiConfigured) return;
     setMatches(null);
     setError(null);
     startTransition(async () => {
@@ -115,7 +117,7 @@ export function CreatorMatchResults({ brandId, hasAnalysis }: Props) {
           <Select
             value={String(limit)}
             onChange={(e) => setLimit(Number(e.target.value))}
-            disabled={isPending || !hasAnalysis}
+            disabled={isPending || !hasAnalysis || !aiConfigured}
             className="w-24 h-8 text-sm py-0"
           >
             {LIMIT_OPTIONS.map((n) => (
@@ -124,18 +126,24 @@ export function CreatorMatchResults({ brandId, hasAnalysis }: Props) {
           </Select>
           <Button
             onClick={handleMatch}
-            disabled={isPending || !hasAnalysis}
+            disabled={isPending || !hasAnalysis || !aiConfigured}
             variant={matches ? "outline" : "default"}
             size="sm"
             title={!hasAnalysis ? "Analyze brand first" : undefined}
           >
-            {isPending ? "Matching…" : matches ? "Re-match" : "Find Matches"}
+            {isPending ? "Matching…" : !aiConfigured ? "AI Not Configured" : matches ? "Re-match" : "Find Matches"}
           </Button>
         </div>
       </CardHeader>
 
       <CardContent>
-        {!hasAnalysis && (
+        {!aiConfigured && (
+          <p className="text-sm text-muted-foreground py-2">
+            Add an Anthropic API key to enable creator matching.
+          </p>
+        )}
+
+        {aiConfigured && !hasAnalysis && (
           <p className="text-sm text-muted-foreground py-2">
             Analyze the brand first to enable creator matching.
           </p>

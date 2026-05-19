@@ -13,6 +13,7 @@ type Props = {
   hasWebsite: boolean;
   analysis: BrandAnalysis | null | undefined;
   analyzedAt: Date | null | undefined;
+  aiConfigured: boolean;
 };
 
 export function BrandAnalysisCard({
@@ -20,11 +21,13 @@ export function BrandAnalysisCard({
   hasWebsite,
   analysis,
   analyzedAt,
+  aiConfigured,
 }: Props) {
   const { success, error } = useToast();
   const [isPending, startTransition] = useTransition();
 
   function handleAnalyze() {
+    if (!aiConfigured) return;
     startTransition(async () => {
       const result = await analyzeBrandAction(brandId);
       if (result.success) {
@@ -50,13 +53,19 @@ export function BrandAnalysisCard({
         </div>
         <Button
           onClick={handleAnalyze}
-          disabled={isPending}
+          disabled={isPending || !aiConfigured}
           variant={analysis ? "outline" : "default"}
           size="sm"
         >
-          {isPending ? "Analyzing…" : analysis ? "Re-analyze" : "Analyze Brand"}
+          {isPending ? "Analyzing…" : !aiConfigured ? "AI Not Configured" : analysis ? "Re-analyze" : "Analyze Brand"}
         </Button>
       </CardHeader>
+
+      {!aiConfigured && (
+        <CardContent>
+          <p className="text-sm text-muted-foreground py-2">Add an Anthropic API key to enable brand analysis.</p>
+        </CardContent>
+      )}
 
       {isPending && (
         <CardContent>

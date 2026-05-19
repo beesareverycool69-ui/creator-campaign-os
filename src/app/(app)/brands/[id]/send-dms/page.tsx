@@ -4,6 +4,7 @@ import { getBrandById } from "@/lib/actions/brands";
 import { getLeadsForOutreach } from "@/lib/actions/outreach";
 import { SendDMsQueue } from "@/components/features/outreach/send-dms-queue";
 import { EmptyState } from "@/components/ui/empty-state";
+import { isConfiguredEnv } from "@/lib/env";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -87,7 +88,11 @@ export default async function SendDMsPage({ params }: Props) {
           actionLabel="View Leads"
         />
       ) : (
-        <SendDMsQueue brandId={id} initialLeads={leads} />
+        <SendDMsQueue
+          brandId={id}
+          initialLeads={leads}
+          aiConfigured={isConfiguredEnv("ANTHROPIC_API_KEY")}
+        />
       )}
     </div>
   );

@@ -326,19 +326,19 @@ export default async function CampaignCreatorPage({ params }: Props) {
                   <Link
                     href={`/campaigns/${campaignId}/creators/${creatorId}/content/new`}
                   >
-                    <Button size="sm">+ Submit Content</Button>
+                    <Button size="sm">+ Internal Upload</Button>
                   </Link>
                 </div>
               </div>
             ) : (
               <div className="flex items-center justify-between">
                 <p className="text-muted-foreground text-sm">
-                  No content submitted yet.
+                  No content submitted yet. Send creators the portal link for uploads, or use internal upload for manual entry.
                 </p>
                 <Link
                   href={`/campaigns/${campaignId}/creators/${creatorId}/content/new`}
                 >
-                  <Button size="sm">Submit Content</Button>
+                  <Button size="sm">Internal Upload</Button>
                 </Link>
               </div>
             )}

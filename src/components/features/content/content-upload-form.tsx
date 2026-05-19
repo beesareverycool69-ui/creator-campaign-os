@@ -159,7 +159,7 @@ export function ContentUploadForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Submit Content</CardTitle>
+        <CardTitle>Internal Content Upload</CardTitle>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -303,7 +303,7 @@ export function ContentUploadForm({
 
           <div className="flex gap-4">
             <Button type="submit" disabled={loading || uploading}>
-              {loading ? "Submitting..." : "Submit Content"}
+              {loading ? "Saving..." : "Save Internal Upload"}
             </Button>
             <Button
               type="button"
