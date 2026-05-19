@@ -196,23 +196,30 @@ export async function getSetupProgress() {
   ]);
 
   const brand = firstBrand[0] || null;
-  const readyForOutreach = brand
-    ? await db
-        .select({ count: count() })
-        .from(brandCreators)
-        .where(
-          and(
-            eq(brandCreators.brandId, brand.id),
-            inArray(brandCreators.status, ["discovered", "researching", "qualified"]),
-            eq(brandCreators.doNotContact, false)
-          )
-        )
-    : [];
+  const [nextOutreachBrand] = await db
+    .select({
+      id: brands.id,
+      name: brands.name,
+      readyLeadCount: count(brandCreators.id),
+    })
+    .from(brands)
+    .innerJoin(brandCreators, eq(brands.id, brandCreators.brandId))
+    .where(
+      and(
+        inArray(brandCreators.status, ["discovered", "researching", "qualified"]),
+        eq(brandCreators.doNotContact, false)
+      )
+    )
+    .groupBy(brands.id, brands.name)
+    .orderBy(desc(count(brandCreators.id)))
+    .limit(1);
 
   return {
     firstBrandId: brand?.id || null,
     firstBrandName: brand?.name || null,
-    readyForOutreachCount: readyForOutreach[0]?.count || 0,
+    nextOutreachBrandId: nextOutreachBrand?.id || null,
+    nextOutreachBrandName: nextOutreachBrand?.name || null,
+    readyForOutreachCount: nextOutreachBrand?.readyLeadCount || 0,
     hasBrand: !!brand,
     hasProducts: (productCount[0]?.count || 0) > 0,
     hasCreators: (leadCount[0]?.count || 0) > 0,

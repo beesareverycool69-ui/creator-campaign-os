@@ -100,9 +100,8 @@ export default async function DashboardPage() {
     setup.hasBrand &&
     setup.hasProducts &&
     setup.hasCreators &&
-    !setup.hasOutreach &&
     setup.readyForOutreachCount > 0 &&
-    !!setup.firstBrandId;
+    !!setup.nextOutreachBrandId;
 
   return (
     <div className="space-y-6">
@@ -145,7 +144,7 @@ export default async function DashboardPage() {
             <p className="text-sm text-muted-foreground">
               Your brand, product, and lead list are set up. Start outreach from the brand DM queue.
             </p>
-            <Link href={`/brands/${setup.firstBrandId}/send-dms`}>
+            <Link href={`/brands/${setup.nextOutreachBrandId}/send-dms`}>
               <Button>
                 Send DMs
                 <ArrowRight className="h-4 w-4 ml-2" />
