@@ -2,7 +2,8 @@
 
 import { db } from "@/lib/db";
 import { campaigns, campaignCreators, brands } from "@/lib/db/schema";
-import { eq, count, desc } from "drizzle-orm";
+import { requireUser } from "@/lib/auth/access";
+import { and, eq, count, desc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 // =============================================================================
@@ -36,7 +37,10 @@ export type CreateCampaignInput = {
  * Get all campaigns, optionally filtered by brand
  */
 export async function getCampaigns(brandId?: string) {
-  const whereClause = brandId ? eq(campaigns.brandId, brandId) : undefined;
+  const user = await requireUser();
+  const whereClause = brandId
+    ? and(eq(campaigns.brandId, brandId), eq(brands.userId, user.id))
+    : eq(brands.userId, user.id);
 
   const result = await db
     .select({
@@ -70,6 +74,8 @@ export async function getCampaigns(brandId?: string) {
  * Get a single campaign by ID with creator counts per status
  */
 export async function getCampaignById(id: string) {
+  const user = await requireUser();
+
   const [campaign] = await db
     .select({
       id: campaigns.id,
@@ -92,7 +98,7 @@ export async function getCampaignById(id: string) {
     })
     .from(campaigns)
     .leftJoin(brands, eq(campaigns.brandId, brands.id))
-    .where(eq(campaigns.id, id));
+    .where(and(eq(campaigns.id, id), eq(brands.userId, user.id)));
 
   if (!campaign) return null;
 
@@ -131,6 +137,18 @@ export async function getCampaignById(id: string) {
  * Create a new campaign
  */
 export async function createCampaign(input: CreateCampaignInput) {
+  const user = await requireUser();
+
+  const [brand] = await db
+    .select({ id: brands.id })
+    .from(brands)
+    .where(and(eq(brands.id, input.brandId), eq(brands.userId, user.id)))
+    .limit(1);
+
+  if (!brand) {
+    throw new Error("Brand not found");
+  }
+
   const [newCampaign] = await db
     .insert(campaigns)
     .values({
@@ -157,6 +175,12 @@ export async function createCampaign(input: CreateCampaignInput) {
  * Update campaign status
  */
 export async function updateCampaignStatus(id: string, status: CampaignStatus) {
+  const campaign = await getCampaignById(id);
+
+  if (!campaign) {
+    throw new Error("Campaign not found");
+  }
+
   const [updated] = await db
     .update(campaigns)
     .set({
