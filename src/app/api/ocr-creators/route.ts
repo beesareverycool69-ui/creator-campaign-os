@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireDiscoveryApiAccess } from "@/lib/api/discovery-auth";
 import Anthropic from "@anthropic-ai/sdk";
 
 const anthropic = new Anthropic();
@@ -8,6 +9,9 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const image = formData.get("image") as File;
     const brandId = formData.get("brandId") as string;
+
+    const authError = await requireDiscoveryApiAccess(brandId);
+    if (authError) return authError;
 
     if (!image) {
       return NextResponse.json({ error: "Image is required" }, { status: 400 });

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireDiscoveryApiAccess } from "@/lib/api/discovery-auth";
 import Anthropic from "@anthropic-ai/sdk";
 import type { BrandProfile, SearchKeywords, DiscoveredCreator, ScoredCreator } from "@/lib/types/discovery";
 
@@ -11,12 +12,16 @@ const client = new Anthropic();
  */
 export async function POST(request: NextRequest) {
   try {
-    const { profile, keywords, database_creators, discovered_creators } = await request.json() as {
+    const { profile, keywords, database_creators, discovered_creators, brandId } = await request.json() as {
       profile: BrandProfile;
       keywords: SearchKeywords;
       database_creators: any[];
       discovered_creators: DiscoveredCreator[];
+      brandId?: string;
     };
+
+    const authError = await requireDiscoveryApiAccess(brandId);
+    if (authError) return authError;
 
     if (!profile) {
       return NextResponse.json(

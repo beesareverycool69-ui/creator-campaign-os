@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireDiscoveryApiAccess } from "@/lib/api/discovery-auth";
 import { db } from "@/lib/db";
 import { creators, creatorPlatforms } from "@/lib/db/schema";
 import { sql, desc, or, ilike } from "drizzle-orm";
@@ -10,7 +11,10 @@ import type { SearchKeywords } from "@/lib/types/discovery";
  */
 export async function POST(request: NextRequest) {
   try {
-    const { keywords } = await request.json() as { keywords: SearchKeywords };
+    const { keywords, brandId } = await request.json() as { keywords: SearchKeywords; brandId?: string };
+
+    const authError = await requireDiscoveryApiAccess(brandId);
+    if (authError) return authError;
 
     if (!keywords || !keywords.niche_keywords) {
       return NextResponse.json(

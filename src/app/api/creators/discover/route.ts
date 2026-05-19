@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireDiscoveryApiAccess } from "@/lib/api/discovery-auth";
 import Anthropic from "@anthropic-ai/sdk";
 import type { BrandProfile, SearchKeywords, DiscoveredCreator } from "@/lib/types/discovery";
 
@@ -109,10 +110,14 @@ Only include creators you found evidence of through search. Do not make up profi
 
 export async function POST(request: NextRequest) {
   try {
-    const { profile, keywords } = await request.json() as {
+    const { profile, keywords, brandId } = await request.json() as {
       profile: BrandProfile;
       keywords: SearchKeywords;
+      brandId?: string;
     };
+
+    const authError = await requireDiscoveryApiAccess(brandId);
+    if (authError) return authError;
 
     if (!profile || !keywords) {
       return NextResponse.json(

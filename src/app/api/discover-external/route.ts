@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireDiscoveryApiAccess } from "@/lib/api/discovery-auth";
 import { discoverCreators, type DiscoveryParams } from "@/lib/ai/discover-external";
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+
+    const authError = await requireDiscoveryApiAccess(body.brandId);
+    if (authError) return authError;
     
     const {
       keywords,

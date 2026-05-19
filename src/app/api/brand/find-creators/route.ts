@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireDiscoveryApiAccess } from "@/lib/api/discovery-auth";
 import type { BrandProfile, SearchKeywords, DiscoveredCreator, ScoredCreator } from "@/lib/types/discovery";
 
 /**
@@ -12,7 +13,10 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
   
   try {
-    const { url } = await request.json();
+    const { url, brandId } = await request.json();
+
+    const authError = await requireDiscoveryApiAccess(brandId);
+    if (authError) return authError;
 
     if (!url) {
       return NextResponse.json(
@@ -35,8 +39,11 @@ export async function POST(request: NextRequest) {
     
     const analyzeRes = await fetch(`${baseUrl}/api/brand/analyze`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url }),
+      headers: {
+        "Content-Type": "application/json",
+        ...(request.headers.get("cookie") ? { cookie: request.headers.get("cookie")! } : {}),
+      },
+      body: JSON.stringify({ url, brandId }),
     });
     
     const analyzeData = await analyzeRes.json();
@@ -63,8 +70,11 @@ export async function POST(request: NextRequest) {
     
     const keywordsRes = await fetch(`${baseUrl}/api/brand/keywords`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ profile }),
+      headers: {
+        "Content-Type": "application/json",
+        ...(request.headers.get("cookie") ? { cookie: request.headers.get("cookie")! } : {}),
+      },
+      body: JSON.stringify({ profile, brandId }),
     });
     
     const keywordsData = await keywordsRes.json();
@@ -94,8 +104,11 @@ export async function POST(request: NextRequest) {
     try {
       const matchRes = await fetch(`${baseUrl}/api/creators/match`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ keywords }),
+        headers: {
+          "Content-Type": "application/json",
+          ...(request.headers.get("cookie") ? { cookie: request.headers.get("cookie")! } : {}),
+        },
+        body: JSON.stringify({ keywords, brandId }),
       });
       
       const matchData = await matchRes.json();
@@ -121,8 +134,11 @@ export async function POST(request: NextRequest) {
     
     const discoverRes = await fetch(`${baseUrl}/api/creators/discover`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ profile, keywords }),
+      headers: {
+        "Content-Type": "application/json",
+        ...(request.headers.get("cookie") ? { cookie: request.headers.get("cookie")! } : {}),
+      },
+      body: JSON.stringify({ profile, keywords, brandId }),
     });
     
     const discoverData = await discoverRes.json();
@@ -155,12 +171,16 @@ export async function POST(request: NextRequest) {
     
     const scoreRes = await fetch(`${baseUrl}/api/creators/score`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(request.headers.get("cookie") ? { cookie: request.headers.get("cookie")! } : {}),
+      },
       body: JSON.stringify({
         profile,
         keywords,
         database_creators: databaseCreators,
         discovered_creators: discoveredCreators,
+        brandId,
       }),
     });
     
