@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireOwnedBrand } from "@/lib/auth/access";
 import { creators, creatorPlatforms, brandCreators } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
 
@@ -19,6 +20,17 @@ export async function POST(
 ) {
   try {
     const { brandId } = await params;
+
+    try {
+      await requireOwnedBrand(brandId);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Brand not found";
+      return NextResponse.json(
+        { error: message === "Authentication required" ? message : "Brand not found" },
+        { status: message === "Authentication required" ? 401 : 404 }
+      );
+    }
+
     const { creators: importedCreators } = (await request.json()) as {
       creators: ImportedCreator[];
     };
