@@ -8,6 +8,7 @@ import {
   addresses,
   products,
 } from "@/lib/db/schema";
+import { requireOwnedCampaignCreator, requireOwnedShipment } from "@/lib/auth/access";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -45,6 +46,8 @@ export type CreateShipmentInput = {
  * Get shipment for a campaign creator
  */
 export async function getShipment(campaignCreatorId: string) {
+  await requireOwnedCampaignCreator(campaignCreatorId);
+
   const result = await db.query.shipments.findFirst({
     where: eq(shipments.campaignCreatorId, campaignCreatorId),
     with: {
@@ -125,6 +128,8 @@ export async function getBrandProducts(brandId: string) {
  * Create a new shipment
  */
 export async function createShipment(input: CreateShipmentInput) {
+  await requireOwnedCampaignCreator(input.campaignCreatorId);
+
   // Check if shipment already exists
   const existing = await getShipment(input.campaignCreatorId);
   if (existing) {
@@ -171,6 +176,8 @@ export async function createShipment(input: CreateShipmentInput) {
  * Update shipment status
  */
 export async function updateShipmentStatus(id: string, status: ShipmentStatus) {
+  await requireOwnedShipment(id);
+
   const now = new Date();
 
   const updateData: Record<string, any> = {
@@ -216,6 +223,8 @@ export async function updateTrackingInfo(
   trackingNumber: string,
   carrier: string
 ) {
+  await requireOwnedShipment(id);
+
   // Generate tracking URL based on carrier
   const trackingUrl = getTrackingUrl(carrier, trackingNumber);
 

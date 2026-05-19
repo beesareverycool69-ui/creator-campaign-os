@@ -7,6 +7,7 @@ import {
   contentMetrics,
   campaignCreators,
 } from "@/lib/db/schema";
+import { requireOwnedCampaignCreator, requireOwnedContent } from "@/lib/auth/access";
 import { eq, desc, count, and, inArray, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -80,6 +81,8 @@ export type ContentWithDetails = {
 export async function getContent(
   campaignCreatorId: string
 ): Promise<ContentWithDetails[]> {
+  await requireOwnedCampaignCreator(campaignCreatorId);
+
   const result = await db.query.contents.findMany({
     where: eq(contents.campaignCreatorId, campaignCreatorId),
     orderBy: [desc(contents.createdAt)],
@@ -106,6 +109,8 @@ export async function getContent(
  * Get single content item by ID with revisions and metrics
  */
 export async function getContentById(id: string) {
+  await requireOwnedContent(id);
+
   const result = await db.query.contents.findFirst({
     where: eq(contents.id, id),
     with: {
@@ -214,6 +219,8 @@ export async function getCampaignContentSummary(campaignId: string) {
  * Submit new content
  */
 export async function submitContent(input: SubmitContentInput) {
+  await requireOwnedCampaignCreator(input.campaignCreatorId);
+
   const [newContent] = await db
     .insert(contents)
     .values({
@@ -253,6 +260,8 @@ export async function submitContent(input: SubmitContentInput) {
  * Update content status
  */
 export async function updateContentStatus(id: string, status: ContentStatus) {
+  await requireOwnedContent(id);
+
   const [updated] = await db
     .update(contents)
     .set({
@@ -306,6 +315,8 @@ export async function requestRevision(id: string, feedback: string, fileUrls?: s
  * Approve content
  */
 export async function approveContent(id: string) {
+  await requireOwnedContent(id);
+
   const [updated] = await db
     .update(contents)
     .set({
@@ -325,6 +336,8 @@ export async function approveContent(id: string) {
  * Reject content
  */
 export async function rejectContent(id: string, feedback?: string) {
+  await requireOwnedContent(id);
+
   // Add rejection feedback as revision if provided
   if (feedback) {
     await db.insert(contentRevisions).values({
@@ -355,6 +368,8 @@ export async function markAsPosted(
   postUrl: string,
   postedAt?: Date
 ) {
+  await requireOwnedContent(id);
+
   const [updated] = await db
     .update(contents)
     .set({
@@ -393,6 +408,8 @@ export async function markAsLive(id: string) {
  * Add content metrics
  */
 export async function addContentMetrics(input: AddMetricsInput) {
+  await requireOwnedContent(input.contentId);
+
   // Calculate engagement rate if we have enough data
   let engagementRate: string | null = null;
   if (input.views && input.views > 0) {

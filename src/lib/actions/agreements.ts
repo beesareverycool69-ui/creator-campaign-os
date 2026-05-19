@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db";
 import { agreements, campaignCreators } from "@/lib/db/schema";
+import { requireOwnedAgreement, requireOwnedCampaignCreator } from "@/lib/auth/access";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
@@ -46,6 +47,8 @@ export type CreateAgreementInput = {
  * Get agreement for a campaign creator
  */
 export async function getAgreement(campaignCreatorId: string) {
+  await requireOwnedCampaignCreator(campaignCreatorId);
+
   const result = await db.query.agreements.findFirst({
     where: eq(agreements.campaignCreatorId, campaignCreatorId),
   });
@@ -88,6 +91,8 @@ export async function getAgreementById(id: string) {
  * Create a new agreement
  */
 export async function createAgreement(input: CreateAgreementInput) {
+  await requireOwnedCampaignCreator(input.campaignCreatorId);
+
   // Check if agreement already exists
   const existing = await getAgreement(input.campaignCreatorId);
   if (existing) {
@@ -129,6 +134,8 @@ export async function createAgreement(input: CreateAgreementInput) {
  * Update agreement status
  */
 export async function updateAgreementStatus(id: string, status: AgreementStatus) {
+  await requireOwnedAgreement(id);
+
   const now = new Date();
 
   const updateData: Record<string, any> = {
@@ -173,6 +180,8 @@ export async function updateAgreementStatus(id: string, status: AgreementStatus)
  * Generate PDF from agreement and store in Supabase Storage
  */
 export async function generateAgreementPDF(id: string): Promise<string> {
+  await requireOwnedAgreement(id);
+
   const agreement = await getAgreementById(id);
 
   if (!agreement) {

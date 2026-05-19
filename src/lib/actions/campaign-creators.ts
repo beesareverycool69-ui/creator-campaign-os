@@ -8,6 +8,12 @@ import {
   creatorPlatforms,
   campaigns,
 } from "@/lib/db/schema";
+import {
+  requireOwnedBrand,
+  requireOwnedBrandCreator,
+  requireOwnedCampaign,
+  requireOwnedCampaignCreator,
+} from "@/lib/auth/access";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -95,6 +101,8 @@ export type CampaignCreatorWithDetails = {
 export async function getCampaignCreators(
   campaignId: string
 ): Promise<CampaignCreatorWithDetails[]> {
+  await requireOwnedCampaign(campaignId);
+
   const result = await db.query.campaignCreators.findMany({
     where: eq(campaignCreators.campaignId, campaignId),
     with: {
@@ -152,6 +160,8 @@ export async function getCampaignCreators(
  * Get a single campaign-creator by ID with all details
  */
 export async function getCampaignCreatorById(id: string) {
+  await requireOwnedCampaignCreator(id);
+
   const result = await db.query.campaignCreators.findFirst({
     where: eq(campaignCreators.id, id),
     with: {
@@ -183,6 +193,15 @@ export async function getAvailableBrandCreatorsForCampaign(
   brandId: string,
   campaignId: string
 ) {
+  const [brand, campaign] = await Promise.all([
+    requireOwnedBrand(brandId),
+    requireOwnedCampaign(campaignId),
+  ]);
+
+  if (campaign.brandId !== brand.id) {
+    throw new Error("Campaign must belong to the selected brand");
+  }
+
   // Get all brand creators for this brand
   const allBrandCreators = await db.query.brandCreators.findMany({
     where: eq(brandCreators.brandId, brandId),
@@ -235,14 +254,10 @@ export async function getAvailableBrandCreatorsForCampaign(
  * IMPORTANT: Takes brandCreatorId, not raw creatorId
  */
 export async function addCreatorToCampaign(input: AddCreatorToCampaignInput) {
-  // Verify the campaign and brand creator exist and belong to the same brand
+  // Verify the campaign and brand creator exist, are owned, and belong to the same brand
   const [campaign, brandCreator] = await Promise.all([
-    db.query.campaigns.findFirst({
-      where: eq(campaigns.id, input.campaignId),
-    }),
-    db.query.brandCreators.findFirst({
-      where: eq(brandCreators.id, input.brandCreatorId),
-    }),
+    requireOwnedCampaign(input.campaignId),
+    requireOwnedBrandCreator(input.brandCreatorId),
   ]);
 
   if (!campaign) {
@@ -300,6 +315,8 @@ export async function updateCampaignCreatorStatus(
   id: string,
   status: CampaignCreatorStatus
 ) {
+  await requireOwnedCampaignCreator(id);
+
   const now = new Date();
 
   // Build update object with appropriate timestamps
@@ -343,6 +360,8 @@ export async function updateCampaignCreatorStatus(
  * Update campaign creator notes
  */
 export async function updateCampaignCreatorNotes(id: string, notes: string) {
+  await requireOwnedCampaignCreator(id);
+
   const [updated] = await db
     .update(campaignCreators)
     .set({
@@ -366,6 +385,8 @@ export async function updateCampaignCreatorRate(
   rate: number,
   rateType: "flat" | "per_post" | "per_view" | "affiliate"
 ) {
+  await requireOwnedCampaignCreator(id);
+
   const [updated] = await db
     .update(campaignCreators)
     .set({
