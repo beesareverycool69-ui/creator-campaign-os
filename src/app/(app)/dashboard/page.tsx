@@ -96,6 +96,13 @@ export default async function DashboardPage() {
     },
   ];
   const setupComplete = setupSteps.every((step) => step.complete);
+  const showFirstOutreachNextStep =
+    setup.hasBrand &&
+    setup.hasProducts &&
+    setup.hasCreators &&
+    !setup.hasOutreach &&
+    setup.readyForOutreachCount > 0 &&
+    !!setup.firstBrandId;
 
   return (
     <div className="space-y-6">
@@ -122,6 +129,31 @@ export default async function DashboardPage() {
           </Link>
         </div>
       </div>
+
+      {showFirstOutreachNextStep && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Send className="h-5 w-5 text-blue-500" />
+              Send your first DMs
+            </CardTitle>
+            <CardDescription>
+              {setup.readyForOutreachCount} lead{setup.readyForOutreachCount === 1 ? "" : "s"} ready for outreach.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex items-center justify-between gap-4">
+            <p className="text-sm text-muted-foreground">
+              Your brand, product, and lead list are set up. Start outreach from the brand DM queue.
+            </p>
+            <Link href={`/brands/${setup.firstBrandId}/send-dms`}>
+              <Button>
+                Send DMs
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
 
       {!setupComplete && (
         <Card>
@@ -172,7 +204,7 @@ export default async function DashboardPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Creators</p>
+                <p className="text-sm font-medium text-muted-foreground">Creator Profiles</p>
                 <p className="text-3xl font-bold">{stats.creators}</p>
               </div>
               <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
@@ -200,7 +232,7 @@ export default async function DashboardPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Leads</p>
+                <p className="text-sm font-medium text-muted-foreground">Leads Added</p>
                 <p className="text-3xl font-bold">{stats.totalLeads}</p>
               </div>
               <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
@@ -272,35 +304,37 @@ export default async function DashboardPage() {
         </Card>
 
         {/* Outreach Stats */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Mail className="h-5 w-5" />
-              Outreach Performance
-            </CardTitle>
-            <CardDescription>Message delivery and engagement</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-4 bg-muted/50 rounded-lg">
-                <p className="text-3xl font-bold">{outreach.total}</p>
-                <p className="text-sm text-muted-foreground">Messages Sent</p>
+        {outreach.hasSentOutreach && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5" />
+                Outreach Performance
+              </CardTitle>
+              <CardDescription>Message delivery and engagement</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-4 bg-muted/50 rounded-lg">
+                  <p className="text-3xl font-bold">{outreach.sentOutreachTotal}</p>
+                  <p className="text-sm text-muted-foreground">Messages Sent</p>
+                </div>
+                <div className="text-center p-4 bg-muted/50 rounded-lg">
+                  <p className="text-3xl font-bold">{outreach.repliedCount}</p>
+                  <p className="text-sm text-muted-foreground">Replies</p>
+                </div>
+                <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <p className="text-3xl font-bold text-blue-600">{outreach.openRate}%</p>
+                  <p className="text-sm text-muted-foreground">Open Rate</p>
+                </div>
+                <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <p className="text-3xl font-bold text-green-600">{outreach.replyRate}%</p>
+                  <p className="text-sm text-muted-foreground">Reply Rate</p>
+                </div>
               </div>
-              <div className="text-center p-4 bg-muted/50 rounded-lg">
-                <p className="text-3xl font-bold">{(outreach as Record<string, number>).replied || 0}</p>
-                <p className="text-sm text-muted-foreground">Replies</p>
-              </div>
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
-                <p className="text-3xl font-bold text-blue-600">{outreach.openRate}%</p>
-                <p className="text-sm text-muted-foreground">Open Rate</p>
-              </div>
-              <div className="text-center p-4 bg-green-50 rounded-lg">
-                <p className="text-3xl font-bold text-green-600">{outreach.replyRate}%</p>
-                <p className="text-sm text-muted-foreground">Reply Rate</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -436,7 +470,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Top Brands */}
-      {brandPerf.length > 0 && (
+      {brandPerf.length > 1 && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

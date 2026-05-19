@@ -11,7 +11,7 @@ import {
   campaignCreators,
   products,
 } from "@/lib/db/schema";
-import { eq, sql, and, gte, lte, count, desc } from "drizzle-orm";
+import { eq, sql, and, lte, count, desc, inArray } from "drizzle-orm";
 
 export async function getDashboardStats() {
   // Get overall counts
@@ -75,9 +75,21 @@ export async function getOutreachStats() {
   const replied = result.replied || 0;
   const opened = result.opened || 0;
 
+  const sentOutreachTotal = [
+    "sent",
+    "delivered",
+    "opened",
+    "clicked",
+    "replied",
+    "no_response",
+  ].reduce((total, status) => total + (result[status] || 0), 0);
+
   return {
     ...result,
     total: Object.values(result).reduce((a, b) => a + b, 0),
+    sentOutreachTotal,
+    repliedCount: replied,
+    hasSentOutreach: sentOutreachTotal > 0,
     replyRate: sent > 0 ? Math.round((replied / sent) * 100) : 0,
     openRate: sent > 0 ? Math.round((opened / sent) * 100) : 0,
   };
@@ -184,10 +196,23 @@ export async function getSetupProgress() {
   ]);
 
   const brand = firstBrand[0] || null;
+  const readyForOutreach = brand
+    ? await db
+        .select({ count: count() })
+        .from(brandCreators)
+        .where(
+          and(
+            eq(brandCreators.brandId, brand.id),
+            inArray(brandCreators.status, ["discovered", "researching", "qualified"]),
+            eq(brandCreators.doNotContact, false)
+          )
+        )
+    : [];
 
   return {
     firstBrandId: brand?.id || null,
     firstBrandName: brand?.name || null,
+    readyForOutreachCount: readyForOutreach[0]?.count || 0,
     hasBrand: !!brand,
     hasProducts: (productCount[0]?.count || 0) > 0,
     hasCreators: (leadCount[0]?.count || 0) > 0,
