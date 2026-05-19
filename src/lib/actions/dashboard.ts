@@ -15,19 +15,12 @@ import { eq, sql, and, lte, count, desc, inArray } from "drizzle-orm";
 
 export async function getDashboardStats() {
   // Get overall counts
-  const [
-    creatorCount,
-    brandCount,
-    campaignCount,
-    leadCount,
-  ] = await Promise.all([
-    db.select({ count: count() }).from(creators),
-    db.select({ count: count() }).from(brands),
-    db.select({ count: count() }).from(campaigns).where(
-      sql`${campaigns.status} IN ('active', 'recruiting')`
-    ),
-    db.select({ count: count() }).from(brandCreators),
-  ]);
+  const creatorCount = await db.select({ count: count() }).from(creators);
+  const brandCount = await db.select({ count: count() }).from(brands);
+  const campaignCount = await db.select({ count: count() }).from(campaigns).where(
+    sql`${campaigns.status} IN ('active', 'recruiting')`
+  );
+  const leadCount = await db.select({ count: count() }).from(brandCreators);
 
   return {
     creators: creatorCount[0]?.count || 0,
@@ -183,17 +176,15 @@ export async function getRecentActivity() {
 }
 
 export async function getSetupProgress() {
-  const [firstBrand, productCount, leadCount, outreachCount, campaignCount] = await Promise.all([
-    db
-      .select({ id: brands.id, name: brands.name })
-      .from(brands)
-      .orderBy(desc(brands.createdAt))
-      .limit(1),
-    db.select({ count: count() }).from(products),
-    db.select({ count: count() }).from(brandCreators),
-    db.select({ count: count() }).from(outreaches),
-    db.select({ count: count() }).from(campaigns),
-  ]);
+  const firstBrand = await db
+    .select({ id: brands.id, name: brands.name })
+    .from(brands)
+    .orderBy(desc(brands.createdAt))
+    .limit(1);
+  const productCount = await db.select({ count: count() }).from(products);
+  const leadCount = await db.select({ count: count() }).from(brandCreators);
+  const outreachCount = await db.select({ count: count() }).from(outreaches);
+  const campaignCount = await db.select({ count: count() }).from(campaigns);
 
   const brand = firstBrand[0] || null;
   const [nextOutreachBrand] = await db

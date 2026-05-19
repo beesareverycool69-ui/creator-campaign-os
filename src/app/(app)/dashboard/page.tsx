@@ -28,15 +28,13 @@ import {
 } from "lucide-react";
 
 export default async function DashboardPage() {
-  const [stats, funnel, outreach, tasks, activity, brandPerf, setup] = await Promise.all([
-    getDashboardStats(),
-    getLeadFunnelStats(),
-    getOutreachStats(),
-    getTodaysTasks(),
-    getRecentActivity(),
-    getBrandPerformance(),
-    getSetupProgress(),
-  ]);
+  const stats = await getDashboardStats();
+  const funnel = await getLeadFunnelStats();
+  const outreach = await getOutreachStats();
+  const tasks = await getTodaysTasks();
+  const activity = await getRecentActivity();
+  const brandPerf = await getBrandPerformance();
+  const setup = await getSetupProgress();
 
   const funnelSteps = [
     { key: "discovered", label: "Discovered", color: "bg-slate-500" },
