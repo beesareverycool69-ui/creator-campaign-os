@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { affiliateConversions, campaignCreators } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { createHmac } from "crypto";
+import { isProduction, verifyHexHmacSignature } from "@/lib/webhooks/signatures";
 
 // Webhook secret for validating requests (set in env)
 const WEBHOOK_SECRET = process.env.CONVERSION_WEBHOOK_SECRET;
@@ -26,20 +26,30 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.text();
     
-    // Validate webhook signature if secret is configured
+    const signature = request.headers.get("X-Webhook-Signature");
+
+    if (isProduction() && !WEBHOOK_SECRET) {
+      return NextResponse.json(
+        { error: "Webhook secret is not configured" },
+        { status: 500 }
+      );
+    }
+
+    // Validate webhook signature if secret is configured. In production,
+    // the secret and signature are required before any processing.
     if (WEBHOOK_SECRET) {
-      const signature = request.headers.get("X-Webhook-Signature");
-      if (signature) {
-        const expectedSignature = createHmac("sha256", WEBHOOK_SECRET)
-          .update(body)
-          .digest("hex");
-        
-        if (signature !== expectedSignature) {
-          return NextResponse.json(
-            { error: "Invalid signature" },
-            { status: 401 }
-          );
-        }
+      if (!signature) {
+        return NextResponse.json(
+          { error: "Missing signature" },
+          { status: 401 }
+        );
+      }
+
+      if (!verifyHexHmacSignature(body, signature, WEBHOOK_SECRET)) {
+        return NextResponse.json(
+          { error: "Invalid signature" },
+          { status: 401 }
+        );
       }
     }
 

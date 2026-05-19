@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { affiliateConversions, campaignCreators } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
-import { createHmac } from "crypto";
+import { isProduction, verifyBase64HmacSignature } from "@/lib/webhooks/signatures";
 
 /**
  * Shopify Order Webhook Handler
@@ -22,18 +22,25 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.text();
     
-    // Verify Shopify signature if secret is configured
+    const hmacHeader = request.headers.get("X-Shopify-Hmac-Sha256");
+
+    if (isProduction() && !SHOPIFY_WEBHOOK_SECRET) {
+      return NextResponse.json(
+        { error: "Shopify webhook secret is not configured" },
+        { status: 500 }
+      );
+    }
+
+    // Verify Shopify signature if secret is configured. In production,
+    // the secret and signature are required before any processing.
     if (SHOPIFY_WEBHOOK_SECRET) {
-      const hmacHeader = request.headers.get("X-Shopify-Hmac-Sha256");
-      if (hmacHeader) {
-        const hash = createHmac("sha256", SHOPIFY_WEBHOOK_SECRET)
-          .update(body, "utf8")
-          .digest("base64");
-        
-        if (hash !== hmacHeader) {
-          console.error("Invalid Shopify webhook signature");
-          return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
-        }
+      if (!hmacHeader) {
+        return NextResponse.json({ error: "Missing signature" }, { status: 401 });
+      }
+
+      if (!verifyBase64HmacSignature(body, hmacHeader, SHOPIFY_WEBHOOK_SECRET)) {
+        console.error("Invalid Shopify webhook signature");
+        return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
       }
     }
 
