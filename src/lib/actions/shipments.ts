@@ -7,8 +7,15 @@ import {
   campaignCreators,
   addresses,
   products,
+  brandCreators,
+  brands,
 } from "@/lib/db/schema";
-import { requireOwnedCampaignCreator, requireOwnedShipment } from "@/lib/auth/access";
+import {
+  requireOwnedBrand,
+  requireOwnedCampaignCreator,
+  requireOwnedShipment,
+  requireUser,
+} from "@/lib/auth/access";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -100,6 +107,19 @@ export async function getShipmentById(id: string) {
  * Get creator's addresses for shipment form
  */
 export async function getCreatorAddresses(creatorId: string) {
+  const user = await requireUser();
+
+  const [ownedCreator] = await db
+    .select({ id: brandCreators.id })
+    .from(brandCreators)
+    .innerJoin(brands, eq(brandCreators.brandId, brands.id))
+    .where(and(eq(brandCreators.creatorId, creatorId), eq(brands.userId, user.id)))
+    .limit(1);
+
+  if (!ownedCreator) {
+    return [];
+  }
+
   const result = await db.query.addresses.findMany({
     where: eq(addresses.creatorId, creatorId),
     orderBy: (addresses, { desc }) => [desc(addresses.isDefault)],
@@ -112,6 +132,8 @@ export async function getCreatorAddresses(creatorId: string) {
  * Get brand's products for shipment form
  */
 export async function getBrandProducts(brandId: string) {
+  await requireOwnedBrand(brandId);
+
   const result = await db.query.products.findMany({
     where: and(eq(products.brandId, brandId), eq(products.isActive, true)),
     orderBy: (products, { asc }) => [asc(products.name)],
