@@ -23,6 +23,75 @@ export type CreatorMatchResult = {
   reason: string;
 };
 
+const MATCH_PARSE_ERROR = "Could not parse AI match results. Please try again.";
+
+function extractJsonArray(text: string) {
+  const cleaned = text
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/```$/i, "")
+    .trim();
+
+  if (cleaned.startsWith("[") && cleaned.endsWith("]")) {
+    return cleaned;
+  }
+
+  const start = cleaned.indexOf("[");
+  const end = cleaned.lastIndexOf("]");
+  if (start !== -1 && end !== -1 && end > start) {
+    return cleaned.slice(start, end + 1);
+  }
+
+  const objectStart = cleaned.indexOf("{");
+  const objectEnd = cleaned.lastIndexOf("}");
+  if (objectStart !== -1 && objectEnd !== -1 && objectEnd > objectStart) {
+    return cleaned.slice(objectStart, objectEnd + 1);
+  }
+
+  throw new Error(MATCH_PARSE_ERROR);
+}
+
+function validateMatchResults(value: unknown): CreatorMatchResult[] {
+  const maybeArray = Array.isArray(value)
+    ? value
+    : value &&
+        typeof value === "object" &&
+        "matches" in value &&
+        Array.isArray((value as { matches: unknown }).matches)
+      ? (value as { matches: unknown[] }).matches
+      : null;
+
+  if (!maybeArray) {
+    throw new Error(MATCH_PARSE_ERROR);
+  }
+
+  return maybeArray.map((item) => {
+    if (!item || typeof item !== "object") {
+      throw new Error(MATCH_PARSE_ERROR);
+    }
+
+    const candidate = item as Record<string, unknown>;
+    const creatorId = candidate.creatorId;
+    const fitScore = candidate.fitScore;
+    const reason = candidate.reason;
+
+    if (typeof creatorId !== "string" || creatorId.length === 0) {
+      throw new Error(MATCH_PARSE_ERROR);
+    }
+    if (typeof fitScore !== "number" || !Number.isFinite(fitScore)) {
+      throw new Error(MATCH_PARSE_ERROR);
+    }
+    if (typeof reason !== "string" || reason.length === 0) {
+      throw new Error(MATCH_PARSE_ERROR);
+    }
+
+    return {
+      creatorId,
+      fitScore: Math.max(0, Math.min(100, Math.round(fitScore))),
+      reason,
+    };
+  });
+}
+
 export async function matchCreators(
   brandAnalysis: BrandAnalysis,
   creators: CreatorForMatching[]
@@ -72,7 +141,7 @@ Score each creator from 0–100 for fit with this brand. Consider:
 - Follower count vs ideal range
 - Tone and audience alignment from bio
 
-Return ONLY a valid JSON array — no markdown, no explanation:
+Return ONLY a valid JSON array. Do not include markdown fences, comments, prose, or trailing text:
 [
   {
     "creatorId": "<exact id from above>",
@@ -92,17 +161,12 @@ Order by fitScore descending. Include ALL creators even if score is low.`;
   const text =
     message.content[0].type === "text" ? message.content[0].text : "";
 
-  const cleaned = text
-    .replace(/^```(?:json)?\n?/m, "")
-    .replace(/\n?```$/m, "")
-    .trim();
-
-  let parsed: CreatorMatchResult[];
+  let parsed: unknown;
   try {
-    parsed = JSON.parse(cleaned);
+    parsed = JSON.parse(extractJsonArray(text));
   } catch {
-    throw new Error(`Claude returned invalid JSON: ${cleaned.slice(0, 200)}`);
+    throw new Error(MATCH_PARSE_ERROR);
   }
 
-  return parsed;
+  return validateMatchResults(parsed);
 }
