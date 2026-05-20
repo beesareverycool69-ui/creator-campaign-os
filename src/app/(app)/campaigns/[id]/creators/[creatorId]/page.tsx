@@ -78,7 +78,7 @@ export default async function CampaignCreatorPage({ params }: Props) {
       {/* Header */}
       <div className="flex items-start gap-6">
         {/* Avatar */}
-        <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center text-2xl font-semibold shrink-0">
+        <div className="w-20 h-20 rounded-full bg-card/70 border border-border flex items-center justify-center text-2xl font-semibold shrink-0">
           {creator.avatarUrl ? (
             <img
               src={creator.avatarUrl}
@@ -298,19 +298,19 @@ export default async function CampaignCreatorPage({ params }: Props) {
               <div className="space-y-4">
                 {/* Stats row */}
                 <div className="grid grid-cols-4 gap-2 text-center">
-                  <div className="bg-muted rounded-lg p-2">
+                  <div className="bg-background/85 border border-border rounded-lg p-2">
                     <div className="text-lg font-bold">{contentStats.total}</div>
                     <div className="text-xs text-muted-foreground">Total</div>
                   </div>
-                  <div className="bg-muted rounded-lg p-2">
+                  <div className="bg-background/85 border border-border rounded-lg p-2">
                     <div className="text-lg font-bold">{contentStats.submitted}</div>
                     <div className="text-xs text-muted-foreground">In Review</div>
                   </div>
-                  <div className="bg-muted rounded-lg p-2">
+                  <div className="bg-background/85 border border-border rounded-lg p-2">
                     <div className="text-lg font-bold">{contentStats.approved}</div>
                     <div className="text-xs text-muted-foreground">Approved</div>
                   </div>
-                  <div className="bg-muted rounded-lg p-2">
+                  <div className="bg-background/85 border border-border rounded-lg p-2">
                     <div className="text-lg font-bold">{contentStats.posted}</div>
                     <div className="text-xs text-muted-foreground">Posted</div>
                   </div>

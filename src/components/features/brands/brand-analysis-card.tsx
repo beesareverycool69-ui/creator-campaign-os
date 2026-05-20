@@ -105,7 +105,7 @@ export function BrandAnalysisCard({
             </div>
 
             {/* Right column — ideal creator profile */}
-            <div className="space-y-3 border rounded-lg p-3 bg-muted/30">
+            <div className="space-y-3 border border-border rounded-lg p-3 bg-background/85">
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                 Ideal Creator Profile
               </p>

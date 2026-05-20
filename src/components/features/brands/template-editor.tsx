@@ -389,7 +389,7 @@ export function TemplateEditor({ brandId, templates }: TemplateEditorProps) {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <pre className="text-sm text-muted-foreground whitespace-pre-wrap font-sans bg-muted/50 rounded-lg p-3">
+                    <pre className="text-sm text-muted-foreground whitespace-pre-wrap font-sans bg-card/70 border border-border rounded-lg p-3">
                       {template.body}
                     </pre>
                   </CardContent>

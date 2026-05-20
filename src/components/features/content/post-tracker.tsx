@@ -107,7 +107,7 @@ export function PostTracker({
       <CardContent className="space-y-4">
         {/* Current post info */}
         {postUrl && (
-          <div className="bg-muted p-3 rounded-lg space-y-2">
+          <div className="bg-card/70 border border-border p-3 rounded-lg space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Post URL</span>
               <a
@@ -186,7 +186,7 @@ export function PostTracker({
                 📊 Add Metrics
               </Button>
             ) : (
-              <form onSubmit={handleAddMetrics} className="space-y-4 p-4 bg-muted rounded-lg">
+              <form onSubmit={handleAddMetrics} className="space-y-4 p-4 bg-card/70 border border-border rounded-lg">
                 <h4 className="font-medium">Add Performance Metrics</h4>
                 
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">

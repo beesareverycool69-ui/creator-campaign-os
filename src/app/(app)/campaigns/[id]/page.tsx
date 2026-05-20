@@ -97,7 +97,7 @@ export default async function CampaignPage({ params, searchParams }: Props) {
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-4">
           {/* Brand logo */}
-          <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center text-lg font-semibold shrink-0">
+          <div className="w-12 h-12 rounded-lg bg-card/70 border border-border flex items-center justify-center text-lg font-semibold shrink-0">
             {campaign.brand.logoUrl ? (
               <img
                 src={campaign.brand.logoUrl}

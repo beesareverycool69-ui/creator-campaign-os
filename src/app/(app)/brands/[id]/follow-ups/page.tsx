@@ -57,7 +57,7 @@ export default async function FollowUpsPage({ params, searchParams }: Props) {
       </div>
 
       {/* Stats */}
-      <div className="rounded-lg border p-4 bg-muted/30">
+      <div className="rounded-lg border border-border p-4 bg-card/70">
         <div className="flex items-center gap-6 text-sm">
           <span>
             <span className="text-primary font-medium">{fu1Leads.length}</span>{" "}
@@ -87,7 +87,7 @@ export default async function FollowUpsPage({ params, searchParams }: Props) {
               className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 tab === t.id
                   ? "bg-primary text-primary-foreground"
-                  : "bg-muted hover:bg-muted/80"
+                  : "bg-background/85 border border-border hover:bg-card"
               }`}
             >
               {t.label} <span className="ml-1 opacity-70">+{t.count}</span>

@@ -74,7 +74,7 @@ export default async function BrandPage({ params }: Props) {
       {/* Header */}
       <div className="flex items-start gap-6">
         {/* Logo */}
-        <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center text-2xl font-semibold shrink-0">
+        <div className="w-16 h-16 rounded-lg bg-card/70 border border-border flex items-center justify-center text-2xl font-semibold shrink-0">
           {brand.logoUrl ? (
             <img
               src={brand.logoUrl}
@@ -118,7 +118,7 @@ export default async function BrandPage({ params }: Props) {
           <Card className="hover:border-primary/50 transition-colors cursor-pointer">
             <CardContent className="pt-4 pb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-secondary/600/10 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-card/70 border border-border flex items-center justify-center">
                   <span className="text-primary text-lg">✉️</span>
                 </div>
                 <div>
@@ -136,7 +136,7 @@ export default async function BrandPage({ params }: Props) {
           <Card className="hover:border-primary/50 transition-colors cursor-pointer">
             <CardContent className="pt-4 pb-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-accent/25 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-lg bg-card/70 border border-border flex items-center justify-center">
                   <span className="text-primary text-lg">🔄</span>
                 </div>
                 <div>

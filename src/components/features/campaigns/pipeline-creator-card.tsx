@@ -52,7 +52,7 @@ export function PipelineCreatorCard({
         <CardContent className="p-3">
           <div className="flex items-start gap-3">
             {/* Avatar */}
-            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-semibold shrink-0">
+            <div className="w-10 h-10 rounded-full bg-card/70 border border-border flex items-center justify-center text-sm font-semibold shrink-0">
               {creator.avatarUrl ? (
                 <img
                   src={creator.avatarUrl}

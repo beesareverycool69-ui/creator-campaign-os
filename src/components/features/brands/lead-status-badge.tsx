@@ -39,7 +39,7 @@ const STATUS_CONFIG: Record<
   },
   contacted: {
     label: "Contacted",
-    className: "bg-secondary text-primary border-accent/40",
+    className: "bg-secondary text-primary border-border",
   },
   engaged: {
     label: "Engaged",
@@ -51,7 +51,7 @@ const STATUS_CONFIG: Record<
   },
   paused: {
     label: "Paused",
-    className: "bg-accent/30 text-primary border-accent/40",
+    className: "bg-accent/30 text-primary border-border",
   },
   churned: {
     label: "Churned",

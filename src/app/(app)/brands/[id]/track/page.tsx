@@ -67,7 +67,7 @@ export default async function TrackPage({ params, searchParams }: Props) {
       </div>
 
       {/* Stats */}
-      <div className="rounded-lg border p-4 bg-muted/30">
+      <div className="rounded-lg border border-border p-4 bg-card/70">
         <div className="flex items-center gap-8 text-sm">
           <span>
             <span className="text-2xl font-bold text-primary">{pendingCount}</span>{" "}
@@ -117,10 +117,10 @@ export default async function TrackPage({ params, searchParams }: Props) {
             <button
               className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 tab === t.id
-                  ? t.id === "pending" ? "bg-accent text-black" :
-                    t.id === "accepted" ? "bg-green-500 text-white" :
-                    "bg-red-500 text-white"
-                  : "bg-muted hover:bg-muted/80"
+                  ? t.id === "pending" ? "bg-card text-foreground border border-border" :
+                    t.id === "accepted" ? "bg-green-600 text-white" :
+                    "bg-destructive text-destructive-foreground"
+                  : "bg-background/85 border border-border hover:bg-card"
               }`}
             >
               {t.label} <span className="ml-1 opacity-70">{t.count}</span>

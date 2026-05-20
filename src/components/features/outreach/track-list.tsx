@@ -93,10 +93,10 @@ function TrackCard({
 
   const getStatusBadge = () => {
     if (lead.status === "contacted" && !lead.lastContactedAt) {
-      return <Badge variant="outline" className="bg-secondary/600/10 text-primary border-blue-500/30">DM SENT</Badge>;
+      return <Badge variant="outline" className="bg-card/70 text-primary border-blue-500/30">DM SENT</Badge>;
     }
     if (lead.status === "contacted") {
-      return <Badge variant="outline" className="bg-accent/25 text-primary border-orange-500/30">FOLLOW-UP 1</Badge>;
+      return <Badge variant="outline" className="bg-card/70 text-primary border-border">FOLLOW-UP 1</Badge>;
     }
     return null;
   };
@@ -143,7 +143,7 @@ function TrackCard({
                 className="w-12 h-12 rounded-full object-cover"
               />
             ) : (
-              <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-lg font-bold">
+              <div className="w-12 h-12 rounded-full bg-card/70 border border-border flex items-center justify-center text-lg font-bold">
                 {lead.creator.name[0]}
               </div>
             )}

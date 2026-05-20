@@ -131,7 +131,7 @@ function PipelineCard({
               className="w-8 h-8 rounded-full object-cover"
             />
           ) : (
-            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-bold">
+            <div className="w-8 h-8 rounded-full bg-card/70 border border-border flex items-center justify-center text-sm font-bold">
               {creator.creator.name[0]}
             </div>
           )}

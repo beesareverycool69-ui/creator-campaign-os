@@ -37,7 +37,7 @@ export function PrintingPressQueue({ brandId, brand, creators }: Props) {
       case "needs_brief":
         return <Badge className="bg-orange-500/20 text-primary border-orange-500/30">NEEDS BRIEF</Badge>;
       case "ready_to_ship":
-        return <Badge className="bg-secondary/600/20 text-primary border-blue-500/30">READY TO SHIP</Badge>;
+        return <Badge className="bg-card/70 text-primary border-blue-500/30">READY TO SHIP</Badge>;
       case "brief_sent":
         return <Badge className="bg-primary/20 text-primary border-primary/30">BRIEF SENT</Badge>;
       case "posted":
@@ -72,7 +72,7 @@ export function PrintingPressQueue({ brandId, brand, creators }: Props) {
                       className="w-12 h-12 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-lg font-bold">
+                    <div className="w-12 h-12 rounded-full bg-card/70 border border-border flex items-center justify-center text-lg font-bold">
                       {creator.creator.name[0]}
                     </div>
                   )}

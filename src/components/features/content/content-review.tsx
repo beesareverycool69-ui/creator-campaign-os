@@ -133,7 +133,7 @@ export function ContentReview({ contentId, currentStatus }: ContentReviewProps) 
       <CardContent className="space-y-4">
         {/* Feedback form */}
         {showFeedback && (
-          <div className="space-y-3 p-4 bg-muted rounded-lg">
+          <div className="space-y-3 p-4 bg-card/70 border border-border rounded-lg">
             <Label>
               {actionType === "revision" ? "Revision Feedback" : "Rejection Reason"}
             </Label>

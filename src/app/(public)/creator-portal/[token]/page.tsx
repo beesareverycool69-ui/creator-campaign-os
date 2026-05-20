@@ -57,9 +57,9 @@ export default async function CreatorPortalPage({ params }: Props) {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
         <div className="container max-w-4xl py-6">
           <div className="flex items-center gap-4">
             {brand.logoUrl ? (
@@ -94,7 +94,7 @@ export default async function CreatorPortalPage({ params }: Props) {
                 <div key={i} className="text-center">
                   <div
                     className={`mx-auto w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
-                      step.completed ? "bg-green-100 text-primary" : "bg-muted text-muted-foreground"
+                      step.completed ? "bg-green-100 text-primary" : "bg-card/70 text-muted-foreground"
                     }`}
                   >
                     <step.icon className="h-5 w-5" />
@@ -130,7 +130,7 @@ export default async function CreatorPortalPage({ params }: Props) {
               {campaignCreator.affiliateCode && (
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Your Promo Code</p>
-                  <code className="text-lg font-bold bg-muted px-3 py-1 rounded">
+                  <code className="text-lg font-bold bg-card/70 border border-border px-3 py-1 rounded">
                     {campaignCreator.affiliateCode}
                   </code>
                 </div>

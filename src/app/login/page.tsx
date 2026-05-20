@@ -123,7 +123,7 @@ export default function LoginPage() {
               type="button"
               onClick={handleSignUp}
               disabled={loading}
-              className="w-full py-2 px-4 border border-input rounded-md hover:bg-accent disabled:opacity-50"
+              className="w-full py-2 px-4 border border-input rounded-md hover:bg-card disabled:opacity-50"
             >
               Create Account
             </button>

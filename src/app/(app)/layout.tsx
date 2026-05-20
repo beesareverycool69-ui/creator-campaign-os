@@ -36,7 +36,7 @@ export default async function AppLayout({
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
-      <aside className="hidden w-64 border-r bg-muted/30 md:flex flex-col">
+      <aside className="hidden w-64 border-r border-border bg-card/70 md:flex flex-col">
         {/* Logo */}
         <div className="p-6 border-b">
           <Link href="/dashboard" className="font-bold text-lg">
@@ -51,7 +51,7 @@ export default async function AppLayout({
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                  className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-card transition-colors"
                 >
                   <item.icon className="h-4 w-4" />
                   {item.label}
@@ -71,7 +71,7 @@ export default async function AppLayout({
           <form action="/auth/signout" method="POST">
             <button
               type="submit"
-              className="flex items-center gap-3 px-3 py-2 w-full rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              className="flex items-center gap-3 px-3 py-2 w-full rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-card transition-colors"
             >
               <LogOut className="h-4 w-4" />
               Sign out

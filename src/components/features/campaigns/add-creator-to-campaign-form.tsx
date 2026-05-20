@@ -90,7 +90,7 @@ export function AddCreatorToCampaignForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="border rounded-lg p-4 space-y-4 bg-muted/50"
+      className="border border-border rounded-lg p-4 space-y-4 bg-card/70"
     >
       <div className="space-y-2">
         <Label htmlFor="brandCreatorId">Select Creator *</Label>

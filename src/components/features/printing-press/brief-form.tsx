@@ -172,7 +172,7 @@ export function BriefForm({ brandId, brand, brandCreatorId, creator }: Props) {
                 className={`px-3 py-1.5 rounded-md text-sm transition-colors ${
                   contentTypes.includes(type)
                     ? "bg-primary text-primary-foreground"
-                    : "bg-muted hover:bg-muted/80"
+                    : "bg-background/85 border border-border hover:bg-card"
                 }`}
               >
                 {type}
@@ -258,7 +258,7 @@ export function BriefForm({ brandId, brand, brandCreatorId, creator }: Props) {
         ) : (
           <div className="space-y-4">
             {/* Generated brief preview */}
-            <div className="rounded-lg bg-muted/50 p-4">
+            <div className="rounded-lg border border-border bg-card/70 p-4">
               <pre className="text-sm whitespace-pre-wrap font-sans">{generatedBrief}</pre>
             </div>
 
@@ -285,7 +285,7 @@ export function BriefForm({ brandId, brand, brandCreatorId, creator }: Props) {
       <div className="rounded-lg border p-4 opacity-60">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-muted text-muted-foreground text-sm font-medium">2</span>
+            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-card/70 text-muted-foreground text-sm font-medium">2</span>
             <h3 className="font-semibold">Content Licensing Agreement</h3>
           </div>
           <Badge variant="outline" className="gap-1">
@@ -302,7 +302,7 @@ export function BriefForm({ brandId, brand, brandCreatorId, creator }: Props) {
       <div className="rounded-lg border p-4 opacity-60">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-muted text-muted-foreground text-sm font-medium">3</span>
+            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-card/70 text-muted-foreground text-sm font-medium">3</span>
             <h3 className="font-semibold">Ship Product</h3>
           </div>
           <Badge variant="outline" className="gap-1">

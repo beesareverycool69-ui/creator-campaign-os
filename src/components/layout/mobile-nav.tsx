@@ -27,7 +27,7 @@ export function MobileNav({ userEmail }: { userEmail: string | undefined }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex h-10 w-10 items-center justify-center rounded-md border bg-background text-muted-foreground hover:bg-accent hover:text-foreground md:hidden"
+        className="inline-flex h-10 w-10 items-center justify-center rounded-md border bg-background text-muted-foreground hover:bg-card hover:text-foreground md:hidden"
         aria-label="Open navigation"
       >
         <Menu className="h-5 w-5" />
@@ -54,7 +54,7 @@ export function MobileNav({ userEmail }: { userEmail: string | undefined }) {
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-card hover:text-foreground"
                 aria-label="Close navigation"
               >
                 <X className="h-5 w-5" />
@@ -68,7 +68,7 @@ export function MobileNav({ userEmail }: { userEmail: string | undefined }) {
                     <Link
                       href={item.href}
                       onClick={() => setOpen(false)}
-                      className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                      className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-card transition-colors"
                     >
                       <item.icon className="h-4 w-4" />
                       {item.label}
@@ -87,7 +87,7 @@ export function MobileNav({ userEmail }: { userEmail: string | undefined }) {
               <form action="/auth/signout" method="POST">
                 <button
                   type="submit"
-                  className="flex items-center gap-3 px-3 py-2 w-full rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+                  className="flex items-center gap-3 px-3 py-2 w-full rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-card transition-colors"
                 >
                   <LogOut className="h-4 w-4" />
                   Sign out

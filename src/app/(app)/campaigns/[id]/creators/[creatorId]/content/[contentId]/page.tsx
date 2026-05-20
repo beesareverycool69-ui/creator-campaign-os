@@ -120,7 +120,7 @@ export default async function ContentDetailPage({ params }: Props) {
                   })}
                 </div>
               ) : (
-                <div className="text-center py-12 bg-muted rounded-lg">
+                <div className="text-center py-12 bg-card/70 border border-border rounded-lg">
                   <p className="text-muted-foreground">No content files</p>
                 </div>
               )}

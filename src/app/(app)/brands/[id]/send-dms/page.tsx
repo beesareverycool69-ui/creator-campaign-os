@@ -62,7 +62,7 @@ export default async function SendDMsPage({ params }: Props) {
           <span className="text-sm font-medium">Today's DMs: {sentToday} / {dailyLimit}</span>
           <span className="text-sm text-muted-foreground">{leads.length} in queue</span>
         </div>
-        <div className="h-2 bg-muted rounded-full overflow-hidden">
+        <div className="h-2 bg-card/70 rounded-full overflow-hidden">
           <div 
             className="h-full bg-primary transition-all"
             style={{ width: `${Math.min((sentToday / dailyLimit) * 100, 100)}%` }}

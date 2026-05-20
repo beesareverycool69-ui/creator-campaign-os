@@ -28,7 +28,7 @@ const STATUS_CONFIG: Record<
   },
   in_transit: {
     label: "In Transit",
-    className: "bg-secondary text-primary border-accent/40",
+    className: "bg-secondary text-primary border-border",
     emoji: "🛫",
   },
   delivered: {

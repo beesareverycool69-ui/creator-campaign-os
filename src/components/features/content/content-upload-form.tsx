@@ -181,7 +181,7 @@ export function ContentUploadForm({
               {uploading ? (
                 <div className="space-y-2">
                   <p className="text-muted-foreground">Uploading...</p>
-                  <div className="w-full bg-muted rounded-full h-2">
+                  <div className="w-full bg-card/70 rounded-full h-2">
                     <div
                       className="bg-primary h-2 rounded-full transition-all"
                       style={{ width: `${uploadProgress}%` }}

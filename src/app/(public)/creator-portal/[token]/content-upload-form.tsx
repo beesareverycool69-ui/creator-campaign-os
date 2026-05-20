@@ -188,7 +188,7 @@ export function ContentUploadForm({ token }: ContentUploadFormProps) {
           {files.map((file, i) => (
             <div
               key={i}
-              className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+              className="flex items-center justify-between p-3 bg-card/70 border border-border rounded-lg"
             >
               <div className="flex items-center gap-3">
                 {file.type.startsWith("video/") ? (
@@ -265,7 +265,7 @@ export function ContentUploadForm({ token }: ContentUploadFormProps) {
             <span>Uploading...</span>
             <span>{uploadProgress}%</span>
           </div>
-          <div className="h-2 bg-muted rounded-full overflow-hidden">
+          <div className="h-2 bg-card/70 rounded-full overflow-hidden">
             <div
               className="h-full bg-primary transition-all duration-300"
               style={{ width: `${uploadProgress}%` }}

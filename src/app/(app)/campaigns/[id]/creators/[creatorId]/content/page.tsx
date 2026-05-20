@@ -63,23 +63,23 @@ export default async function ContentListPage({ params }: Props) {
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div className="bg-muted rounded-lg p-4 text-center">
+        <div className="bg-card/70 border border-border rounded-lg p-4 text-center">
           <div className="text-2xl font-bold">{stats.total}</div>
           <div className="text-sm text-muted-foreground">Total</div>
         </div>
-        <div className="bg-muted rounded-lg p-4 text-center">
+        <div className="bg-card/70 border border-border rounded-lg p-4 text-center">
           <div className="text-2xl font-bold">{stats.submitted}</div>
           <div className="text-sm text-muted-foreground">In Review</div>
         </div>
-        <div className="bg-muted rounded-lg p-4 text-center">
+        <div className="bg-card/70 border border-border rounded-lg p-4 text-center">
           <div className="text-2xl font-bold">{stats.revisionRequested}</div>
           <div className="text-sm text-muted-foreground">Revisions</div>
         </div>
-        <div className="bg-muted rounded-lg p-4 text-center">
+        <div className="bg-card/70 border border-border rounded-lg p-4 text-center">
           <div className="text-2xl font-bold">{stats.approved}</div>
           <div className="text-sm text-muted-foreground">Approved</div>
         </div>
-        <div className="bg-muted rounded-lg p-4 text-center">
+        <div className="bg-card/70 border border-border rounded-lg p-4 text-center">
           <div className="text-2xl font-bold">{stats.posted}</div>
           <div className="text-sm text-muted-foreground">Posted</div>
         </div>

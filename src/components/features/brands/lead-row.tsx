@@ -178,12 +178,12 @@ export function LeadRow({ brandCreator, followUpDaysThreshold = 3 }: LeadRowProp
   return (
     <div className="border rounded-lg overflow-hidden">
       {/* Main row */}
-      <div className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
+      <div className="flex items-center justify-between p-4 hover:bg-card/70 transition-colors">
         {/* Creator info */}
         <div className="flex items-center gap-4 flex-1 min-w-0">
           {/* Avatar */}
           <Link href={`/creators/${creator.id}`}>
-            <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-semibold shrink-0 hover:ring-2 ring-primary transition-all">
+            <div className="w-10 h-10 rounded-full bg-card/70 border border-border flex items-center justify-center text-sm font-semibold shrink-0 hover:ring-2 ring-primary transition-all">
               {creator.avatarUrl ? (
                 <img
                   src={creator.avatarUrl}
@@ -257,7 +257,7 @@ export function LeadRow({ brandCreator, followUpDaysThreshold = 3 }: LeadRowProp
             variant="outline"
             onClick={handleGenerateFollowUp}
             disabled={isGeneratingFollowUp}
-            className="hidden md:flex mr-2 shrink-0 border-orange-300 text-primary hover:bg-orange-50"
+            className="hidden md:flex mr-2 shrink-0 border-border text-primary hover:bg-card"
             title={`${daysSinceContact}d since last contact`}
           >
             {isGeneratingFollowUp ? "Generating…" : `Follow-up (${daysSinceContact}d)`}
@@ -283,7 +283,7 @@ export function LeadRow({ brandCreator, followUpDaysThreshold = 3 }: LeadRowProp
 
       {/* Follow-up panel */}
       {followUpOpen && (
-        <div className="border-t bg-orange-50/50 p-4 space-y-3">
+        <div className="border-t border-border bg-card/70 p-4 space-y-3">
           <p className="text-xs font-medium text-primary">Follow-up message</p>
           {isGeneratingFollowUp ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -318,7 +318,7 @@ export function LeadRow({ brandCreator, followUpDaysThreshold = 3 }: LeadRowProp
 
       {/* Outreach panel — expands below the row */}
       {outreachOpen && (
-        <div className="border-t bg-muted/30 p-4 space-y-3">
+        <div className="border-t border-border bg-card/70 p-4 space-y-3">
           {isGenerating ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span className="animate-spin">⟳</span>

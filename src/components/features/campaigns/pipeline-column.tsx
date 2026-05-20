@@ -74,7 +74,7 @@ export function PipelineColumn({
       </div>
 
       {/* Column content */}
-      <div className="flex-1 bg-muted/30 rounded-b-lg p-2 space-y-2 min-h-[200px]">
+      <div className="flex-1 bg-card/70 border-x border-b border-border rounded-b-lg p-2 space-y-2 min-h-[200px]">
         {creatorsInStatus.length === 0 ? (
           <div className="text-center text-sm text-muted-foreground py-8">
             No creators

@@ -27,7 +27,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
         <CardContent className="p-4">
           <div className="flex items-start gap-4">
             {/* Brand logo */}
-            <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center text-sm font-semibold shrink-0">
+            <div className="w-10 h-10 rounded-lg bg-card/70 border border-border flex items-center justify-center text-sm font-semibold shrink-0">
               {campaign.brand?.logoUrl ? (
                 <img
                   src={campaign.brand.logoUrl}

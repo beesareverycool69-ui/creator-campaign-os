@@ -20,7 +20,7 @@ export function BrandCard({ brand }: BrandCardProps) {
         <CardContent className="p-4">
           <div className="flex items-center gap-4">
             {/* Logo */}
-            <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center text-lg font-semibold shrink-0">
+            <div className="w-12 h-12 rounded-lg bg-card/70 border border-border flex items-center justify-center text-lg font-semibold shrink-0">
               {brand.logoUrl ? (
                 <img
                   src={brand.logoUrl}

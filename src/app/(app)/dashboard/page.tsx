@@ -38,13 +38,13 @@ export default async function DashboardPage() {
 
   const funnelSteps = [
     { key: "discovered", label: "Discovered", color: "bg-muted-foreground" },
-    { key: "contacted", label: "Contacted", color: "bg-secondary/600" },
+    { key: "contacted", label: "Contacted", color: "bg-primary/70" },
     { key: "engaged", label: "Engaged", color: "bg-primary" },
     { key: "active", label: "Active", color: "bg-green-500" },
   ];
 
   const statusColors: Record<string, string> = {
-    discovered: "bg-muted text-muted-foreground",
+    discovered: "bg-card/70 text-muted-foreground",
     researching: "bg-yellow-100 text-primary",
     qualified: "bg-blue-100 text-primary",
     contacted: "bg-secondary text-primary",
@@ -169,11 +169,11 @@ export default async function DashboardPage() {
                 <Link
                   key={step.label}
                   href={step.href}
-                  className="rounded-lg border p-4 hover:bg-muted/50 transition-colors"
+                  className="rounded-lg border p-4 hover:bg-card/70 transition-colors"
                 >
                   <div className="flex items-center gap-2 mb-3">
                     <div className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold ${
-                      step.complete ? "bg-green-100 text-primary" : "bg-muted text-muted-foreground"
+                      step.complete ? "bg-green-100 text-primary" : "bg-card/70 text-muted-foreground"
                     }`}>
                       {step.complete ? <CheckCircle2 className="h-4 w-4" /> : index + 1}
                     </div>
@@ -204,7 +204,7 @@ export default async function DashboardPage() {
                 <p className="text-sm font-medium text-muted-foreground">Creator Profiles</p>
                 <p className="text-3xl font-bold">{stats.creators}</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center">
+              <div className="h-12 w-12 rounded-full bg-card/70 border border-border flex items-center justify-center">
                 <Users className="h-6 w-6 text-primary" />
               </div>
             </div>
@@ -218,7 +218,7 @@ export default async function DashboardPage() {
                 <p className="text-sm font-medium text-muted-foreground">Active Brands</p>
                 <p className="text-3xl font-bold">{stats.brands}</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center">
+              <div className="h-12 w-12 rounded-full bg-card/70 border border-border flex items-center justify-center">
                 <Building2 className="h-6 w-6 text-primary" />
               </div>
             </div>
@@ -246,7 +246,7 @@ export default async function DashboardPage() {
                 <p className="text-sm font-medium text-muted-foreground">Active Campaigns</p>
                 <p className="text-3xl font-bold">{stats.activeCampaigns}</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-accent/30 flex items-center justify-center">
+              <div className="h-12 w-12 rounded-full bg-card/70 border border-border flex items-center justify-center">
                 <Megaphone className="h-6 w-6 text-primary" />
               </div>
             </div>
@@ -277,7 +277,7 @@ export default async function DashboardPage() {
                       <span className="font-medium">{step.label}</span>
                       <span className="text-muted-foreground">{value}</span>
                     </div>
-                    <div className="h-3 bg-muted rounded-full overflow-hidden">
+                    <div className="h-3 bg-card/70 rounded-full overflow-hidden">
                       <div
                         className={`h-full ${step.color} rounded-full transition-all`}
                         style={{ width: `${width}%` }}
@@ -312,15 +312,15 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-4 bg-muted/50 rounded-lg">
+                <div className="text-center p-4 bg-card/70 border border-border rounded-lg">
                   <p className="text-3xl font-bold">{outreach.sentOutreachTotal}</p>
                   <p className="text-sm text-muted-foreground">Messages Sent</p>
                 </div>
-                <div className="text-center p-4 bg-muted/50 rounded-lg">
+                <div className="text-center p-4 bg-card/70 border border-border rounded-lg">
                   <p className="text-3xl font-bold">{outreach.repliedCount}</p>
                   <p className="text-sm text-muted-foreground">Replies</p>
                 </div>
-                <div className="text-center p-4 bg-secondary/60 rounded-lg">
+                <div className="text-center p-4 bg-card/70 border border-border rounded-lg">
                   <p className="text-3xl font-bold text-primary">{outreach.openRate}%</p>
                   <p className="text-sm text-muted-foreground">Open Rate</p>
                 </div>
@@ -367,7 +367,7 @@ export default async function DashboardPage() {
                     <Link
                       key={lead.id}
                       href={`/brands/${lead.brandId}/send-dms`}
-                      className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors"
+                      className="flex items-center justify-between p-2 rounded-lg hover:bg-card/70 transition-colors"
                     >
                       <div>
                         <p className="font-medium text-sm">{lead.creatorName}</p>
@@ -407,7 +407,7 @@ export default async function DashboardPage() {
                     <Link
                       key={lead.id}
                       href={`/brands/${lead.brandId}/follow-ups`}
-                      className="flex items-center justify-between p-2 rounded-lg hover:bg-muted transition-colors"
+                      className="flex items-center justify-between p-2 rounded-lg hover:bg-card/70 transition-colors"
                     >
                       <div>
                         <p className="font-medium text-sm">{lead.creatorName}</p>
@@ -447,7 +447,7 @@ export default async function DashboardPage() {
                     className="flex items-center justify-between py-2 border-b last:border-0"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-sm font-medium">
+                      <div className="w-8 h-8 rounded-full bg-card/70 border border-border flex items-center justify-center text-sm font-medium">
                         {lead.creatorName.charAt(0)}
                       </div>
                       <div>

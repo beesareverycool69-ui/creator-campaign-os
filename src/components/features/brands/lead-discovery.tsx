@@ -259,12 +259,12 @@ export function LeadDiscovery({ brandId, onAddCreators, aiConfig }: LeadDiscover
       </CardHeader>
       <CardContent>
         {/* Tab buttons */}
-        <div className="flex gap-1 p-1 bg-muted rounded-lg mb-4">
+        <div className="flex gap-1 p-1 bg-card/70 border border-border rounded-lg mb-4">
           <button
             onClick={() => setActiveTab("external")}
             className={cn(
               "flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-              activeTab === "external" ? "bg-background shadow-sm" : "hover:bg-background/50"
+              activeTab === "external" ? "bg-background/85 shadow-sm" : "hover:bg-background/60"
             )}
           >
             <Globe className="h-4 w-4" />
@@ -274,7 +274,7 @@ export function LeadDiscovery({ brandId, onAddCreators, aiConfig }: LeadDiscover
             onClick={() => setActiveTab("csv")}
             className={cn(
               "flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-              activeTab === "csv" ? "bg-background shadow-sm" : "hover:bg-background/50"
+              activeTab === "csv" ? "bg-background/85 shadow-sm" : "hover:bg-background/60"
             )}
           >
             <Upload className="h-4 w-4" />
@@ -284,7 +284,7 @@ export function LeadDiscovery({ brandId, onAddCreators, aiConfig }: LeadDiscover
             onClick={() => setActiveTab("ocr")}
             className={cn(
               "flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-              activeTab === "ocr" ? "bg-background shadow-sm" : "hover:bg-background/50"
+              activeTab === "ocr" ? "bg-background/85 shadow-sm" : "hover:bg-background/60"
             )}
           >
             <Image className="h-4 w-4" />
@@ -429,7 +429,7 @@ export function LeadDiscovery({ brandId, onAddCreators, aiConfig }: LeadDiscover
                   key={index}
                   className={cn(
                     "flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors",
-                    creator.selected ? "bg-primary/5 border-primary" : "bg-muted/50 border-transparent"
+                    creator.selected ? "bg-primary/5 border-primary" : "bg-background/85 border-border"
                   )}
                   onClick={() => toggleCreatorSelection(index)}
                 >

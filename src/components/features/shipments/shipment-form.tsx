@@ -160,7 +160,7 @@ export function ShipmentForm({
 
             {/* Display selected address details */}
             {defaultAddress && (
-              <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md mt-2">
+              <div className="text-sm text-muted-foreground bg-card/70 border border-border p-3 rounded-md mt-2">
                 <p className="font-medium">{defaultAddress.recipientName}</p>
                 <p>{defaultAddress.street1}</p>
                 {defaultAddress.street2 && <p>{defaultAddress.street2}</p>}

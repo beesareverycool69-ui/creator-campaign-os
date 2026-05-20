@@ -28,7 +28,7 @@ const STATUS_CONFIG: Record<
   },
   signed: {
     label: "Signed",
-    className: "bg-secondary text-primary border-accent/40",
+    className: "bg-secondary text-primary border-border",
     emoji: "✍️",
   },
   countersigned: {

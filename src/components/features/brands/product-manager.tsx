@@ -84,7 +84,7 @@ export function ProductManager({ brandId, products }: ProductManagerProps) {
         ) : products.length > 0 ? (
           <div className="space-y-2">
             {products.map((product) => (
-              <div key={product.id} className="flex items-start justify-between rounded-lg border p-3">
+              <div key={product.id} className="flex items-start justify-between rounded-lg border border-border bg-background/60 p-3">
                 <div>
                   <p className="font-medium">{product.name}</p>
                   <p className="text-sm text-muted-foreground">
@@ -105,7 +105,7 @@ export function ProductManager({ brandId, products }: ProductManagerProps) {
         ) : null}
 
         {isOpen && (
-          <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border bg-muted/50 p-4">
+          <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border border-border bg-card/70 p-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="name">Product Name *</Label>

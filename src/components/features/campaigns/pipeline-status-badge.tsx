@@ -52,7 +52,7 @@ const STATUS_CONFIG: Record<
   },
   negotiating: {
     label: "Negotiating",
-    className: "bg-secondary text-primary border-accent/40",
+    className: "bg-secondary text-primary border-border",
     emoji: "💬",
   },
   accepted: {
@@ -62,7 +62,7 @@ const STATUS_CONFIG: Record<
   },
   declined: {
     label: "Declined",
-    className: "bg-muted text-muted-foreground border-slate-200",
+    className: "bg-card/70 text-muted-foreground border-slate-200",
     emoji: "👎",
   },
   ghosted: {
@@ -84,7 +84,7 @@ const STATUS_CONFIG: Record<
   // Execution
   shipped: {
     label: "Shipped",
-    className: "bg-secondary text-primary border-accent/40",
+    className: "bg-secondary text-primary border-border",
     emoji: "📦",
   },
   creating: {
@@ -94,7 +94,7 @@ const STATUS_CONFIG: Record<
   },
   in_review: {
     label: "In Review",
-    className: "bg-accent/30 text-primary border-accent/40",
+    className: "bg-accent/30 text-primary border-border",
     emoji: "👀",
   },
   revision: {
@@ -130,7 +130,7 @@ const STATUS_CONFIG: Record<
   },
   withdrawn: {
     label: "Withdrawn",
-    className: "bg-red-50 text-red-700 border-red-200",
+    className: "bg-card text-muted-foreground border-border",
     emoji: "🚪",
   },
 };

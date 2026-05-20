@@ -152,7 +152,7 @@ export function SendDMsQueue({ brandId, initialLeads, aiConfigured }: Props) {
                   className="w-16 h-16 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center text-2xl font-bold">
+                <div className="w-16 h-16 rounded-full bg-card/70 border border-border flex items-center justify-center text-2xl font-bold">
                   {currentLead.creator.name[0]}
                 </div>
               )}
@@ -200,7 +200,7 @@ export function SendDMsQueue({ brandId, initialLeads, aiConfigured }: Props) {
 
           {/* Bio */}
           {currentLead.creator.bio && (
-            <div className="mb-6 p-3 bg-card/70 rounded-lg">
+            <div className="mb-6 p-3 bg-card/70 border border-border rounded-lg">
               <p className="text-sm font-medium mb-1">Bio</p>
               <p className="text-sm text-muted-foreground">{currentLead.creator.bio}</p>
             </div>

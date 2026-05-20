@@ -55,7 +55,7 @@ export function RevisionHistory({ revisions }: RevisionHistoryProps) {
                 </div>
 
                 {/* Feedback */}
-                <div className="bg-muted p-3 rounded-lg">
+                <div className="bg-card/70 border border-border p-3 rounded-lg">
                   <p className="text-sm whitespace-pre-wrap">{revision.feedback}</p>
                 </div>
 

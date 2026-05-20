@@ -46,7 +46,7 @@ export function CreatorCard({ creator }: CreatorCardProps) {
         <CardContent className="p-4">
           <div className="flex items-start gap-4">
             {/* Avatar */}
-            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center text-lg font-semibold shrink-0">
+            <div className="w-12 h-12 rounded-full bg-card/70 border border-border flex items-center justify-center text-lg font-semibold shrink-0">
               {creator.avatarUrl ? (
                 <img
                   src={creator.avatarUrl}
