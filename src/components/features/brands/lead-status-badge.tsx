@@ -27,11 +27,11 @@ const STATUS_CONFIG: Record<
   },
   researching: {
     label: "Researching",
-    className: "bg-blue-100 text-blue-800 border-blue-200",
+    className: "bg-secondary text-primary border-primary/30",
   },
   qualified: {
     label: "Qualified",
-    className: "bg-indigo-100 text-indigo-800 border-indigo-200",
+    className: "bg-secondary text-primary border-primary/30",
   },
   unqualified: {
     label: "Unqualified",
@@ -39,19 +39,19 @@ const STATUS_CONFIG: Record<
   },
   contacted: {
     label: "Contacted",
-    className: "bg-yellow-100 text-yellow-800 border-yellow-200",
+    className: "bg-secondary text-primary border-accent/40",
   },
   engaged: {
     label: "Engaged",
-    className: "bg-green-100 text-green-800 border-green-200",
+    className: "bg-primary/10 text-primary border-primary/30",
   },
   active: {
     label: "Active",
-    className: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    className: "bg-primary/10 text-primary border-primary/30",
   },
   paused: {
     label: "Paused",
-    className: "bg-orange-100 text-orange-800 border-orange-200",
+    className: "bg-accent/30 text-primary border-accent/40",
   },
   churned: {
     label: "Churned",

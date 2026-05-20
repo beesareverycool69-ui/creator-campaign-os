@@ -93,10 +93,10 @@ function TrackCard({
 
   const getStatusBadge = () => {
     if (lead.status === "contacted" && !lead.lastContactedAt) {
-      return <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500/30">DM SENT</Badge>;
+      return <Badge variant="outline" className="bg-secondary/600/10 text-primary border-blue-500/30">DM SENT</Badge>;
     }
     if (lead.status === "contacted") {
-      return <Badge variant="outline" className="bg-orange-500/10 text-orange-500 border-orange-500/30">FOLLOW-UP 1</Badge>;
+      return <Badge variant="outline" className="bg-accent/25 text-primary border-orange-500/30">FOLLOW-UP 1</Badge>;
     }
     return null;
   };
@@ -194,7 +194,7 @@ function TrackCard({
                   onClick={handleAccept}
                   disabled={isPending}
                   variant="outline"
-                  className="text-green-500 border-green-500/30 hover:bg-green-500/10"
+                  className="text-primary border-primary/30 hover:bg-primary/10"
                 >
                   Accepted
                 </Button>

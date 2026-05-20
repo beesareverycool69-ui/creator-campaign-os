@@ -20,9 +20,9 @@ type Props = {
 };
 
 function scoreColor(score: number) {
-  if (score >= 75) return "bg-green-100 text-green-800";
-  if (score >= 50) return "bg-yellow-100 text-yellow-800";
-  return "bg-red-100 text-red-800";
+  if (score >= 75) return "bg-primary/10 text-primary";
+  if (score >= 50) return "bg-secondary text-primary";
+  return "bg-secondary text-primary";
 }
 
 function MatchRow({ match, brandId }: { match: Match; brandId: string }) {
@@ -68,7 +68,7 @@ function MatchRow({ match, brandId }: { match: Match; brandId: string }) {
       {/* Action */}
       <div className="shrink-0">
         {added ? (
-          <span className="text-sm text-green-600 font-medium">Added ✓</span>
+          <span className="text-sm text-primary font-medium">Added ✓</span>
         ) : (
           <Button size="sm" variant="outline" onClick={handleAdd} disabled={isPending}>
             {isPending ? "Adding…" : "Add to Brand"}

@@ -25,7 +25,7 @@ export function LeadList({ brandCreators }: Props) {
         <div className="hidden lg:block w-32">Last Contact</div>
         {contactedCount > 0 && (
           <div className="flex items-center gap-2 mr-2 text-xs">
-            <span className="text-orange-600">Follow-up after</span>
+            <span className="text-primary">Follow-up after</span>
             <Select
               value={String(followUpDays)}
               onChange={(e) => setFollowUpDays(Number(e.target.value))}

@@ -109,9 +109,9 @@ function FollowUpCard({
   };
 
   const getBadgeColor = () => {
-    if (lead.daysSinceContact <= 3) return "bg-orange-500/20 text-orange-500 border-orange-500/30";
-    if (lead.daysSinceContact <= 7) return "bg-yellow-500/20 text-yellow-500 border-yellow-500/30";
-    return "bg-red-500/20 text-red-500 border-red-500/30";
+    if (lead.daysSinceContact <= 3) return "bg-accent/20 text-primary border-accent/40";
+    if (lead.daysSinceContact <= 7) return "bg-accent/20 text-primary border-accent/40";
+    return "bg-secondary text-primary border-primary/30";
   };
 
   return (
@@ -161,7 +161,7 @@ function FollowUpCard({
               onClick={handleSendEarly}
               disabled={isPending}
               variant="outline"
-              className="bg-orange-500/10 border-orange-500/30 text-orange-500 hover:bg-orange-500/20"
+              className="bg-accent/25 border-orange-500/30 text-primary hover:bg-orange-500/20"
             >
               Send Early
             </Button>

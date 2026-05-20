@@ -26,10 +26,10 @@ type CreatorCardProps = {
 function getTierColor(tier: string | null): string {
   const colors: Record<string, string> = {
     nano: "bg-gray-100 text-gray-800",
-    micro: "bg-blue-100 text-blue-800",
-    mid: "bg-green-100 text-green-800",
-    macro: "bg-purple-100 text-purple-800",
-    mega: "bg-yellow-100 text-yellow-800",
+    micro: "bg-secondary text-primary",
+    mid: "bg-primary/10 text-primary",
+    macro: "bg-secondary text-primary",
+    mega: "bg-secondary text-primary",
   };
   return tier ? colors[tier] || "bg-secondary" : "bg-secondary";
 }

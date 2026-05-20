@@ -20,27 +20,27 @@ interface ContentListProps {
 const statusConfig = {
   pending: {
     label: "Pending",
-    color: "bg-yellow-100 text-yellow-800",
+    color: "bg-secondary text-primary",
     icon: Clock,
   },
   submitted: {
     label: "Pending Review",
-    color: "bg-yellow-100 text-yellow-800",
+    color: "bg-secondary text-primary",
     icon: Clock,
   },
   in_review: {
     label: "In Review",
-    color: "bg-blue-100 text-blue-800",
+    color: "bg-secondary text-primary",
     icon: Eye,
   },
   approved: {
     label: "Approved",
-    color: "bg-green-100 text-green-800",
+    color: "bg-primary/10 text-primary",
     icon: CheckCircle2,
   },
   revision_requested: {
     label: "Revision Requested",
-    color: "bg-orange-100 text-orange-800",
+    color: "bg-accent/30 text-primary",
     icon: AlertCircle,
   },
   rejected: {
@@ -50,7 +50,7 @@ const statusConfig = {
   },
   posted: {
     label: "Posted",
-    color: "bg-purple-100 text-purple-800",
+    color: "bg-secondary text-primary",
     icon: CheckCircle2,
   },
 };
@@ -71,7 +71,7 @@ export function ContentList({ contents }: ContentListProps) {
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
                 {isVideo ? (
-                  <FileVideo className="h-6 w-6 text-blue-500" />
+                  <FileVideo className="h-6 w-6 text-primary" />
                 ) : (
                   <FileImage className="h-6 w-6 text-green-500" />
                 )}

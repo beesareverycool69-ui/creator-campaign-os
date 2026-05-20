@@ -138,7 +138,7 @@ export function ContentUploadForm({ token }: ContentUploadFormProps) {
     return (
       <div className="text-center py-12">
         <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <Check className="h-8 w-8 text-green-600" />
+          <Check className="h-8 w-8 text-primary" />
         </div>
         <h3 className="text-lg font-medium">Content Submitted!</h3>
         <p className="text-sm text-muted-foreground mt-1">
@@ -192,7 +192,7 @@ export function ContentUploadForm({ token }: ContentUploadFormProps) {
             >
               <div className="flex items-center gap-3">
                 {file.type.startsWith("video/") ? (
-                  <FileVideo className="h-8 w-8 text-blue-500" />
+                  <FileVideo className="h-8 w-8 text-primary" />
                 ) : (
                   <FileImage className="h-8 w-8 text-green-500" />
                 )}

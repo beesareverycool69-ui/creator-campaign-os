@@ -23,19 +23,19 @@ const STATUS_CONFIG: Record<
   },
   approved: {
     label: "Approved",
-    className: "bg-blue-100 text-blue-800 border-blue-200",
+    className: "bg-secondary text-primary border-primary/30",
   },
   recruiting: {
     label: "Recruiting",
-    className: "bg-purple-100 text-purple-800 border-purple-200",
+    className: "bg-secondary text-primary border-primary/30",
   },
   active: {
     label: "Active",
-    className: "bg-green-100 text-green-800 border-green-200",
+    className: "bg-primary/10 text-primary border-primary/30",
   },
   completed: {
     label: "Completed",
-    className: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    className: "bg-primary/10 text-primary border-primary/30",
   },
   archived: {
     label: "Archived",

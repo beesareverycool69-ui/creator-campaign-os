@@ -215,7 +215,7 @@ export function BriefForm({ brandId, brand, brandCreatorId, creator }: Props) {
             />
           </div>
           <div>
-            <Label htmlFor="donts" className="text-red-500">Don'ts (optional)</Label>
+            <Label htmlFor="donts">Don'ts (optional)</Label>
             <Textarea 
               id="donts"
               value={donts}

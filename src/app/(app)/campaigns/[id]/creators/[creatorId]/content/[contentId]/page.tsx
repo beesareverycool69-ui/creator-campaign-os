@@ -252,7 +252,7 @@ export default async function ContentDetailPage({ params }: Props) {
                 </div>
                 {latestMetrics.engagementRate && (
                   <div className="mt-4 pt-4 border-t text-center">
-                    <div className="text-xl font-bold text-green-600">
+                    <div className="text-xl font-bold text-primary">
                       {latestMetrics.engagementRate}%
                     </div>
                     <div className="text-xs text-muted-foreground">

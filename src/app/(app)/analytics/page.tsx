@@ -86,7 +86,7 @@ export default async function AnalyticsPage() {
                 <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
                 <p className="text-3xl font-bold">{formatCurrency(stats.totalRevenue)}</p>
                 {revenueTrend !== 0 && (
-                  <div className={`flex items-center text-sm mt-1 ${revenueTrend > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  <div className={`flex items-center text-sm mt-1 ${revenueTrend > 0 ? 'text-primary' : 'text-red-600'}`}>
                     {revenueTrend > 0 ? (
                       <ArrowUpRight className="h-4 w-4" />
                     ) : (
@@ -97,7 +97,7 @@ export default async function AnalyticsPage() {
                 )}
               </div>
               <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-                <DollarSign className="h-6 w-6 text-green-600" />
+                <DollarSign className="h-6 w-6 text-primary" />
               </div>
             </div>
           </CardContent>
@@ -111,8 +111,8 @@ export default async function AnalyticsPage() {
                 <p className="text-3xl font-bold">{formatCurrency(stats.totalCommission)}</p>
                 <p className="text-sm text-muted-foreground mt-1">Owed to creators</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center">
-                <Users className="h-6 w-6 text-purple-600" />
+              <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center">
+                <Users className="h-6 w-6 text-primary" />
               </div>
             </div>
           </CardContent>
@@ -126,8 +126,8 @@ export default async function AnalyticsPage() {
                 <p className="text-3xl font-bold">{formatNumber(stats.totalConversions)}</p>
                 <p className="text-sm text-muted-foreground mt-1">Total orders</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-                <ShoppingCart className="h-6 w-6 text-blue-600" />
+              <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center">
+                <ShoppingCart className="h-6 w-6 text-primary" />
               </div>
             </div>
           </CardContent>
@@ -143,8 +143,8 @@ export default async function AnalyticsPage() {
                   {stats.conversionRate.toFixed(1)}% conversion rate
                 </p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-orange-100 flex items-center justify-center">
-                <TrendingUp className="h-6 w-6 text-orange-600" />
+              <div className="h-12 w-12 rounded-full bg-accent/30 flex items-center justify-center">
+                <TrendingUp className="h-6 w-6 text-primary" />
               </div>
             </div>
           </CardContent>
@@ -259,7 +259,7 @@ export default async function AnalyticsPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Trophy className="h-5 w-5 text-yellow-500" />
+              <Trophy className="h-5 w-5 text-primary" />
               Top Performing Creators
             </CardTitle>
             <CardDescription>Ranked by revenue generated</CardDescription>
@@ -281,9 +281,9 @@ export default async function AnalyticsPage() {
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                        i === 0 ? 'bg-yellow-100 text-yellow-700' :
+                        i === 0 ? 'bg-yellow-100 text-primary' :
                         i === 1 ? 'bg-gray-100 text-gray-700' :
-                        i === 2 ? 'bg-orange-100 text-orange-700' :
+                        i === 2 ? 'bg-orange-100 text-primary' :
                         'bg-muted text-muted-foreground'
                       }`}>
                         {i + 1}

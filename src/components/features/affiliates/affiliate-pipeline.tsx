@@ -50,9 +50,9 @@ export function AffiliatePipeline({ brandId, creators, uploadUrlsByBrandCreatorI
   }));
 
   const columns: { id: PipelineStage; title: string; icon: React.ReactNode; color: string }[] = [
-    { id: "ship", title: "Ship Product", icon: <Package className="h-4 w-4" />, color: "text-yellow-500" },
-    { id: "awaiting", title: "Awaiting Content", icon: <Clock className="h-4 w-4" />, color: "text-blue-500" },
-    { id: "review", title: "Review Content", icon: <FileVideo className="h-4 w-4" />, color: "text-purple-500" },
+    { id: "ship", title: "Ship Product", icon: <Package className="h-4 w-4" />, color: "text-primary" },
+    { id: "awaiting", title: "Awaiting Content", icon: <Clock className="h-4 w-4" />, color: "text-primary" },
+    { id: "review", title: "Review Content", icon: <FileVideo className="h-4 w-4" />, color: "text-primary" },
     { id: "ready", title: "Ready to Post", icon: <CheckCircle className="h-4 w-4" />, color: "text-green-500" },
   ];
 
@@ -113,9 +113,9 @@ function PipelineCard({
   const handle = primaryPlatform?.handle;
 
   const tierColors = {
-    gold: "bg-yellow-500/20 text-yellow-500 border-yellow-500/30",
+    gold: "bg-accent/20 text-primary border-yellow-500/30",
     silver: "bg-gray-400/20 text-gray-400 border-gray-400/30",
-    bronze: "bg-orange-700/20 text-orange-700 border-orange-700/30",
+    bronze: "bg-orange-700/20 text-primary border-orange-700/30",
   };
 
 
@@ -161,7 +161,7 @@ function PipelineCard({
               onChange={(e) => setTrackingNumber(e.target.value)}
               className="h-8 text-xs"
             />
-            <Button size="sm" className="w-full h-7 text-xs bg-yellow-500 hover:bg-yellow-600 text-black">
+            <Button size="sm" className="w-full h-7 text-xs bg-accent hover:bg-yellow-600 text-black">
               Enter Tracking #
             </Button>
           </div>

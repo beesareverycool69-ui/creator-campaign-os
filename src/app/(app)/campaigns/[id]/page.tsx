@@ -205,19 +205,19 @@ export default async function CampaignPage({ params, searchParams }: Props) {
                 <div className="text-sm text-muted-foreground">Total Submissions</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-yellow-600">
+                <div className="text-3xl font-bold text-primary">
                   {contentSummary.submitted}
                 </div>
                 <div className="text-sm text-muted-foreground">In Review</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-green-600">
+                <div className="text-3xl font-bold text-primary">
                   {contentSummary.approved}
                 </div>
                 <div className="text-sm text-muted-foreground">Approved</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-blue-600">
+                <div className="text-3xl font-bold text-primary">
                   {contentSummary.posted}
                 </div>
                 <div className="text-sm text-muted-foreground">Posted</div>

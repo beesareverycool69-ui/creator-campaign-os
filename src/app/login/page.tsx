@@ -102,7 +102,7 @@ export default function LoginPage() {
             <p
               className={`text-sm ${
                 error.includes("Check your email")
-                  ? "text-green-600"
+                  ? "text-primary"
                   : "text-destructive"
               }`}
             >

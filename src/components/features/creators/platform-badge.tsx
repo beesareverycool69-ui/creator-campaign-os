@@ -19,11 +19,11 @@ function formatFollowers(count: number): string {
 
 function getPlatformColor(platformId: string): string {
   const colors: Record<string, string> = {
-    instagram: "bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0",
+    instagram: "bg-gradient-to-r from-primary to-accent text-white border-0",
     tiktok: "bg-black text-white border-0",
-    youtube: "bg-red-600 text-white border-0",
+    youtube: "bg-primary text-primary-foreground border-0",
     twitter: "bg-sky-500 text-white border-0",
-    twitch: "bg-purple-600 text-white border-0",
+    twitch: "bg-primary text-white border-0",
   };
   return colors[platformId] || "bg-secondary";
 }

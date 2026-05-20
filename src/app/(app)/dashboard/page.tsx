@@ -37,19 +37,19 @@ export default async function DashboardPage() {
   const setup = await getSetupProgress();
 
   const funnelSteps = [
-    { key: "discovered", label: "Discovered", color: "bg-slate-500" },
-    { key: "contacted", label: "Contacted", color: "bg-blue-500" },
-    { key: "engaged", label: "Engaged", color: "bg-purple-500" },
+    { key: "discovered", label: "Discovered", color: "bg-muted-foreground" },
+    { key: "contacted", label: "Contacted", color: "bg-secondary/600" },
+    { key: "engaged", label: "Engaged", color: "bg-primary" },
     { key: "active", label: "Active", color: "bg-green-500" },
   ];
 
   const statusColors: Record<string, string> = {
-    discovered: "bg-slate-100 text-slate-700",
-    researching: "bg-yellow-100 text-yellow-700",
-    qualified: "bg-blue-100 text-blue-700",
-    contacted: "bg-indigo-100 text-indigo-700",
-    engaged: "bg-purple-100 text-purple-700",
-    active: "bg-green-100 text-green-700",
+    discovered: "bg-muted text-muted-foreground",
+    researching: "bg-yellow-100 text-primary",
+    qualified: "bg-blue-100 text-primary",
+    contacted: "bg-secondary text-primary",
+    engaged: "bg-secondary text-primary",
+    active: "bg-green-100 text-primary",
   };
 
   const setupSteps = [
@@ -131,7 +131,7 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Send className="h-5 w-5 text-blue-500" />
+              <Send className="h-5 w-5 text-primary" />
               Send your first DMs
             </CardTitle>
             <CardDescription>
@@ -156,7 +156,7 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-yellow-500" />
+              <Sparkles className="h-5 w-5 text-primary" />
               Get set up
             </CardTitle>
             <CardDescription>
@@ -173,7 +173,7 @@ export default async function DashboardPage() {
                 >
                   <div className="flex items-center gap-2 mb-3">
                     <div className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold ${
-                      step.complete ? "bg-green-100 text-green-700" : "bg-muted text-muted-foreground"
+                      step.complete ? "bg-green-100 text-primary" : "bg-muted text-muted-foreground"
                     }`}>
                       {step.complete ? <CheckCircle2 className="h-4 w-4" /> : index + 1}
                     </div>
@@ -204,8 +204,8 @@ export default async function DashboardPage() {
                 <p className="text-sm font-medium text-muted-foreground">Creator Profiles</p>
                 <p className="text-3xl font-bold">{stats.creators}</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-                <Users className="h-6 w-6 text-blue-600" />
+              <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center">
+                <Users className="h-6 w-6 text-primary" />
               </div>
             </div>
           </CardContent>
@@ -218,8 +218,8 @@ export default async function DashboardPage() {
                 <p className="text-sm font-medium text-muted-foreground">Active Brands</p>
                 <p className="text-3xl font-bold">{stats.brands}</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center">
-                <Building2 className="h-6 w-6 text-purple-600" />
+              <div className="h-12 w-12 rounded-full bg-secondary flex items-center justify-center">
+                <Building2 className="h-6 w-6 text-primary" />
               </div>
             </div>
           </CardContent>
@@ -233,7 +233,7 @@ export default async function DashboardPage() {
                 <p className="text-3xl font-bold">{stats.totalLeads}</p>
               </div>
               <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-                <UserPlus className="h-6 w-6 text-green-600" />
+                <UserPlus className="h-6 w-6 text-primary" />
               </div>
             </div>
           </CardContent>
@@ -246,8 +246,8 @@ export default async function DashboardPage() {
                 <p className="text-sm font-medium text-muted-foreground">Active Campaigns</p>
                 <p className="text-3xl font-bold">{stats.activeCampaigns}</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-orange-100 flex items-center justify-center">
-                <Megaphone className="h-6 w-6 text-orange-600" />
+              <div className="h-12 w-12 rounded-full bg-accent/30 flex items-center justify-center">
+                <Megaphone className="h-6 w-6 text-primary" />
               </div>
             </div>
           </CardContent>
@@ -320,12 +320,12 @@ export default async function DashboardPage() {
                   <p className="text-3xl font-bold">{outreach.repliedCount}</p>
                   <p className="text-sm text-muted-foreground">Replies</p>
                 </div>
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <p className="text-3xl font-bold text-blue-600">{outreach.openRate}%</p>
+                <div className="text-center p-4 bg-secondary/60 rounded-lg">
+                  <p className="text-3xl font-bold text-primary">{outreach.openRate}%</p>
                   <p className="text-sm text-muted-foreground">Open Rate</p>
                 </div>
                 <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <p className="text-3xl font-bold text-green-600">{outreach.replyRate}%</p>
+                  <p className="text-3xl font-bold text-primary">{outreach.replyRate}%</p>
                   <p className="text-sm text-muted-foreground">Reply Rate</p>
                 </div>
               </div>
@@ -339,7 +339,7 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-yellow-500" />
+              <Sparkles className="h-5 w-5 text-primary" />
               Today&apos;s Tasks
             </CardTitle>
             <CardDescription>Your outreach queue for today</CardDescription>
@@ -349,7 +349,7 @@ export default async function DashboardPage() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <h4 className="font-medium flex items-center gap-2">
-                  <Send className="h-4 w-4 text-blue-500" />
+                  <Send className="h-4 w-4 text-primary" />
                   DMs to Send
                 </h4>
                 <Badge variant="secondary">{tasks.toContact.length}</Badge>
@@ -389,7 +389,7 @@ export default async function DashboardPage() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <h4 className="font-medium flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-orange-500" />
+                  <Clock className="h-4 w-4 text-primary" />
                   Follow-ups Due
                 </h4>
                 <Badge variant="secondary">{tasks.followUps.length}</Badge>

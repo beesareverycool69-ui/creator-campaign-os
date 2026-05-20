@@ -42,27 +42,27 @@ const STATUS_CONFIG: Record<
   },
   invited: {
     label: "Invited",
-    className: "bg-blue-100 text-blue-800 border-blue-200",
+    className: "bg-secondary text-primary border-primary/30",
     emoji: "✉️",
   },
   reminded: {
     label: "Reminded",
-    className: "bg-blue-50 text-blue-700 border-blue-200",
+    className: "bg-secondary/60 text-primary border-primary/30",
     emoji: "🔔",
   },
   negotiating: {
     label: "Negotiating",
-    className: "bg-yellow-100 text-yellow-800 border-yellow-200",
+    className: "bg-secondary text-primary border-accent/40",
     emoji: "💬",
   },
   accepted: {
     label: "Accepted",
-    className: "bg-indigo-100 text-indigo-800 border-indigo-200",
+    className: "bg-secondary text-primary border-primary/30",
     emoji: "✅",
   },
   declined: {
     label: "Declined",
-    className: "bg-slate-100 text-slate-700 border-slate-200",
+    className: "bg-muted text-muted-foreground border-slate-200",
     emoji: "👎",
   },
   ghosted: {
@@ -73,53 +73,53 @@ const STATUS_CONFIG: Record<
   // Onboarding
   onboarding: {
     label: "Onboarding",
-    className: "bg-purple-100 text-purple-800 border-purple-200",
+    className: "bg-secondary text-primary border-primary/30",
     emoji: "📝",
   },
   ready: {
     label: "Ready",
-    className: "bg-cyan-100 text-cyan-800 border-cyan-200",
+    className: "bg-secondary text-primary border-primary/30",
     emoji: "🚀",
   },
   // Execution
   shipped: {
     label: "Shipped",
-    className: "bg-amber-100 text-amber-800 border-amber-200",
+    className: "bg-secondary text-primary border-accent/40",
     emoji: "📦",
   },
   creating: {
     label: "Creating",
-    className: "bg-green-100 text-green-800 border-green-200",
+    className: "bg-primary/10 text-primary border-primary/30",
     emoji: "🎨",
   },
   in_review: {
     label: "In Review",
-    className: "bg-orange-100 text-orange-800 border-orange-200",
+    className: "bg-accent/30 text-primary border-accent/40",
     emoji: "👀",
   },
   revision: {
     label: "Revision",
-    className: "bg-rose-100 text-rose-800 border-rose-200",
+    className: "bg-secondary text-primary border-primary/30",
     emoji: "🔄",
   },
   approved: {
     label: "Approved",
-    className: "bg-teal-100 text-teal-800 border-teal-200",
+    className: "bg-primary/10 text-primary border-primary/30",
     emoji: "✨",
   },
   posting: {
     label: "Posting",
-    className: "bg-violet-100 text-violet-800 border-violet-200",
+    className: "bg-secondary text-primary border-primary/30",
     emoji: "📤",
   },
   posted: {
     label: "Posted",
-    className: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    className: "bg-primary/10 text-primary border-primary/30",
     emoji: "📱",
   },
   completed: {
     label: "Completed",
-    className: "bg-emerald-200 text-emerald-900 border-emerald-300",
+    className: "bg-primary/20 text-primary border-primary/40",
     emoji: "🎉",
   },
   // Terminal

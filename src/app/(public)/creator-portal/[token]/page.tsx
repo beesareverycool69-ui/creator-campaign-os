@@ -21,12 +21,12 @@ export default async function CreatorPortalPage({ params }: Props) {
   const { campaign, brand, creator, campaignCreator, contents } = data;
 
   const statusColors: Record<string, string> = {
-    pending: "bg-yellow-100 text-yellow-800",
-    in_review: "bg-blue-100 text-blue-800",
-    approved: "bg-green-100 text-green-800",
-    revision_requested: "bg-orange-100 text-orange-800",
+    pending: "bg-secondary text-primary",
+    in_review: "bg-secondary text-primary",
+    approved: "bg-primary/10 text-primary",
+    revision_requested: "bg-accent/30 text-primary",
     rejected: "bg-red-100 text-red-800",
-    posted: "bg-purple-100 text-purple-800",
+    posted: "bg-secondary text-primary",
   };
 
   const steps = [
@@ -94,7 +94,7 @@ export default async function CreatorPortalPage({ params }: Props) {
                 <div key={i} className="text-center">
                   <div
                     className={`mx-auto w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
-                      step.completed ? "bg-green-100 text-green-600" : "bg-muted text-muted-foreground"
+                      step.completed ? "bg-green-100 text-primary" : "bg-muted text-muted-foreground"
                     }`}
                   >
                     <step.icon className="h-5 w-5" />

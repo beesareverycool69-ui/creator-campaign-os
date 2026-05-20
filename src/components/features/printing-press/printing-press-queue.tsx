@@ -35,11 +35,11 @@ export function PrintingPressQueue({ brandId, brand, creators }: Props) {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "needs_brief":
-        return <Badge className="bg-orange-500/20 text-orange-500 border-orange-500/30">NEEDS BRIEF</Badge>;
+        return <Badge className="bg-orange-500/20 text-primary border-orange-500/30">NEEDS BRIEF</Badge>;
       case "ready_to_ship":
-        return <Badge className="bg-blue-500/20 text-blue-500 border-blue-500/30">READY TO SHIP</Badge>;
+        return <Badge className="bg-secondary/600/20 text-primary border-blue-500/30">READY TO SHIP</Badge>;
       case "brief_sent":
-        return <Badge className="bg-purple-500/20 text-purple-500 border-purple-500/30">BRIEF SENT</Badge>;
+        return <Badge className="bg-primary/20 text-primary border-primary/30">BRIEF SENT</Badge>;
       case "posted":
         return <Badge className="bg-green-500/20 text-green-500 border-green-500/30">POSTED</Badge>;
       default:

@@ -257,7 +257,7 @@ export function LeadRow({ brandCreator, followUpDaysThreshold = 3 }: LeadRowProp
             variant="outline"
             onClick={handleGenerateFollowUp}
             disabled={isGeneratingFollowUp}
-            className="hidden md:flex mr-2 shrink-0 border-orange-300 text-orange-700 hover:bg-orange-50"
+            className="hidden md:flex mr-2 shrink-0 border-orange-300 text-primary hover:bg-orange-50"
             title={`${daysSinceContact}d since last contact`}
           >
             {isGeneratingFollowUp ? "Generating…" : `Follow-up (${daysSinceContact}d)`}
@@ -284,7 +284,7 @@ export function LeadRow({ brandCreator, followUpDaysThreshold = 3 }: LeadRowProp
       {/* Follow-up panel */}
       {followUpOpen && (
         <div className="border-t bg-orange-50/50 p-4 space-y-3">
-          <p className="text-xs font-medium text-orange-700">Follow-up message</p>
+          <p className="text-xs font-medium text-primary">Follow-up message</p>
           {isGeneratingFollowUp ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span className="animate-spin">⟳</span>

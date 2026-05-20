@@ -60,12 +60,12 @@ export default async function FollowUpsPage({ params, searchParams }: Props) {
       <div className="rounded-lg border p-4 bg-muted/30">
         <div className="flex items-center gap-6 text-sm">
           <span>
-            <span className="text-orange-500 font-medium">{fu1Leads.length}</span>{" "}
+            <span className="text-primary font-medium">{fu1Leads.length}</span>{" "}
             Follow-up 1 Ready
             <span className="text-muted-foreground ml-1">+{fu1Leads.length} upcoming</span>
           </span>
           <span>
-            <span className="text-purple-500 font-medium">{fu2Leads.length}</span>{" "}
+            <span className="text-primary font-medium">{fu2Leads.length}</span>{" "}
             Follow-up 2 Ready
             <span className="text-muted-foreground ml-1">+{fu2Leads.length} upcoming</span>
           </span>

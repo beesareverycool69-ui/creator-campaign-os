@@ -70,7 +70,7 @@ export default async function TrackPage({ params, searchParams }: Props) {
       <div className="rounded-lg border p-4 bg-muted/30">
         <div className="flex items-center gap-8 text-sm">
           <span>
-            <span className="text-2xl font-bold text-yellow-500">{pendingCount}</span>{" "}
+            <span className="text-2xl font-bold text-primary">{pendingCount}</span>{" "}
             <span className="text-muted-foreground">Awaiting Response</span>
           </span>
           <span>
@@ -117,7 +117,7 @@ export default async function TrackPage({ params, searchParams }: Props) {
             <button
               className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 tab === t.id
-                  ? t.id === "pending" ? "bg-yellow-500 text-black" :
+                  ? t.id === "pending" ? "bg-accent text-black" :
                     t.id === "accepted" ? "bg-green-500 text-white" :
                     "bg-red-500 text-white"
                   : "bg-muted hover:bg-muted/80"

@@ -240,9 +240,9 @@ export function LeadDiscovery({ brandId, onAddCreators, aiConfig }: LeadDiscover
   const selectedCount = discoveredCreators.filter((c) => c.selected).length;
 
   const platformColors: Record<string, string> = {
-    instagram: "bg-gradient-to-r from-purple-500 to-pink-500",
+    instagram: "bg-gradient-to-r from-primary to-accent",
     tiktok: "bg-black",
-    youtube: "bg-red-600",
+    youtube: "bg-primary",
     twitter: "bg-blue-400",
   };
 
@@ -250,7 +250,7 @@ export function LeadDiscovery({ brandId, onAddCreators, aiConfig }: LeadDiscover
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-yellow-500" />
+          <Sparkles className="h-5 w-5 text-primary" />
           Discover Creators
         </CardTitle>
         <CardDescription>
