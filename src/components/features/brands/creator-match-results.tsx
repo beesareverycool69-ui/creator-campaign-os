@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
@@ -42,7 +42,7 @@ function MatchRow({ match, brandId }: { match: Match; brandId: string }) {
     });
   }
 
-  const topPlatform = match.platforms[0];
+  const profileUrl = match.platforms.find((p) => p.profileUrl)?.profileUrl;
 
   return (
     <div className="flex items-start gap-4 p-4 rounded-lg border bg-card">
@@ -53,20 +53,46 @@ function MatchRow({ match, brandId }: { match: Match; brandId: string }) {
 
       {/* Info */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
+        <div className="flex flex-wrap items-center gap-2 mb-1">
           <span className="font-medium">{match.name}</span>
-          {match.platforms.map((p) => (
-            <Badge key={p.platformId} variant="secondary" className="capitalize text-xs">
-              {p.platformId}
-              {p.followerCount ? ` · ${(p.followerCount / 1000).toFixed(0)}k` : ""}
-            </Badge>
-          ))}
+          {match.platforms.map((p) => {
+            const badge = (
+              <Badge variant="secondary" className="capitalize text-xs">
+                {p.platformId}
+                {p.followerCount ? ` · ${(p.followerCount / 1000).toFixed(0)}k` : ""}
+              </Badge>
+            );
+
+            return p.profileUrl ? (
+              <a
+                key={p.platformId}
+                href={p.profileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Open ${match.name}'s ${p.platformId} profile`}
+              >
+                {badge}
+              </a>
+            ) : (
+              <span key={p.platformId}>{badge}</span>
+            );
+          })}
         </div>
         <p className="text-sm text-muted-foreground">{match.reason}</p>
       </div>
 
       {/* Action */}
-      <div className="shrink-0">
+      <div className="shrink-0 flex flex-col items-end gap-2">
+        {profileUrl && (
+          <a
+            href={profileUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonVariants({ size: "sm", variant: "outline" })}
+          >
+            Open Profile
+          </a>
+        )}
         {added ? (
           <span className="text-sm text-primary font-medium">Added ✓</span>
         ) : (

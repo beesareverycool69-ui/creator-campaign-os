@@ -150,7 +150,7 @@ export async function analyzeBrandAction(
 }
 
 export type MatchCreatorsResult =
-  | { success: true; matches: (CreatorMatchResult & { name: string; platforms: { platformId: string; followerCount: number | null }[] })[] }
+  | { success: true; matches: (CreatorMatchResult & { name: string; platforms: { platformId: string; handle: string; profileUrl: string | null; followerCount: number | null }[] })[] }
   | { success: false; error: string };
 
 /**
@@ -203,6 +203,8 @@ export async function matchCreatorsAction(brandId: string, limit = 10): Promise<
       name: creator?.name ?? "Unknown",
       platforms: creator?.platforms.map((p) => ({
         platformId: p.platformId,
+        handle: p.handle,
+        profileUrl: p.profileUrl,
         followerCount: p.followerCount,
       })) ?? [],
     };
