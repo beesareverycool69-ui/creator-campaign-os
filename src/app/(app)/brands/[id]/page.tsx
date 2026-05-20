@@ -59,6 +59,7 @@ export default async function BrandPage({ params }: Props) {
   const acceptedCount = statusCounts["active"] || 0;
   const firstCampaign = campaigns[0];
   const anthropicConfigured = isConfiguredEnv("ANTHROPIC_API_KEY");
+  const suggestedCreatorSearchTerms = buildSuggestedCreatorSearchTerms(brand.brandAnalysis);
 
   return (
     <div className="space-y-6">
@@ -268,6 +269,7 @@ export default async function BrandPage({ params }: Props) {
         brandId={id}
         hasAnalysis={!!brand.brandAnalysis}
         aiConfigured={anthropicConfigured}
+        suggestedSearchTerms={suggestedCreatorSearchTerms}
       />
 
       {/* Recent Leads */}
@@ -315,4 +317,44 @@ export default async function BrandPage({ params }: Props) {
       </Card>
     </div>
   );
+}
+
+
+function buildSuggestedCreatorSearchTerms(analysis: NonNullable<Awaited<ReturnType<typeof getBrandById>>>["brandAnalysis"]) {
+  if (!analysis) {
+    return ["food creators", "snack reviews", "taste tests", "flavor reviews"];
+  }
+
+  const brandText = [
+    analysis.niche,
+    analysis.targetAudience,
+    analysis.idealCreatorProfile.niche,
+    analysis.idealCreatorProfile.contentStyle,
+    analysis.toneOfVoice,
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  const terms = new Set<string>();
+
+  if (/(food|snack|breakfast|flavo[u]?r|taste|dessert|recipe)/.test(brandText)) {
+    [
+      "food creators",
+      "snack reviews",
+      "taste tests",
+      "flavor reviews",
+      "breakfast trends",
+      "food hacks",
+      "new snack finds",
+      "dessert creators",
+    ].forEach((term) => terms.add(term));
+  }
+
+  analysis.idealCreatorProfile.niche
+    .split(/[,/]/)
+    .map((term) => term.trim().toLowerCase())
+    .filter((term) => term.length > 3)
+    .forEach((term) => terms.add(term));
+
+  return Array.from(terms).slice(0, 8);
 }

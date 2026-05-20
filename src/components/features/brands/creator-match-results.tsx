@@ -10,6 +10,12 @@ import { matchCreatorsAction, addCreatorToBrandWithScore } from "@/lib/actions/b
 import type { MatchCreatorsResult } from "@/lib/actions/brands";
 
 const LIMIT_OPTIONS = [10, 50, 100, 200] as const;
+const DEFAULT_SEARCH_TERMS = [
+  "food creators",
+  "snack reviews",
+  "taste tests",
+  "flavor reviews",
+];
 
 type Match = Extract<MatchCreatorsResult, { success: true }>["matches"][number];
 
@@ -17,6 +23,7 @@ type Props = {
   brandId: string;
   hasAnalysis: boolean;
   aiConfigured: boolean;
+  suggestedSearchTerms?: string[];
 };
 
 function scoreColor(score: number) {
@@ -105,7 +112,12 @@ function MatchRow({ match, brandId }: { match: Match; brandId: string }) {
   );
 }
 
-export function CreatorMatchResults({ brandId, hasAnalysis, aiConfigured }: Props) {
+export function CreatorMatchResults({
+  brandId,
+  hasAnalysis,
+  aiConfigured,
+  suggestedSearchTerms = DEFAULT_SEARCH_TERMS,
+}: Props) {
   const { success, error: showError } = useToast();
   const [isPending, startTransition] = useTransition();
   const [matches, setMatches] = useState<Match[] | null>(null);
@@ -193,9 +205,34 @@ export function CreatorMatchResults({ brandId, hasAnalysis, aiConfigured }: Prop
         )}
 
         {matches && matches.length === 0 && (
-          <p className="text-sm text-muted-foreground py-2">
-            No strong matches found. Try discovering more food/snack creators first.
-          </p>
+          <div className="rounded-lg border border-border bg-card/70 p-4 space-y-3">
+            <div>
+              <p className="text-sm font-medium">No strong matches found in your saved creator pool.</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Try discovering more brand-relevant creators, then run matching again.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Suggested searches
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {suggestedSearchTerms.slice(0, 8).map((term) => (
+                  <Badge key={term} variant="secondary" className="text-xs">
+                    {term}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            <a
+              href={`/brands/${brandId}/leads`}
+              className={buttonVariants({ size: "sm", variant: "outline" })}
+            >
+              Discover creators
+            </a>
+          </div>
         )}
 
         {matches && matches.length > 0 && (
