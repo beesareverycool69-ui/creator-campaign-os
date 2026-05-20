@@ -120,7 +120,7 @@ export function CreatorMatchResults({ brandId, hasAnalysis, aiConfigured }: Prop
       const result = await matchCreatorsAction(brandId, limit);
       if (result.success) {
         setMatches(result.matches);
-        success("Matching complete", `Scored ${result.matches.length} creator${result.matches.length !== 1 ? "s" : ""}.`);
+        success("Matching complete", `Found ${result.matches.length} qualified match${result.matches.length !== 1 ? "es" : ""}.`);
       } else {
         setError(result.error);
         showError("Matching failed", result.error);
@@ -135,7 +135,7 @@ export function CreatorMatchResults({ brandId, hasAnalysis, aiConfigured }: Prop
           <CardTitle>Creator Matching</CardTitle>
           {matches && (
             <p className="text-xs text-muted-foreground mt-1">
-              {matches.length} creator{matches.length !== 1 ? "s" : ""} scored
+              {matches.length} qualified match{matches.length !== 1 ? "es" : ""} found
             </p>
           )}
         </div>
@@ -147,7 +147,7 @@ export function CreatorMatchResults({ brandId, hasAnalysis, aiConfigured }: Prop
             className="w-24 h-8 text-sm py-0"
           >
             {LIMIT_OPTIONS.map((n) => (
-              <option key={n} value={n}>Top {n}</option>
+              <option key={n} value={n}>Best {n}</option>
             ))}
           </Select>
           <Button
@@ -177,19 +177,25 @@ export function CreatorMatchResults({ brandId, hasAnalysis, aiConfigured }: Prop
 
         {hasAnalysis && !isPending && !matches && !error && (
           <p className="text-sm text-muted-foreground py-2">
-            Score all creators in your database against this brand's ideal creator profile.
+            Find qualified creators in your database that fit this brand's ideal creator profile.
           </p>
         )}
 
         {isPending && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
             <span className="animate-spin">⟳</span>
-            Scoring creators against brand profile…
+            Finding qualified brand matches…
           </div>
         )}
 
         {error && (
           <p className="text-sm text-destructive py-2">{error}</p>
+        )}
+
+        {matches && matches.length === 0 && (
+          <p className="text-sm text-muted-foreground py-2">
+            No strong matches found. Try discovering more food/snack creators first.
+          </p>
         )}
 
         {matches && matches.length > 0 && (

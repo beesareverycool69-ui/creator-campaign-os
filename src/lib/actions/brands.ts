@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { brands, brandCreators } from "@/lib/db/schema";
+import { brands, brandCreators, type BrandAnalysis } from "@/lib/db/schema";
 import { requireOwnedBrand, requireUser } from "@/lib/auth/access";
 import { and, eq, count } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -153,8 +153,139 @@ export type MatchCreatorsResult =
   | { success: true; matches: (CreatorMatchResult & { name: string; platforms: { platformId: string; handle: string; profileUrl: string | null; followerCount: number | null }[] })[] }
   | { success: false; error: string };
 
+const CANDIDATE_POOL_SIZE = 200;
+const MAX_CREATORS_TO_SCORE = 60;
+const MIN_MATCH_SCORE = 50;
+
+const GENERIC_STOP_WORDS = new Set([
+  "and",
+  "are",
+  "but",
+  "for",
+  "from",
+  "have",
+  "into",
+  "not",
+  "that",
+  "the",
+  "their",
+  "this",
+  "with",
+  "would",
+]);
+
+const FOOD_RELEVANCE_TERMS = [
+  "food",
+  "snack",
+  "snacks",
+  "snacking",
+  "breakfast",
+  "taste test",
+  "taste tests",
+  "flavor",
+  "flavour",
+  "flavor review",
+  "flavor reviews",
+  "food comedy",
+  "new snack",
+  "recipe",
+  "recipes",
+  "dessert",
+  "convenience food",
+  "food hack",
+  "food hacks",
+];
+
+const OBVIOUS_NON_FIT_TERMS = [
+  "fitness",
+  "supplement",
+  "supplements",
+  "skincare",
+  "selfcare",
+  "self-care",
+  "gym",
+];
+
+type BrandAnalysisForMatching = BrandAnalysis;
+type CreatorCandidate = Awaited<ReturnType<typeof db.query.creators.findMany>>[number] & {
+  platforms: { platformId: string; handle: string; profileUrl: string | null; followerCount: number | null; engagementRate: string | null }[];
+};
+
+function getBrandKeywordText(analysis: BrandAnalysisForMatching) {
+  return [
+    analysis.niche,
+    analysis.targetAudience,
+    analysis.toneOfVoice,
+    analysis.idealCreatorProfile.niche,
+    analysis.idealCreatorProfile.contentStyle,
+    analysis.summary,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
+function buildRelevanceKeywords(analysis: BrandAnalysisForMatching) {
+  const text = getBrandKeywordText(analysis);
+  const keywords = new Set<string>();
+
+  for (const phrase of [
+    analysis.niche,
+    analysis.targetAudience,
+    analysis.toneOfVoice,
+    analysis.idealCreatorProfile.niche,
+    analysis.idealCreatorProfile.contentStyle,
+  ]) {
+    phrase
+      ?.toLowerCase()
+      .split(/[^a-z0-9+.-]+/)
+      .map((word) => word.trim())
+      .filter((word) => word.length >= 4 && !GENERIC_STOP_WORDS.has(word))
+      .forEach((word) => keywords.add(word));
+  }
+
+  [analysis.idealCreatorProfile.niche, analysis.idealCreatorProfile.contentStyle]
+    .join(",")
+    .toLowerCase()
+    .split(/[,;]+/)
+    .map((phrase) => phrase.trim())
+    .filter((phrase) => phrase.length >= 4)
+    .forEach((phrase) => keywords.add(phrase));
+
+  if (/(food|snack|breakfast|flavo[u]?r|taste|dessert|recipe)/.test(text)) {
+    FOOD_RELEVANCE_TERMS.forEach((term) => keywords.add(term));
+  }
+
+  return Array.from(keywords);
+}
+
+function scoreCreatorRelevance(creator: CreatorCandidate, keywords: string[]) {
+  const creatorText = [
+    creator.name,
+    creator.bio,
+    creator.country,
+    creator.city,
+    creator.primaryPlatform,
+    creator.tier,
+    ...creator.platforms.flatMap((p) => [p.platformId, p.handle]),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  const positiveMatches = keywords.filter((keyword) => creatorText.includes(keyword));
+  const nonFitMatches = OBVIOUS_NON_FIT_TERMS.filter((term) => creatorText.includes(term));
+  const hasPositiveMatch = positiveMatches.length > 0;
+
+  return {
+    creator,
+    score: positiveMatches.length * 3 - (hasPositiveMatch ? 0 : nonFitMatches.length * 4),
+    positiveMatches: positiveMatches.length,
+  };
+}
+
 /**
- * Score all unlinked creators against the brand's analysis.
+ * Score brand-relevant unlinked creators against the brand's analysis.
  */
 export async function matchCreatorsAction(brandId: string, limit = 10): Promise<MatchCreatorsResult> {
   limit = Math.min(limit, 200);
@@ -165,8 +296,8 @@ export async function matchCreatorsAction(brandId: string, limit = 10): Promise<
     return { success: false, error: "Run brand analysis first." };
 
   // Get creators not yet linked to this brand
-  const { creators, creatorPlatforms, brandCreators: brandCreatorsTable } = await import("@/lib/db/schema");
-  const { notInArray, sql } = await import("drizzle-orm");
+  const { creators, brandCreators: brandCreatorsTable } = await import("@/lib/db/schema");
+  const { notInArray } = await import("drizzle-orm");
 
   // IDs already linked
   const linked = await db
@@ -176,39 +307,54 @@ export async function matchCreatorsAction(brandId: string, limit = 10): Promise<
 
   const linkedIds = linked.map((r) => r.creatorId);
 
-  // Fetch unlinked creators up to the requested limit
-  const allCreators = await db.query.creators.findMany({
+  // Fetch a broader unlinked pool, then score only the most brand-relevant candidates.
+  const candidatePool = await db.query.creators.findMany({
     where: linkedIds.length > 0 ? notInArray(creators.id, linkedIds) : undefined,
     with: { platforms: true },
-    limit,
+    limit: CANDIDATE_POOL_SIZE,
   });
 
-  if (allCreators.length === 0)
+  if (candidatePool.length === 0)
     return { success: false, error: "No unlinked creators to match." };
+
+  const relevanceKeywords = buildRelevanceKeywords(brand.brandAnalysis);
+  const relevantCandidates = candidatePool
+    .map((creator) => scoreCreatorRelevance(creator, relevanceKeywords))
+    .filter((candidate) => candidate.positiveMatches > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, Math.min(MAX_CREATORS_TO_SCORE, Math.max(limit * 4, limit)))
+    .map((candidate) => candidate.creator);
+
+  if (relevantCandidates.length === 0) {
+    return { success: true, matches: [] };
+  }
 
   let results: CreatorMatchResult[];
   try {
-    results = await matchCreators(brand.brandAnalysis, allCreators);
+    results = await matchCreators(brand.brandAnalysis, relevantCandidates);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return { success: false, error: message };
   }
 
-  // Enrich results with name + platforms for display
-  const creatorMap = new Map(allCreators.map((c) => [c.id, c]));
-  const enriched = results.map((r) => {
-    const creator = creatorMap.get(r.creatorId);
-    return {
-      ...r,
-      name: creator?.name ?? "Unknown",
-      platforms: creator?.platforms.map((p) => ({
-        platformId: p.platformId,
-        handle: p.handle,
-        profileUrl: p.profileUrl,
-        followerCount: p.followerCount,
-      })) ?? [],
-    };
-  });
+  // Enrich qualified results with name + platforms for display.
+  const creatorMap = new Map(relevantCandidates.map((c) => [c.id, c]));
+  const enriched = results
+    .filter((r) => r.fitScore >= MIN_MATCH_SCORE)
+    .slice(0, limit)
+    .map((r) => {
+      const creator = creatorMap.get(r.creatorId);
+      return {
+        ...r,
+        name: creator?.name ?? "Unknown",
+        platforms: creator?.platforms.map((p) => ({
+          platformId: p.platformId,
+          handle: p.handle,
+          profileUrl: p.profileUrl,
+          followerCount: p.followerCount,
+        })) ?? [],
+      };
+    });
 
   return { success: true, matches: enriched };
 }
