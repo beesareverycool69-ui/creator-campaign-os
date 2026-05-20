@@ -145,6 +145,9 @@ export function CreatorMatchResults({
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle>Creator Matching</CardTitle>
+          <p className="text-xs text-muted-foreground mt-1">
+            Rank creators already saved to this brand against the ideal creator profile.
+          </p>
           {matches && (
             <p className="text-xs text-muted-foreground mt-1">
               {matches.length} qualified match{matches.length !== 1 ? "es" : ""} found
@@ -189,7 +192,7 @@ export function CreatorMatchResults({
 
         {hasAnalysis && !isPending && !matches && !error && (
           <p className="text-sm text-muted-foreground py-2">
-            Find qualified creators in your database that fit this brand's ideal creator profile.
+            Match and rank creators already saved to this brand. To find new creators, use Discover Creators first.
           </p>
         )}
 
@@ -207,9 +210,9 @@ export function CreatorMatchResults({
         {matches && matches.length === 0 && (
           <div className="rounded-lg border border-border bg-card/70 p-4 space-y-3">
             <div>
-              <p className="text-sm font-medium">No strong matches found in your saved creator pool.</p>
+              <p className="text-sm font-medium">No strong matches found in creators saved to this brand.</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Try discovering more brand-relevant creators, then run matching again.
+                Matching only reviews creators already saved to this brand. Discover and save more brand-relevant creators, then run matching again.
               </p>
             </div>
 
@@ -230,7 +233,7 @@ export function CreatorMatchResults({
               href={`/brands/${brandId}/leads`}
               className={buttonVariants({ size: "sm", variant: "outline" })}
             >
-              Discover creators
+              Discover creators to add
             </a>
           </div>
         )}

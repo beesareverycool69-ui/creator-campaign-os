@@ -254,7 +254,7 @@ export function LeadDiscovery({ brandId, onAddCreators, aiConfig }: LeadDiscover
           Discover Creators
         </CardTitle>
         <CardDescription>
-          Find new creators by searching the web, importing CSV, or scanning screenshots. CSV import works without AI; web search/OCR require API keys.
+          Find new creators to save to this brand. After saving them, run Creator Matching on the brand page to rank fit. CSV import works without AI; web search/OCR require API keys.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -411,14 +411,19 @@ export function LeadDiscovery({ brandId, onAddCreators, aiConfig }: LeadDiscover
         {discoveredCreators.length > 0 && (
           <div className="mt-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h4 className="font-medium">Found Creators ({discoveredCreators.length})</h4>
+              <div>
+                <h4 className="font-medium">Found Creators ({discoveredCreators.length})</h4>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Select creators to save to this brand. Saved creators can be ranked later with Creator Matching.
+                </p>
+              </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={() => setDiscoveredCreators([])}>
                   Clear All
                 </Button>
                 <Button size="sm" onClick={handleAddSelected} disabled={selectedCount === 0 || isLoading}>
                   <Plus className="h-4 w-4 mr-1" />
-                  Add {selectedCount} Creator{selectedCount !== 1 ? "s" : ""}
+                  Save {selectedCount} to Brand
                 </Button>
               </div>
             </div>
