@@ -6,7 +6,11 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast";
-import { matchCreatorsAction, addCreatorToBrandWithScore } from "@/lib/actions/brands";
+import {
+  matchCreatorsAction,
+  addCreatorToBrandWithScore,
+  discoverAndScoreCreatorsAction,
+} from "@/lib/actions/brands";
 import type { MatchCreatorsResult } from "@/lib/actions/brands";
 
 const LIMIT_OPTIONS = [10, 50, 100, 200] as const;
@@ -23,6 +27,7 @@ type Props = {
   brandId: string;
   hasAnalysis: boolean;
   aiConfigured: boolean;
+  discoveryConfigured?: boolean;
   suggestedSearchTerms?: string[];
 };
 
@@ -40,7 +45,21 @@ function MatchRow({ match, brandId }: { match: Match; brandId: string }) {
   function handleAdd() {
     startTransition(async () => {
       try {
-        await addCreatorToBrandWithScore(brandId, match.creatorId, match.fitScore);
+        if (match.source === "discovered" && match.discoveredCreator) {
+          const response = await fetch(`/api/brands/${brandId}/import-creators`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ creators: [match.discoveredCreator] }),
+          });
+
+          if (!response.ok) {
+            const result = await response.json();
+            throw new Error(result.error || "Could not add this creator.");
+          }
+        } else {
+          await addCreatorToBrandWithScore(brandId, match.creatorId, match.fitScore);
+        }
+
         setAdded(true);
         success("Creator added", `${match.name} was added to this brand.`);
       } catch (err) {
@@ -100,7 +119,9 @@ function MatchRow({ match, brandId }: { match: Match; brandId: string }) {
             Open Profile
           </a>
         )}
-        {added ? (
+        {match.source === "saved" ? (
+          <span className="text-sm text-primary font-medium">Saved ✓</span>
+        ) : added ? (
           <span className="text-sm text-primary font-medium">Added ✓</span>
         ) : (
           <Button size="sm" variant="outline" onClick={handleAdd} disabled={isPending}>
@@ -116,6 +137,7 @@ export function CreatorMatchResults({
   brandId,
   hasAnalysis,
   aiConfigured,
+  discoveryConfigured = false,
   suggestedSearchTerms = DEFAULT_SEARCH_TERMS,
 }: Props) {
   const { success, error: showError } = useToast();
@@ -123,19 +145,44 @@ export function CreatorMatchResults({
   const [matches, setMatches] = useState<Match[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [limit, setLimit] = useState<number>(10);
+  const [phase, setPhase] = useState<"matching" | "discovering" | null>(null);
 
   function handleMatch() {
     if (!aiConfigured) return;
     setMatches(null);
     setError(null);
     startTransition(async () => {
+      setPhase("matching");
       const result = await matchCreatorsAction(brandId, limit);
-      if (result.success) {
-        setMatches(result.matches);
-        success("Matching complete", `Found ${result.matches.length} qualified match${result.matches.length !== 1 ? "es" : ""}.`);
-      } else {
+      if (!result.success) {
+        setPhase(null);
         setError(result.error);
         showError("Matching failed", result.error);
+        return;
+      }
+
+      if (result.matches.length > 0 || !discoveryConfigured) {
+        setPhase(null);
+        setMatches(result.matches);
+        success("Matching complete", `Found ${result.matches.length} qualified match${result.matches.length !== 1 ? "es" : ""}.`);
+        return;
+      }
+
+      setPhase("discovering");
+      const discovered = await discoverAndScoreCreatorsAction(brandId, suggestedSearchTerms, limit);
+      setPhase(null);
+
+      if (discovered.success) {
+        setMatches(discovered.matches);
+        success(
+          "Matching complete",
+          discovered.matches.length > 0
+            ? `Found ${discovered.matches.length} discovered candidate${discovered.matches.length !== 1 ? "s" : ""}.`
+            : "No qualified creator matches found."
+        );
+      } else {
+        setError(discovered.error);
+        showError("Discovery failed", discovered.error);
       }
     });
   }
@@ -192,14 +239,14 @@ export function CreatorMatchResults({
 
         {hasAnalysis && !isPending && !matches && !error && (
           <p className="text-sm text-muted-foreground py-2">
-            Match and rank creators already saved to this brand. To find new creators, use Discover Creators first.
+            Match saved creators first. If no strong matches are found, Creator Matching will search and score new creator candidates automatically.
           </p>
         )}
 
         {isPending && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
             <span className="animate-spin">⟳</span>
-            Finding qualified brand matches…
+            {phase === "discovering" ? "Searching and scoring creators…" : "Finding qualified brand matches…"}
           </div>
         )}
 
@@ -210,9 +257,9 @@ export function CreatorMatchResults({
         {matches && matches.length === 0 && (
           <div className="rounded-lg border border-border bg-card/70 p-4 space-y-3">
             <div>
-              <p className="text-sm font-medium">No strong matches found in creators saved to this brand.</p>
+              <p className="text-sm font-medium">No strong creator matches found.</p>
               <p className="text-sm text-muted-foreground mt-1">
-                Matching only reviews creators already saved to this brand. Discover and save more brand-relevant creators, then run matching again.
+                Creator Matching checked saved creators and searched for new candidates, but did not find strong matches. Try a deeper discovery search.
               </p>
             </div>
 
@@ -233,7 +280,7 @@ export function CreatorMatchResults({
               href={`/brands/${brandId}/leads`}
               className={buttonVariants({ size: "sm", variant: "outline" })}
             >
-              Discover creators to add
+              Open Discover Creators
             </a>
           </div>
         )}

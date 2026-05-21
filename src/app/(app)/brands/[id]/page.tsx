@@ -59,6 +59,7 @@ export default async function BrandPage({ params }: Props) {
   const acceptedCount = statusCounts["active"] || 0;
   const firstCampaign = campaigns[0];
   const anthropicConfigured = isConfiguredEnv("ANTHROPIC_API_KEY");
+  const discoveryConfigured = anthropicConfigured && isConfiguredEnv("BRAVE_API_KEY");
   const suggestedCreatorSearchTerms = buildSuggestedCreatorSearchTerms(brand.brandAnalysis);
 
   return (
@@ -269,6 +270,7 @@ export default async function BrandPage({ params }: Props) {
         brandId={id}
         hasAnalysis={!!brand.brandAnalysis}
         aiConfigured={anthropicConfigured}
+        discoveryConfigured={discoveryConfigured}
         suggestedSearchTerms={suggestedCreatorSearchTerms}
       />
 

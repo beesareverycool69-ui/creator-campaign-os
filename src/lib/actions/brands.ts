@@ -7,7 +7,8 @@ import { and, eq, count } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { analyzeBrand } from "@/lib/ai/analyze-brand";
 import { matchCreators } from "@/lib/ai/match-creators";
-import type { CreatorMatchResult } from "@/lib/ai/match-creators";
+import type { CreatorForMatching, CreatorMatchResult } from "@/lib/ai/match-creators";
+import { discoverCreators, type DiscoveredCreator } from "@/lib/ai/discover-external";
 
 // =============================================================================
 // TYPES
@@ -149,8 +150,23 @@ export async function analyzeBrandAction(
   return { success: true };
 }
 
+export type CreatorMatchDisplay = CreatorMatchResult & {
+  name: string;
+  source: "saved" | "discovered";
+  platforms: { platformId: string; handle: string; profileUrl: string | null; followerCount: number | null }[];
+  discoveredCreator?: {
+    handle: string;
+    platform: "instagram" | "tiktok" | "youtube" | "twitter";
+    name?: string;
+    followers?: string;
+    niche?: string;
+    location?: string;
+    profileUrl?: string;
+  };
+};
+
 export type MatchCreatorsResult =
-  | { success: true; matches: (CreatorMatchResult & { name: string; platforms: { platformId: string; handle: string; profileUrl: string | null; followerCount: number | null }[] })[] }
+  | { success: true; matches: CreatorMatchDisplay[] }
   | { success: false; error: string };
 
 const CANDIDATE_POOL_SIZE = 200;
@@ -285,7 +301,7 @@ function scoreCreatorRelevance(creator: CreatorCandidate, keywords: string[]) {
 }
 
 /**
- * Score brand-relevant unlinked creators against the brand's analysis.
+ * Score creators already linked to this brand against the brand's analysis.
  */
 export async function matchCreatorsAction(brandId: string, limit = 10): Promise<MatchCreatorsResult> {
   limit = Math.min(limit, 200);
@@ -295,32 +311,28 @@ export async function matchCreatorsAction(brandId: string, limit = 10): Promise<
   if (!brand.brandAnalysis)
     return { success: false, error: "Run brand analysis first." };
 
-  // Get creators not yet linked to this brand
   const { creators, brandCreators: brandCreatorsTable } = await import("@/lib/db/schema");
-  const { notInArray } = await import("drizzle-orm");
+  const { inArray } = await import("drizzle-orm");
 
-  // IDs already linked
   const linked = await db
     .select({ creatorId: brandCreatorsTable.creatorId })
     .from(brandCreatorsTable)
     .where(eq(brandCreatorsTable.brandId, brandId));
 
   const linkedIds = linked.map((r) => r.creatorId);
+  if (linkedIds.length === 0) {
+    return { success: true, matches: [] };
+  }
 
-  // Fetch a broader unlinked pool, then score only the most brand-relevant candidates.
-  const candidatePool = await db.query.creators.findMany({
-    where: linkedIds.length > 0 ? notInArray(creators.id, linkedIds) : undefined,
+  const savedCreators = await db.query.creators.findMany({
+    where: inArray(creators.id, linkedIds),
     with: { platforms: true },
     limit: CANDIDATE_POOL_SIZE,
   });
 
-  if (candidatePool.length === 0)
-    return { success: false, error: "No unlinked creators to match." };
-
   const relevanceKeywords = buildRelevanceKeywords(brand.brandAnalysis);
-  const relevantCandidates = candidatePool
+  const relevantCandidates = savedCreators
     .map((creator) => scoreCreatorRelevance(creator, relevanceKeywords))
-    .filter((candidate) => candidate.positiveMatches > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, Math.min(MAX_CREATORS_TO_SCORE, Math.max(limit * 4, limit)))
     .map((candidate) => candidate.creator);
@@ -337,7 +349,6 @@ export async function matchCreatorsAction(brandId: string, limit = 10): Promise<
     return { success: false, error: message };
   }
 
-  // Enrich qualified results with name + platforms for display.
   const creatorMap = new Map(relevantCandidates.map((c) => [c.id, c]));
   const enriched = results
     .filter((r) => r.fitScore >= MIN_MATCH_SCORE)
@@ -346,6 +357,7 @@ export async function matchCreatorsAction(brandId: string, limit = 10): Promise<
       const creator = creatorMap.get(r.creatorId);
       return {
         ...r,
+        source: "saved" as const,
         name: creator?.name ?? "Unknown",
         platforms: creator?.platforms.map((p) => ({
           platformId: p.platformId,
@@ -353,6 +365,112 @@ export async function matchCreatorsAction(brandId: string, limit = 10): Promise<
           profileUrl: p.profileUrl,
           followerCount: p.followerCount,
         })) ?? [],
+      };
+    });
+
+  return { success: true, matches: enriched };
+}
+
+function parseFollowerCount(str?: string) {
+  if (!str) return null;
+  const match = str.match(/(\d+\.?\d*)([KMB])?/i);
+  if (!match) return null;
+
+  let num = parseFloat(match[1]);
+  const suffix = match[2]?.toUpperCase();
+  if (suffix === "K") num *= 1000;
+  else if (suffix === "M") num *= 1000000;
+  else if (suffix === "B") num *= 1000000000;
+
+  return Math.round(num);
+}
+
+function discoveredCreatorId(creator: DiscoveredCreator) {
+  return `discovered:${creator.platform}:${creator.handle.toLowerCase()}`;
+}
+
+function toCreatorForMatching(creator: DiscoveredCreator): CreatorForMatching {
+  return {
+    id: discoveredCreatorId(creator),
+    name: creator.name || creator.handle,
+    bio: [creator.bio, creator.niche].filter(Boolean).join(" — ") || null,
+    country: creator.location || null,
+    platforms: [{
+      platformId: creator.platform,
+      followerCount: parseFollowerCount(creator.followers),
+      engagementRate: null,
+    }],
+  };
+}
+
+export async function discoverAndScoreCreatorsAction(
+  brandId: string,
+  searchTerms: string[],
+  limit = 10
+): Promise<MatchCreatorsResult> {
+  limit = Math.min(limit, 25);
+  const brand = await getBrandById(brandId);
+
+  if (!brand) return { success: false, error: "Brand not found." };
+  if (!brand.brandAnalysis)
+    return { success: false, error: "Run brand analysis first." };
+
+  const keywords = searchTerms.filter(Boolean).slice(0, 6).join(" ") || [
+    brand.brandAnalysis.niche,
+    brand.brandAnalysis.idealCreatorProfile.niche,
+    brand.brandAnalysis.idealCreatorProfile.contentStyle,
+  ].filter(Boolean).join(" ");
+
+  let discovered: DiscoveredCreator[];
+  try {
+    discovered = await discoverCreators({
+      keywords,
+      platform: "all",
+      limit: Math.min(limit * 2, 25),
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Discovery failed";
+    return { success: false, error: message };
+  }
+
+  if (discovered.length === 0) {
+    return { success: true, matches: [] };
+  }
+
+  const candidates = discovered.map(toCreatorForMatching);
+  let results: CreatorMatchResult[];
+  try {
+    results = await matchCreators(brand.brandAnalysis, candidates);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return { success: false, error: message };
+  }
+
+  const creatorMap = new Map(discovered.map((creator) => [discoveredCreatorId(creator), creator]));
+  const enriched = results
+    .filter((r) => r.fitScore >= MIN_MATCH_SCORE)
+    .slice(0, limit)
+    .map((r) => {
+      const creator = creatorMap.get(r.creatorId);
+      return {
+        ...r,
+        source: "discovered" as const,
+        name: creator?.name || creator?.handle || "Unknown",
+        platforms: creator ? [{
+          platformId: creator.platform,
+          handle: creator.handle,
+          profileUrl: creator.profileUrl || null,
+          followerCount: parseFollowerCount(creator.followers),
+        }] : [],
+        discoveredCreator: creator ? {
+          handle: creator.handle,
+          platform: creator.platform,
+          name: creator.name,
+          followers: creator.followers,
+          niche: creator.niche,
+          location: creator.location,
+          profileUrl: creator.profileUrl,
+        } : undefined,
       };
     });
 
