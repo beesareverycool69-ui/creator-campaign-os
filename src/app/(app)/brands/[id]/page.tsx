@@ -352,6 +352,19 @@ function buildSuggestedCreatorSearchTerms(analysis: NonNullable<Awaited<ReturnTy
     ].forEach((term) => terms.add(term));
   }
 
+  if (/(biohack|longevity|wellness|health optimization|functional wellness|recovery)/.test(brandText)) {
+    [
+      "health optimization creators",
+      "biohacking creators",
+      "longevity creators",
+      "functional wellness creators",
+      "wellness educators",
+      "supplement reviewers",
+      "recovery creators",
+      "performance wellness creators",
+    ].forEach((term) => terms.add(term));
+  }
+
   analysis.idealCreatorProfile.niche
     .split(/[,/]/)
     .map((term) => term.trim().toLowerCase())

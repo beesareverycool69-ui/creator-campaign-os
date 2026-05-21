@@ -27,7 +27,54 @@ export interface DiscoveryParams {
   limit?: number;
 }
 
-async function searchBrave(query: string, count = 10): Promise<string[]> {
+type SearchResult = {
+  query: string;
+  url: string;
+  title: string;
+  snippet: string;
+};
+
+type Platform = DiscoveredCreator["platform"];
+
+type CandidateSearchResult = SearchResult & {
+  platform: Exclude<Platform, "twitter">;
+  handle: string;
+  profileUrl: string;
+};
+
+const BLOCKED_INSTAGRAM_PATHS = new Set([
+  "p",
+  "reel",
+  "reels",
+  "stories",
+  "explore",
+  "accounts",
+  "about",
+  "developer",
+  "directory",
+]);
+
+const BLOCKED_TIKTOK_PATHS = new Set([
+  "discover",
+  "tag",
+  "music",
+  "video",
+  "embed",
+  "foryou",
+  "live",
+]);
+
+const BLOCKED_YOUTUBE_PATHS = new Set([
+  "watch",
+  "shorts",
+  "results",
+  "playlist",
+  "feed",
+  "hashtag",
+  "embed",
+]);
+
+async function searchBrave(query: string, count = 10): Promise<SearchResult[]> {
   if (!BRAVE_API_KEY) {
     throw new Error("BRAVE_API_KEY not configured");
   }
@@ -48,75 +95,232 @@ async function searchBrave(query: string, count = 10): Promise<string[]> {
   }
 
   const data = await response.json();
-  
-  // Extract URLs and snippets from results
-  const results: string[] = [];
-  for (const result of data.web?.results || []) {
-    results.push(`URL: ${result.url}\nTitle: ${result.title}\nSnippet: ${result.description || ""}`);
+  return (data.web?.results || []).map((result: any) => ({
+    query,
+    url: result.url,
+    title: result.title || "",
+    snippet: result.description || "",
+  }));
+}
+
+function normalizeSearchTerm(term: string) {
+  return term
+    .toLowerCase()
+    .replace(/[#@]/g, "")
+    .replace(/\b(creators?|influencers?|educators?|reviewers?)\b/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function buildSearchTerms(keywords: string, limit: number) {
+  const rawTerms = keywords
+    .split(/[,;|\n]+/)
+    .map(normalizeSearchTerm)
+    .filter((term) => term.length >= 3);
+
+  const terms = new Set<string>();
+  rawTerms.forEach((term) => terms.add(term));
+
+  // The old caller often passed one long, over-constrained keyword blob. Preserve it,
+  // but also search meaningful sub-phrases so common creator categories are not starved.
+  for (const raw of rawTerms) {
+    const parts = raw
+      .split(/\s+/)
+      .map((part) => part.trim())
+      .filter((part) => part.length >= 4 && !["creator", "influencer", "content"].includes(part));
+
+    for (const part of parts) terms.add(part);
+    for (let i = 0; i < parts.length - 1; i += 1) {
+      terms.add(`${parts[i]} ${parts[i + 1]}`);
+    }
   }
 
-  return results;
+  return Array.from(terms).slice(0, Math.min(8, Math.max(4, limit)));
+}
+
+function buildPlatformQueries(term: string, platform: DiscoveryParams["platform"], location?: string) {
+  const locationStr = location ? ` ${location}` : "";
+  const queryTerm = term;
+  const queries: { platform: Exclude<Platform, "twitter">; query: string }[] = [];
+
+  if (platform === "all" || platform === "instagram") {
+    queries.push({ platform: "instagram", query: `site:instagram.com ${queryTerm} creator influencer${locationStr}` });
+  }
+  if (platform === "all" || platform === "tiktok") {
+    queries.push({ platform: "tiktok", query: `site:tiktok.com/@ ${queryTerm} creator${locationStr}` });
+  }
+  if (platform === "all" || platform === "youtube") {
+    queries.push({ platform: "youtube", query: `site:youtube.com ${queryTerm} creator channel${locationStr}` });
+  }
+
+  return queries;
+}
+
+function safeUrl(value: string) {
+  try {
+    return new URL(value);
+  } catch {
+    return null;
+  }
+}
+
+function cleanHandle(handle: string) {
+  return decodeURIComponent(handle)
+    .replace(/^@/, "")
+    .replace(/\?.*$/, "")
+    .replace(/\/$/, "")
+    .trim();
+}
+
+function extractProfileCandidate(result: SearchResult): CandidateSearchResult | null {
+  const parsed = safeUrl(result.url);
+  if (!parsed) return null;
+
+  const hostname = parsed.hostname.replace(/^www\./, "").toLowerCase();
+  const segments = parsed.pathname.split("/").filter(Boolean);
+  if (segments.length === 0) return null;
+
+  if (hostname === "instagram.com") {
+    const first = cleanHandle(segments[0]);
+    if (!first || BLOCKED_INSTAGRAM_PATHS.has(first.toLowerCase())) return null;
+    return {
+      ...result,
+      platform: "instagram",
+      handle: first,
+      profileUrl: `https://www.instagram.com/${first}/`,
+    };
+  }
+
+  if (hostname === "tiktok.com") {
+    const first = segments[0];
+    if (!first.startsWith("@")) return null;
+    const handle = cleanHandle(first);
+    if (!handle || BLOCKED_TIKTOK_PATHS.has(handle.toLowerCase())) return null;
+    return {
+      ...result,
+      platform: "tiktok",
+      handle,
+      profileUrl: `https://www.tiktok.com/@${handle}`,
+    };
+  }
+
+  if (hostname === "youtube.com" || hostname === "m.youtube.com") {
+    const first = segments[0];
+    if (BLOCKED_YOUTUBE_PATHS.has(first.toLowerCase())) return null;
+
+    if (first.startsWith("@")) {
+      const handle = cleanHandle(first);
+      return {
+        ...result,
+        platform: "youtube",
+        handle,
+        profileUrl: `https://www.youtube.com/@${handle}`,
+      };
+    }
+
+    if (["channel", "c", "user"].includes(first.toLowerCase()) && segments[1]) {
+      const handle = cleanHandle(segments[1]);
+      return {
+        ...result,
+        platform: "youtube",
+        handle,
+        profileUrl: `https://www.youtube.com/${first}/${handle}`,
+      };
+    }
+  }
+
+  return null;
+}
+
+function extractJsonArray(text: string) {
+  const cleaned = text
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/```$/i, "")
+    .trim();
+
+  const start = cleaned.indexOf("[");
+  const end = cleaned.lastIndexOf("]");
+  if (start !== -1 && end !== -1 && end > start) {
+    return cleaned.slice(start, end + 1);
+  }
+
+  return cleaned;
+}
+
+function dedupeCandidates(results: SearchResult[]) {
+  const candidates = new Map<string, CandidateSearchResult>();
+
+  for (const result of results) {
+    const candidate = extractProfileCandidate(result);
+    if (!candidate) continue;
+
+    const key = `${candidate.platform}:${candidate.handle.toLowerCase()}`;
+    const existing = candidates.get(key);
+    if (!existing || candidate.snippet.length > existing.snippet.length) {
+      candidates.set(key, candidate);
+    }
+  }
+
+  return Array.from(candidates.values());
 }
 
 export async function discoverCreators(params: DiscoveryParams): Promise<DiscoveredCreator[]> {
   const { keywords, platform, location, limit = 10 } = params;
+  const searchTerms = buildSearchTerms(keywords, limit * 2);
+  const queries = searchTerms.flatMap((term) => buildPlatformQueries(term, platform, location));
+  const resultsPerQuery = Math.min(20, Math.max(8, Math.ceil((limit * 5) / Math.max(queries.length, 1))));
 
-  // Build search queries based on platform
-  const queries: string[] = [];
-  
-  const locationStr = location ? ` ${location}` : "";
-  const baseQuery = `${keywords} influencer${locationStr}`;
-
-  if (platform === "all" || platform === "instagram") {
-    queries.push(`${baseQuery} instagram site:instagram.com`);
-  }
-  if (platform === "all" || platform === "tiktok") {
-    queries.push(`${baseQuery} tiktok site:tiktok.com`);
-  }
-  if (platform === "all" || platform === "youtube") {
-    queries.push(`${baseQuery} youtuber youtube channel site:youtube.com`);
-  }
-
-  // Run searches
-  const allResults: string[] = [];
-  for (const query of queries) {
+  const allResults: SearchResult[] = [];
+  for (const { query } of queries) {
     try {
-      const results = await searchBrave(query, Math.ceil(limit / queries.length) + 5);
+      const results = await searchBrave(query, resultsPerQuery);
+      console.log(`[creator-discovery] Brave results=${results.length} query="${query}"`);
       allResults.push(...results);
     } catch (error) {
       console.error(`Search failed for "${query}":`, error);
     }
   }
 
-  if (allResults.length === 0) {
+  const profileCandidates = dedupeCandidates(allResults);
+  console.log(
+    `[creator-discovery] raw_results=${allResults.length} profile_candidates=${profileCandidates.length} filtered_before_claude=${allResults.length - profileCandidates.length}`
+  );
+
+  if (profileCandidates.length === 0) {
     return [];
   }
 
-  // Use Claude to parse and extract creator info from search results
-  const prompt = `You are extracting influencer/creator profiles from search results.
+  const candidatesForClaude = profileCandidates.slice(0, Math.max(limit * 4, 40));
+
+  const prompt = `You are extracting influencer/creator profiles from platform profile search results.
 
 SEARCH CONTEXT:
 Keywords: ${keywords}
+Expanded search terms: ${searchTerms.join(", ")}
 ${location ? `Location: ${location}` : ""}
 Platform filter: ${platform}
 
-SEARCH RESULTS:
-${allResults.join("\n\n---\n\n")}
+PROFILE CANDIDATES:
+${candidatesForClaude.map((candidate, index) => `${index + 1}. Platform: ${candidate.platform}\nHandle: ${candidate.handle}\nProfile URL: ${candidate.profileUrl}\nTitle: ${candidate.title}\nSnippet: ${candidate.snippet}\nMatched query: ${candidate.query}`).join("\n\n---\n\n")}
 
-Extract creator profiles from these results. For each creator found, determine:
+For each real creator profile, return:
 - handle (username without @)
-- name (display name if visible)
+- name (display name if visible; otherwise use handle)
 - platform (instagram, tiktok, or youtube)
-- profileUrl (full URL to their profile)
-- bio (if visible in snippet)
+- profileUrl (the profile URL above)
+- bio (if visible in title/snippet)
 - followers (if mentioned, format as "10K", "1.2M", etc.)
 - location (city/country if mentioned or inferable)
 - niche (their content category based on context)
-- confidence (0-100 how confident this is a real active creator profile, not a news article or random mention)
+- confidence (0-100 how confident this is a real active creator profile in or adjacent to the search niche)
 
-Return ONLY a valid JSON array. Skip results that aren't actual creator profiles.
-Only include results with confidence >= 50.
-Limit to ${limit} results, prioritize higher confidence scores.
+Rules:
+- Return ONLY a valid JSON array.
+- Use the exact profileUrl values from candidates; do not invent URLs.
+- Skip articles, videos, hashtag/discover pages, brands, publications, and marketplaces.
+- It is OK to include candidates with sparse snippets if the URL is a direct creator profile and the niche is plausible.
+- Only include results with confidence >= 40; final brand-fit scoring happens later and remains strict.
+- Limit to ${limit} results, prioritize creator/profile confidence and niche relevance.
 
 [
   {
@@ -127,40 +331,50 @@ Limit to ${limit} results, prioritize higher confidence scores.
     "bio": "optional bio",
     "followers": "50K",
     "location": "Austin, TX",
-    "niche": "fitness",
+    "niche": "functional wellness",
     "confidence": 85
   }
 ]`;
 
   const message = await client.messages.create({
     model: "claude-sonnet-4-6",
-    max_tokens: 2048,
+    max_tokens: 8192,
     messages: [{ role: "user", content: prompt }],
   });
 
   const text = message.content[0].type === "text" ? message.content[0].text : "";
-  const cleaned = text.replace(/^```(?:json)?\n?/m, "").replace(/\n?```$/m, "").trim();
+  const cleaned = extractJsonArray(text);
 
   try {
     const parsed = JSON.parse(cleaned) as DiscoveredCreator[];
-    
-    // Filter by follower range if specified
-    return parsed.filter(creator => {
-      if (!creator.followers) return true;
-      
+    const byKey = new Map<string, DiscoveredCreator>();
+
+    for (const creator of parsed) {
+      if (!creator.handle || !creator.platform || !creator.profileUrl) continue;
+      if (creator.confidence < 40) continue;
+
       const followerNum = parseFollowerCount(creator.followers);
-      if (params.minFollowers && followerNum < params.minFollowers) return false;
-      if (params.maxFollowers && followerNum > params.maxFollowers) return false;
-      
-      return true;
-    }).slice(0, limit);
+      if (params.minFollowers && followerNum < params.minFollowers) continue;
+      if (params.maxFollowers && followerNum > params.maxFollowers) continue;
+
+      const key = `${creator.platform}:${creator.handle.toLowerCase()}`;
+      const existing = byKey.get(key);
+      if (!existing || creator.confidence > existing.confidence) {
+        byKey.set(key, creator);
+      }
+    }
+
+    return Array.from(byKey.values())
+      .sort((a, b) => b.confidence - a.confidence)
+      .slice(0, limit);
   } catch {
     console.error("Failed to parse Claude response:", cleaned.slice(0, 200));
     return [];
   }
 }
 
-function parseFollowerCount(str: string): number {
+function parseFollowerCount(str?: string): number {
+  if (!str) return 0;
   const match = str.match(/(\d+\.?\d*)([KMB])?/i);
   if (!match) return 0;
   
@@ -191,7 +405,7 @@ export async function enrichCreatorProfile(
 
     const prompt = `Extract profile information for the creator @${handle} on ${platform} from these search results:
 
-${results.join("\n\n---\n\n")}
+${results.map((result) => `URL: ${result.url}\nTitle: ${result.title}\nSnippet: ${result.snippet}`).join("\n\n---\n\n")}
 
 Return ONLY a JSON object with available info:
 {

@@ -13,6 +13,8 @@ export type CreatorForMatching = {
   country: string | null;
   platforms: {
     platformId: string;
+    handle?: string | null;
+    profileUrl?: string | null;
     followerCount: number | null;
     engagementRate: string | null;
   }[];
@@ -187,6 +189,8 @@ export async function matchCreators(
       const platformSummary = c.platforms
         .map((p) => {
           const parts = [p.platformId];
+          if (p.handle) parts.push(`@${p.handle}`);
+          if (p.profileUrl) parts.push(p.profileUrl);
           if (p.followerCount) parts.push(`${p.followerCount.toLocaleString()} followers`);
           if (p.engagementRate) parts.push(`${p.engagementRate}% engagement`);
           return parts.join(", ");

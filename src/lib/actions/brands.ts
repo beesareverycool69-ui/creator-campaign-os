@@ -171,7 +171,7 @@ export type MatchCreatorsResult =
 
 const CANDIDATE_POOL_SIZE = 200;
 const MAX_CREATORS_TO_SCORE = 60;
-const MIN_MATCH_SCORE = 50;
+const MIN_MATCH_SCORE = 70;
 
 const GENERIC_STOP_WORDS = new Set([
   "and",
@@ -273,6 +273,47 @@ function buildRelevanceKeywords(analysis: BrandAnalysisForMatching) {
   }
 
   return Array.from(keywords);
+}
+
+function addSplitTerms(terms: Set<string>, value?: string | null) {
+  value
+    ?.split(/[,;/|]+/)
+    .map((term) => term.trim().toLowerCase())
+    .filter((term) => term.length >= 4)
+    .forEach((term) => terms.add(term));
+}
+
+function buildDiscoverySearchTerms(analysis: BrandAnalysisForMatching, requestedTerms: string[]) {
+  const terms = new Set<string>();
+
+  requestedTerms
+    .map((term) => term.trim().toLowerCase())
+    .filter((term) => term.length >= 4)
+    .forEach((term) => terms.add(term));
+
+  addSplitTerms(terms, analysis.niche);
+  addSplitTerms(terms, analysis.idealCreatorProfile.niche);
+  addSplitTerms(terms, analysis.idealCreatorProfile.contentStyle);
+
+  const text = getBrandKeywordText(analysis);
+  if (/(biohack|longevity|wellness|health optimization|functional wellness|recovery)/.test(text)) {
+    [
+      "health optimization creators",
+      "biohacking creators",
+      "longevity creators",
+      "functional wellness creators",
+      "wellness educators",
+      "supplement reviewers",
+      "recovery creators",
+      "performance wellness creators",
+    ].forEach((term) => terms.add(term));
+  }
+
+  if (/(food|snack|breakfast|flavo[u]?r|taste|dessert|recipe)/.test(text)) {
+    FOOD_RELEVANCE_TERMS.map((term) => `${term} creators`).forEach((term) => terms.add(term));
+  }
+
+  return Array.from(terms).slice(0, 18);
 }
 
 function scoreCreatorRelevance(creator: CreatorCandidate, keywords: string[]) {
@@ -397,6 +438,8 @@ function toCreatorForMatching(creator: DiscoveredCreator): CreatorForMatching {
     country: creator.location || null,
     platforms: [{
       platformId: creator.platform,
+      handle: creator.handle,
+      profileUrl: creator.profileUrl,
       followerCount: parseFollowerCount(creator.followers),
       engagementRate: null,
     }],
@@ -415,18 +458,20 @@ export async function discoverAndScoreCreatorsAction(
   if (!brand.brandAnalysis)
     return { success: false, error: "Run brand analysis first." };
 
-  const keywords = searchTerms.filter(Boolean).slice(0, 6).join(" ") || [
+  const discoveryTerms = buildDiscoverySearchTerms(brand.brandAnalysis, searchTerms);
+  const keywords = discoveryTerms.join(", ") || [
     brand.brandAnalysis.niche,
     brand.brandAnalysis.idealCreatorProfile.niche,
     brand.brandAnalysis.idealCreatorProfile.contentStyle,
-  ].filter(Boolean).join(" ");
+  ].filter(Boolean).join(", ");
+  const discoveryPoolSize = Math.min(Math.max(limit * 5, 45), 75);
 
   let discovered: DiscoveredCreator[];
   try {
     discovered = await discoverCreators({
       keywords,
       platform: "all",
-      limit: Math.min(limit * 2, 25),
+      limit: discoveryPoolSize,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Discovery failed";
@@ -437,7 +482,9 @@ export async function discoverAndScoreCreatorsAction(
     return { success: true, matches: [] };
   }
 
-  const candidates = discovered.map(toCreatorForMatching);
+  const candidates = discovered
+    .slice(0, Math.min(discovered.length, 80))
+    .map(toCreatorForMatching);
   let results: CreatorMatchResult[];
   try {
     results = await matchCreators(brand.brandAnalysis, candidates);
