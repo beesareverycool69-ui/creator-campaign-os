@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireDiscoveryApiAccess } from "@/lib/api/discovery-auth";
+import { NO_DASH_COPY_RULE, sanitizeGeneratedCopy } from "@/lib/utils/generated-copy";
 import Anthropic from "@anthropic-ai/sdk";
 import type { BrandProfile, SearchKeywords, DiscoveredCreator } from "@/lib/types/discovery";
 
@@ -72,7 +73,8 @@ Return ONLY a valid JSON array with 5-10 creators (no markdown, no explanation):
   }
 ]
 
-Only include creators you found evidence of through search. Do not make up profiles.`,
+Only include creators you found evidence of through search. Do not make up profiles.
+${NO_DASH_COPY_RULE}`,
         },
       ],
     });
@@ -100,7 +102,7 @@ Only include creators you found evidence of through search. Do not make up profi
       return [];
     }
 
-    const creators = JSON.parse(jsonMatch[0]) as DiscoveredCreator[];
+    const creators = sanitizeGeneratedCopy(JSON.parse(jsonMatch[0]) as DiscoveredCreator[]);
     return creators.map((c) => ({ ...c, platform, source: "discovered" }));
   } catch (error) {
     console.error(`Discovery failed for ${platform}:`, error);

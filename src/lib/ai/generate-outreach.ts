@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { BrandAnalysis } from "@/lib/db/schema";
+import { NO_DASH_COPY_RULE, sanitizeGeneratedText } from "@/lib/utils/generated-copy";
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -56,7 +57,7 @@ Name: ${creator.name}
 ${creator.bio ? `Bio: ${creator.bio}` : ""}
 Platforms: ${platformSummary || "not listed"}
 
-Write a short, personalized outreach DM (3–5 sentences). Requirements:
+Write a short, personalized outreach DM (3-5 sentences). Requirements:
 - Address the creator by first name
 - Reference something specific about their content or platform presence (use their bio or platform info)
 - Briefly introduce the brand and why there's a natural fit
@@ -64,6 +65,7 @@ Write a short, personalized outreach DM (3–5 sentences). Requirements:
 - Tone must match the brand: ${brand.analysis?.toneOfVoice ?? "professional and friendly"}
 - Write in plain text, no subject line, no sign-off, no placeholders in brackets
 - Do NOT use generic phrases like "I came across your profile" or "I love your content"
+- ${NO_DASH_COPY_RULE}
 
 Return ONLY the message text. Nothing else.`;
 
@@ -74,5 +76,5 @@ Return ONLY the message text. Nothing else.`;
   });
 
   const text = message.content[0].type === "text" ? message.content[0].text : "";
-  return text.trim();
+  return sanitizeGeneratedText(text);
 }

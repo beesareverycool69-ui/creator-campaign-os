@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireDiscoveryApiAccess } from "@/lib/api/discovery-auth";
+import { NO_DASH_COPY_RULE, sanitizeGeneratedCopy } from "@/lib/utils/generated-copy";
 import Anthropic from "@anthropic-ai/sdk";
 import type { BrandProfile, SearchKeywords, DiscoveredCreator, ScoredCreator } from "@/lib/types/discovery";
 
@@ -110,7 +111,8 @@ Return ONLY a valid JSON array sorted by score descending, TOP 20 max (no markdo
     "suggested_collab_type": "e.g., product review, tutorial, brand ambassador",
     "source": "database" or "discovered"
   }
-]`,
+]
+${NO_DASH_COPY_RULE}`,
         },
       ],
     });
@@ -141,7 +143,7 @@ Return ONLY a valid JSON array sorted by score descending, TOP 20 max (no markdo
       );
     }
 
-    const scoredCreators = JSON.parse(jsonMatch[0]) as ScoredCreator[];
+    const scoredCreators = sanitizeGeneratedCopy(JSON.parse(jsonMatch[0]) as ScoredCreator[]);
 
     // Ensure sorted by score
     scoredCreators.sort((a, b) => b.score - a.score);

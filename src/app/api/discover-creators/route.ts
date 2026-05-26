@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireDiscoveryApiAccess } from "@/lib/api/discovery-auth";
+import { NO_DASH_COPY_RULE, sanitizeGeneratedCopy } from "@/lib/utils/generated-copy";
 import Anthropic from "@anthropic-ai/sdk";
 
 const anthropic = new Anthropic();
@@ -45,7 +46,8 @@ Respond ONLY with valid JSON array, no other text:
   }
 ]
 
-Make the profiles diverse and realistic for the ${platform} platform.`,
+Make the profiles diverse and realistic for the ${platform} platform.
+${NO_DASH_COPY_RULE}`,
         },
       ],
     });
@@ -62,7 +64,7 @@ Make the profiles diverse and realistic for the ${platform} platform.`,
       throw new Error("Could not parse creator list");
     }
 
-    const creators = JSON.parse(jsonMatch[0]);
+    const creators = sanitizeGeneratedCopy(JSON.parse(jsonMatch[0]));
 
     return NextResponse.json({ creators });
   } catch (error) {

@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { Message, Tool } from "@anthropic-ai/sdk/resources/messages";
 import type { BrandAnalysis } from "@/lib/db/schema";
+import { NO_DASH_COPY_RULE, sanitizeGeneratedCopy } from "@/lib/utils/generated-copy";
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -162,6 +163,7 @@ Rules:
 - creatorId must be one of these exact IDs: ${Array.from(validCreatorIds).join(", ")}
 - fitScore must be a number from 0 to 100.
 - Do not add markdown, prose, comments, or trailing text.
+- ${NO_DASH_COPY_RULE}
 
 Response to repair:
 ${rawResponse}`;
@@ -209,7 +211,7 @@ export async function matchCreators(
     })
     .join("\n\n---\n\n");
 
-  const prompt = `You are scoring creators for brand fit. Be precise and critical — not every creator is a good fit.
+  const prompt = `You are scoring creators for brand fit. Be precise and critical, not every creator is a good fit.
 
 BRAND IDEAL CREATOR PROFILE:
 - Niche: ${brandAnalysis.niche}
@@ -218,18 +220,18 @@ BRAND IDEAL CREATOR PROFILE:
 - Ideal creator niche: ${brandAnalysis.idealCreatorProfile.niche}
 - Ideal content style: ${brandAnalysis.idealCreatorProfile.contentStyle}
 - Ideal platforms: ${brandAnalysis.idealCreatorProfile.platforms.join(", ")}
-- Ideal follower range: ${brandAnalysis.idealCreatorProfile.followerRange.min.toLocaleString()} – ${brandAnalysis.idealCreatorProfile.followerRange.max.toLocaleString()}
+- Ideal follower range: ${brandAnalysis.idealCreatorProfile.followerRange.min.toLocaleString()} to ${brandAnalysis.idealCreatorProfile.followerRange.max.toLocaleString()}
 
 CREATORS TO SCORE:
 ${creatorProfiles}
 
-Score each creator from 0–100 for fit with this brand. Consider:
+Score each creator from 0-100 for fit with this brand. Consider:
 - Niche/content alignment (most important)
 - Platform match
 - Follower count vs ideal range
 - Tone and audience alignment from bio
 
-Return creator scores using the ${MATCH_RESULTS_TOOL_NAME} tool. Include ALL creators even if score is low. Order by fitScore descending.`;
+Return creator scores using the ${MATCH_RESULTS_TOOL_NAME} tool. Include ALL creators even if score is low. Order by fitScore descending. ${NO_DASH_COPY_RULE}`;
 
   const message = await client.messages.create({
     model: "claude-sonnet-4-6",
@@ -240,11 +242,11 @@ Return creator scores using the ${MATCH_RESULTS_TOOL_NAME} tool. Include ALL cre
   });
 
   try {
-    return parseMatchResponse(message, validCreatorIds);
+    return sanitizeGeneratedCopy(parseMatchResponse(message, validCreatorIds));
   } catch {
     const rawResponse = getTextContent(message) || JSON.stringify(getToolInput(message) ?? "");
     try {
-      return await repairMatchResponse(rawResponse, validCreatorIds);
+      return sanitizeGeneratedCopy(await repairMatchResponse(rawResponse, validCreatorIds));
     } catch {
       throw new Error(MATCH_PARSE_ERROR);
     }

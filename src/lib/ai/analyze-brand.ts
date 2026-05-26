@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { BrandAnalysis } from "@/lib/db/schema";
+import { NO_DASH_COPY_RULE, sanitizeGeneratedCopy } from "@/lib/utils/generated-copy";
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -51,7 +52,7 @@ Here is the website content:
 ${content}
 </website>
 
-Return ONLY a valid JSON object with this exact shape — no markdown, no explanation:
+Return ONLY a valid JSON object with this exact shape, no markdown, no explanation. ${NO_DASH_COPY_RULE}
 {
   "niche": "one concise phrase describing the brand's category/niche",
   "toneOfVoice": "2-4 adjectives or short phrases describing their tone",
@@ -86,5 +87,5 @@ Base follower ranges on the brand's apparent scale: micro (5k-50k), mid-tier (50
     throw new Error(`Claude returned invalid JSON: ${cleaned.slice(0, 200)}`);
   }
 
-  return parsed;
+  return sanitizeGeneratedCopy(parsed);
 }

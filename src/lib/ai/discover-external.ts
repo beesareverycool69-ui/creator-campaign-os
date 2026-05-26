@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { NO_DASH_COPY_RULE, sanitizeGeneratedCopy } from "@/lib/utils/generated-copy";
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -321,6 +322,7 @@ Rules:
 - It is OK to include candidates with sparse snippets if the URL is a direct creator profile and the niche is plausible.
 - Only include results with confidence >= 40; final brand-fit scoring happens later and remains strict.
 - Limit to ${limit} results, prioritize creator/profile confidence and niche relevance.
+- ${NO_DASH_COPY_RULE}
 
 [
   {
@@ -364,9 +366,9 @@ Rules:
       }
     }
 
-    return Array.from(byKey.values())
+    return sanitizeGeneratedCopy(Array.from(byKey.values())
       .sort((a, b) => b.confidence - a.confidence)
-      .slice(0, limit);
+      .slice(0, limit));
   } catch {
     console.error("Failed to parse Claude response:", cleaned.slice(0, 200));
     return [];
@@ -420,7 +422,8 @@ Return ONLY a JSON object with available info:
   "confidence": 80
 }
 
-If you can't find reliable info, return: {"confidence": 0}`;
+If you can't find reliable info, return: {"confidence": 0}
+${NO_DASH_COPY_RULE}`;
 
     const message = await client.messages.create({
       model: "claude-haiku-4-5-20251001",
@@ -431,7 +434,7 @@ If you can't find reliable info, return: {"confidence": 0}`;
     const text = message.content[0].type === "text" ? message.content[0].text : "";
     const cleaned = text.replace(/^```(?:json)?\n?/m, "").replace(/\n?```$/m, "").trim();
     
-    const parsed = JSON.parse(cleaned) as DiscoveredCreator;
+    const parsed = sanitizeGeneratedCopy(JSON.parse(cleaned) as DiscoveredCreator);
     return parsed.confidence >= 50 ? parsed : null;
   } catch (error) {
     console.error(`Failed to enrich @${handle}:`, error);

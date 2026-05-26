@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireDiscoveryApiAccess } from "@/lib/api/discovery-auth";
+import { NO_DASH_COPY_RULE, sanitizeGeneratedCopy } from "@/lib/utils/generated-copy";
 import Anthropic from "@anthropic-ai/sdk";
 import type { BrandProfile, SearchKeywords } from "@/lib/types/discovery";
 
@@ -33,7 +34,7 @@ ${JSON.stringify(profile, null, 2)}
 
 Generate keywords and search queries optimized for finding creators who would be great brand partners.
 
-Return ONLY a valid JSON object with this exact structure (no markdown, no explanation):
+Return ONLY a valid JSON object with this exact structure (no markdown, no explanation). ${NO_DASH_COPY_RULE}
 
 {
   "niche_keywords": ["5-8 niche terms like 'clean beauty', 'skincare routine', 'minimalist makeup'"],
@@ -83,7 +84,7 @@ Make the search queries specific and effective for finding creators in the ${pro
 
     let keywords: SearchKeywords;
     try {
-      keywords = JSON.parse(jsonMatch[0]);
+      keywords = sanitizeGeneratedCopy(JSON.parse(jsonMatch[0]));
     } catch (parseError) {
       console.error("JSON parse error:", parseError);
       return NextResponse.json(

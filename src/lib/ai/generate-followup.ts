@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { BrandAnalysis } from "@/lib/db/schema";
+import { NO_DASH_COPY_RULE, sanitizeGeneratedText } from "@/lib/utils/generated-copy";
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -33,13 +34,14 @@ DAYS SINCE FIRST MESSAGE: ${daysSinceContact}
 
 ${originalMessage ? `ORIGINAL MESSAGE SENT:\n"${originalMessage}"\n` : ""}
 
-Write a short follow-up DM (2–3 sentences). Rules:
+Write a short follow-up DM (2-3 sentences). Rules:
 - Address them by first name
 - Don't be passive-aggressive or guilt-trip them
 - Acknowledge you're following up, not that they ignored you
-- Add one small new angle — a specific reason why the timing is good now, or a softer ask (e.g. even just a "yes/no works!")
+- Add one small new angle, a specific reason why the timing is good now, or a softer ask (e.g. even just a "yes/no works!")
 - Keep the brand tone: ${brand.analysis?.toneOfVoice ?? "friendly and professional"}
 - Plain text only, no sign-off, no subject line, no placeholders
+- ${NO_DASH_COPY_RULE}
 
 Return ONLY the message. Nothing else.`;
 
@@ -50,5 +52,5 @@ Return ONLY the message. Nothing else.`;
   });
 
   const text = message.content[0].type === "text" ? message.content[0].text : "";
-  return text.trim();
+  return sanitizeGeneratedText(text);
 }

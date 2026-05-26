@@ -2,6 +2,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import type { BrandAnalysis } from "@/lib/db/schema";
+import { NO_DASH_COPY_RULE, sanitizeGeneratedText } from "@/lib/utils/generated-copy";
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -113,7 +114,8 @@ Generate a comprehensive creator brief that includes:
 
 Format the brief in a clean, professional way with clear sections. Use markdown formatting.
 Make it feel personal and collaborative, not corporate.
-Keep the total length reasonable (about 500-700 words).`;
+Keep the total length reasonable (about 500-700 words).
+${NO_DASH_COPY_RULE}`;
 
   try {
     const message = await client.messages.create({
@@ -123,7 +125,7 @@ Keep the total length reasonable (about 500-700 words).`;
     });
 
     const text = message.content[0].type === "text" ? message.content[0].text : "";
-    return { success: true, brief: text.trim() };
+    return { success: true, brief: sanitizeGeneratedText(text) };
   } catch (err) {
     const error = err instanceof Error ? err.message : "Unknown error";
     return { success: false, error };

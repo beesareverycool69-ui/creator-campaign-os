@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireDiscoveryApiAccess } from "@/lib/api/discovery-auth";
+import { NO_DASH_COPY_RULE, sanitizeGeneratedCopy } from "@/lib/utils/generated-copy";
 import Anthropic from "@anthropic-ai/sdk";
 
 const anthropic = new Anthropic();
@@ -68,7 +69,8 @@ Respond ONLY with valid JSON array, no other text:
   }
 ]
 
-If no creators are found, return an empty array: []`,
+If no creators are found, return an empty array: []
+${NO_DASH_COPY_RULE}`,
             },
           ],
         },
@@ -87,7 +89,7 @@ If no creators are found, return an empty array: []`,
       return NextResponse.json({ creators: [] });
     }
 
-    const creators = JSON.parse(jsonMatch[0]);
+    const creators = sanitizeGeneratedCopy(JSON.parse(jsonMatch[0]));
 
     return NextResponse.json({ creators });
   } catch (error) {
