@@ -558,5 +558,7 @@ export async function addCreatorToBrandWithScore(
     .returning();
 
   revalidatePath(`/brands/${brandId}`);
+  revalidatePath(`/brands/${brandId}/leads`);
+  revalidatePath(`/brands/${brandId}/send-dms`);
   return newBrandCreator;
 }

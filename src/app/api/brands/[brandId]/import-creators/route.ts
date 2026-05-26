@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireOwnedBrand } from "@/lib/auth/access";
@@ -151,6 +152,10 @@ export async function POST(
         results.linked++;
       }
     }
+
+    revalidatePath(`/brands/${brandId}`);
+    revalidatePath(`/brands/${brandId}/leads`);
+    revalidatePath(`/brands/${brandId}/send-dms`);
 
     return NextResponse.json({
       success: true,

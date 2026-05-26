@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -38,6 +40,7 @@ function scoreColor(score: number) {
 }
 
 function MatchRow({ match, brandId }: { match: Match; brandId: string }) {
+  const router = useRouter();
   const { success, error } = useToast();
   const [isPending, startTransition] = useTransition();
   const [added, setAdded] = useState(false);
@@ -61,6 +64,7 @@ function MatchRow({ match, brandId }: { match: Match; brandId: string }) {
         }
 
         setAdded(true);
+        router.refresh();
         success("Creator added", `${match.name} was added to this brand.`);
       } catch (err) {
         error("Failed to add creator", err instanceof Error ? err.message : "Please try again.");
@@ -69,6 +73,7 @@ function MatchRow({ match, brandId }: { match: Match; brandId: string }) {
   }
 
   const profileUrl = match.platforms.find((p) => p.profileUrl)?.profileUrl;
+  const isLinkedToBrand = match.source === "saved" || added;
 
   return (
     <div className="flex items-start gap-4 p-4 rounded-lg border bg-card">
@@ -119,10 +124,24 @@ function MatchRow({ match, brandId }: { match: Match; brandId: string }) {
             Open Profile
           </a>
         )}
-        {match.source === "saved" ? (
-          <span className="text-sm text-primary font-medium">Saved ✓</span>
-        ) : added ? (
-          <span className="text-sm text-primary font-medium">Added ✓</span>
+        {isLinkedToBrand ? (
+          <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-right space-y-2">
+            <p className="text-sm font-medium text-primary">Added to this brand</p>
+            <div className="flex flex-wrap justify-end gap-2">
+              <Link
+                href={`/brands/${brandId}/send-dms`}
+                className={buttonVariants({ size: "sm" })}
+              >
+                Send DM
+              </Link>
+              <Link
+                href={`/brands/${brandId}/leads`}
+                className={buttonVariants({ size: "sm", variant: "outline" })}
+              >
+                View in Leads
+              </Link>
+            </div>
+          </div>
         ) : (
           <Button size="sm" variant="outline" onClick={handleAdd} disabled={isPending}>
             {isPending ? "Adding…" : "Add to Brand"}
