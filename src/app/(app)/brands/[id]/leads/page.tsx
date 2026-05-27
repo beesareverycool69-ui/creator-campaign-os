@@ -16,6 +16,7 @@ import {
   getLeadStatusCounts,
 } from "@/lib/actions/brand-creators";
 import { getCreators } from "@/lib/actions/creators";
+import { getCampaigns } from "@/lib/actions/campaigns";
 import { isConfiguredEnv } from "@/lib/env";
 
 type Props = {
@@ -39,10 +40,11 @@ export default async function BrandLeadsPage({ params, searchParams }: Props) {
   const { id } = await params;
   const { status: statusFilter } = await searchParams;
 
-  const [brand, statusCounts, allCreators] = await Promise.all([
+  const [brand, statusCounts, allCreators, campaigns] = await Promise.all([
     getBrandById(id),
     getLeadStatusCounts(id),
     getCreators(),
+    getCampaigns(id),
   ]);
 
   if (!brand) {
@@ -65,8 +67,23 @@ export default async function BrandLeadsPage({ params, searchParams }: Props) {
     (sum, count) => sum + count,
     0
   );
+  const engagedCount = statusCounts["engaged"] || 0;
+  const contactedCount = statusCounts["contacted"] || 0;
+  const activeCount = statusCounts["active"] || 0;
   const readyForDmCount =
-    (statusCounts["discovered"] || 0) + (statusCounts["qualified"] || 0);
+    (statusCounts["discovered"] || 0) +
+    (statusCounts["researching"] || 0) +
+    (statusCounts["qualified"] || 0);
+  const firstCampaign = campaigns[0];
+  const nextStep = getLeadsNextStep({
+    brandId: id,
+    engagedCount,
+    contactedCount,
+    activeCount,
+    readyForDmCount,
+    totalCount,
+    firstCampaignId: firstCampaign?.id,
+  });
 
   return (
     <div className="space-y-6">
@@ -106,16 +123,7 @@ export default async function BrandLeadsPage({ params, searchParams }: Props) {
         }}
       />
 
-      <NextStepCard
-        title={readyForDmCount > 0 ? "Send DM" : "Discover or Add Creators"}
-        description={
-          readyForDmCount > 0
-            ? `${readyForDmCount} creator${readyForDmCount === 1 ? " is" : "s are"} ready for outreach.`
-            : "Add more creators or run discovery until you have leads ready for outreach."
-        }
-        href={readyForDmCount > 0 ? `/brands/${id}/send-dms` : `/brands/${id}/leads`}
-        actionLabel={readyForDmCount > 0 ? "Send DMs" : "Find Creators"}
-      />
+      <NextStepCard {...nextStep} />
 
       {/* Status filter tabs */}
       <div className="flex flex-wrap gap-2">
@@ -168,10 +176,80 @@ export default async function BrandLeadsPage({ params, searchParams }: Props) {
                 : "No creators linked to this brand yet."}
             </p>
           ) : (
-            <LeadList brandCreators={brandCreators} />
+            <LeadList
+              brandId={id}
+              firstCampaignId={firstCampaign?.id}
+              brandCreators={brandCreators}
+            />
           )}
         </CardContent>
       </Card>
     </div>
   );
+}
+
+
+function getLeadsNextStep({
+  brandId,
+  engagedCount,
+  contactedCount,
+  activeCount,
+  readyForDmCount,
+  totalCount,
+  firstCampaignId,
+}: {
+  brandId: string;
+  engagedCount: number;
+  contactedCount: number;
+  activeCount: number;
+  readyForDmCount: number;
+  totalCount: number;
+  firstCampaignId?: string;
+}) {
+  if (engagedCount > 0) {
+    return {
+      title: "Accept or add engaged creators",
+      description: `${engagedCount} engaged creator${engagedCount === 1 ? " is" : "s are"} ready for a decision. Accept them, then move them into a campaign.`,
+      href: `/brands/${brandId}/leads?status=engaged`,
+      actionLabel: "Review Engaged",
+    };
+  }
+
+  if (activeCount > 0) {
+    return {
+      title: "Add accepted creators to campaign",
+      description: `${activeCount} accepted creator${activeCount === 1 ? " is" : "s are"} ready for campaign onboarding.`,
+      href: firstCampaignId
+        ? `/campaigns/${firstCampaignId}`
+        : `/campaigns/new?brandId=${brandId}`,
+      actionLabel: firstCampaignId ? "Open Campaign" : "Create Campaign",
+    };
+  }
+
+  if (contactedCount > 0) {
+    return {
+      title: "Track replies",
+      description: `${contactedCount} contacted creator${contactedCount === 1 ? " needs" : "s need"} reply tracking or follow-up.`,
+      href: `/brands/${brandId}/track?tab=pending`,
+      actionLabel: "Track Replies",
+    };
+  }
+
+  if (readyForDmCount > 0) {
+    return {
+      title: "Send DMs",
+      description: `${readyForDmCount} creator${readyForDmCount === 1 ? " is" : "s are"} ready for outreach.`,
+      href: `/brands/${brandId}/send-dms`,
+      actionLabel: "Send DMs",
+    };
+  }
+
+  return {
+    title: "Discover creators",
+    description: totalCount > 0
+      ? "No primary action is waiting. Discover or add more creators to keep building the funnel."
+      : "No leads yet. Discover or add creators to start the funnel.",
+    href: `/brands/${brandId}/leads`,
+    actionLabel: "Find Creators",
+  };
 }

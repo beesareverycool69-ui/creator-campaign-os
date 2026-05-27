@@ -9,9 +9,11 @@ const FOLLOW_UP_OPTIONS = [3, 5, 7, 14] as const;
 
 type Props = {
   brandCreators: BrandCreatorWithDetails[];
+  brandId: string;
+  firstCampaignId?: string;
 };
 
-export function LeadList({ brandCreators }: Props) {
+export function LeadList({ brandCreators, brandId, firstCampaignId }: Props) {
   const [followUpDays, setFollowUpDays] = useState(3);
 
   const contactedCount = brandCreators.filter((bc) => bc.status === "contacted").length;
@@ -43,6 +45,8 @@ export function LeadList({ brandCreators }: Props) {
       {brandCreators.map((bc) => (
         <LeadRow
           key={bc.id}
+          brandId={brandId}
+          firstCampaignId={firstCampaignId}
           brandCreator={bc}
           followUpDaysThreshold={followUpDays}
         />

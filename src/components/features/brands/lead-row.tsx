@@ -20,6 +20,8 @@ import {
 } from "@/lib/actions/outreach";
 
 type LeadRowProps = {
+  brandId: string;
+  firstCampaignId?: string;
   followUpDaysThreshold?: number;
   brandCreator: {
     id: string;
@@ -44,7 +46,12 @@ type LeadRowProps = {
   };
 };
 
-export function LeadRow({ brandCreator, followUpDaysThreshold = 3 }: LeadRowProps) {
+export function LeadRow({
+  brandId,
+  firstCampaignId,
+  brandCreator,
+  followUpDaysThreshold = 3,
+}: LeadRowProps) {
   const router = useRouter();
   const { success, error } = useToast();
   const [status, setStatus] = useState<LeadStatus>(brandCreator.status);
@@ -81,6 +88,22 @@ export function LeadRow({ brandCreator, followUpDaysThreshold = 3 }: LeadRowProp
       console.error("Failed to update status:", err);
       error("Failed to update status", err instanceof Error ? err.message : "Please try again.");
       // Revert on error
+      setStatus(brandCreator.status);
+    } finally {
+      setUpdating(false);
+    }
+  }
+
+  async function handleAcceptCreator() {
+    setUpdating(true);
+    try {
+      await updateLeadStatus(brandCreator.id, "active");
+      setStatus("active");
+      success("Creator accepted", "Next: add this creator to a campaign.");
+      router.refresh();
+    } catch (err) {
+      console.error("Failed to accept creator:", err);
+      error("Failed to accept creator", err instanceof Error ? err.message : "Please try again.");
       setStatus(brandCreator.status);
     } finally {
       setUpdating(false);
@@ -172,6 +195,17 @@ export function LeadRow({ brandCreator, followUpDaysThreshold = 3 }: LeadRowProp
     daysSinceContact !== null &&
     daysSinceContact >= followUpDaysThreshold;
 
+  const campaignHref = firstCampaignId
+    ? `/campaigns/${firstCampaignId}?brandCreatorId=${brandCreator.id}`
+    : `/campaigns/new?brandId=${brandId}&brandCreatorId=${brandCreator.id}`;
+
+  const nextAction = getLeadNextAction(status, {
+    brandId,
+    campaignHref,
+    onAccept: handleAcceptCreator,
+    updating,
+  });
+
   const { creator } = brandCreator;
   const statusOptions = getLeadStatusOptions();
 
@@ -239,16 +273,26 @@ export function LeadRow({ brandCreator, followUpDaysThreshold = 3 }: LeadRowProp
             : "Never"}
         </div>
 
-        {/* Generate DM button */}
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={handleGenerate}
-          disabled={isGenerating}
-          className="hidden md:flex mr-2 shrink-0"
-        >
-          {isGenerating ? "Generating…" : outreachMessage ? "Regenerate DM" : "Generate DM"}
-        </Button>
+        {/* Next action */}
+        <div className="hidden md:flex items-center gap-2 mr-2 shrink-0">
+          {nextAction.kind === "button" && (
+            <Button
+              size="sm"
+              variant={nextAction.variant}
+              onClick={nextAction.onClick}
+              disabled={nextAction.disabled}
+            >
+              {nextAction.label}
+            </Button>
+          )}
+          {nextAction.kind === "link" && (
+            <Link href={nextAction.href}>
+              <Button size="sm" variant={nextAction.variant}>
+                {nextAction.label}
+              </Button>
+            </Link>
+          )}
+        </div>
 
         {/* Follow-up button — only for contacted creators past threshold */}
         {showFollowUp && (
@@ -367,4 +411,61 @@ function getFlagEmoji(countryCode: string): string {
     .split("")
     .map((char) => 127397 + char.charCodeAt(0));
   return String.fromCodePoint(...codePoints);
+}
+
+
+type LeadNextAction =
+  | { kind: "button"; label: string; variant: "default" | "outline"; onClick: () => void; disabled?: boolean }
+  | { kind: "link"; label: string; variant: "default" | "outline"; href: string }
+  | { kind: "none" };
+
+function getLeadNextAction(
+  status: LeadStatus,
+  {
+    brandId,
+    campaignHref,
+    onAccept,
+    updating,
+  }: {
+    brandId: string;
+    campaignHref: string;
+    onAccept: () => void;
+    updating: boolean;
+  }
+): LeadNextAction {
+  switch (status) {
+    case "discovered":
+    case "researching":
+    case "qualified":
+      return {
+        kind: "link",
+        label: "Send DM",
+        variant: "default",
+        href: `/brands/${brandId}/send-dms`,
+      };
+    case "contacted":
+      return {
+        kind: "link",
+        label: "Track Reply",
+        variant: "default",
+        href: `/brands/${brandId}/track?tab=pending`,
+      };
+    case "engaged":
+      return {
+        kind: "button",
+        label: updating ? "Accepting…" : "Accept Creator",
+        variant: "default",
+        onClick: onAccept,
+        disabled: updating,
+      };
+    case "active":
+      return {
+        kind: "link",
+        label: "Add to Campaign",
+        variant: "default",
+        href: campaignHref,
+      };
+    default:
+      return { kind: "none" };
+  }
 }

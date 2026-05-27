@@ -342,7 +342,7 @@ export default async function BrandPage({ params }: Props) {
 
               {/* Lead rows */}
               {brandCreators.slice(0, 10).map((bc) => (
-                <LeadRow key={bc.id} brandCreator={bc} />
+                <LeadRow key={bc.id} brandId={id} firstCampaignId={firstCampaign?.id} brandCreator={bc} />
               ))}
 
               {brandCreators.length > 10 && (
