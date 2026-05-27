@@ -39,6 +39,7 @@ export function CampaignForm({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [noEndDate, setNoEndDate] = useState(false);
   const lockBrand = Boolean(pendingBrandCreatorId && defaultBrandId);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -47,6 +48,14 @@ export function CampaignForm({
     setError(null);
 
     const formData = new FormData(e.currentTarget);
+    const startDate = (formData.get("startDate") as string) || undefined;
+    const endDate = noEndDate ? undefined : (formData.get("endDate") as string) || undefined;
+
+    if (startDate && endDate && endDate <= startDate) {
+      setError("End date must be after the start date.");
+      setLoading(false);
+      return;
+    }
 
     try {
       const campaign = await createCampaign({
@@ -54,8 +63,8 @@ export function CampaignForm({
         name: formData.get("name") as string,
         description: (formData.get("description") as string) || undefined,
         objective: (formData.get("objective") as any) || undefined,
-        startDate: (formData.get("startDate") as string) || undefined,
-        endDate: (formData.get("endDate") as string) || undefined,
+        startDate,
+        endDate,
         targetCreatorCount: formData.get("targetCreatorCount")
           ? parseInt(formData.get("targetCreatorCount") as string)
           : undefined,
@@ -145,14 +154,29 @@ export function CampaignForm({
           </div>
 
           {/* Dates */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="startDate">Start Date</Label>
               <Input id="startDate" name="startDate" type="date" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="endDate">End Date</Label>
-              <Input id="endDate" name="endDate" type="date" />
+              <Input
+                id="endDate"
+                name="endDate"
+                type="date"
+                disabled={noEndDate}
+                className={noEndDate ? "opacity-60" : undefined}
+              />
+              <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                <input
+                  type="checkbox"
+                  checked={noEndDate}
+                  onChange={(event) => setNoEndDate(event.target.checked)}
+                  className="h-4 w-4 rounded border-border"
+                />
+                Ongoing campaign / no end date
+              </label>
             </div>
           </div>
 

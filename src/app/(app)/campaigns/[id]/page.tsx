@@ -124,11 +124,11 @@ export default async function CampaignPage({ params, searchParams }: Props) {
               >
                 {campaign.brand.name}
               </Link>
-              {campaign.startDate && (
+              {(campaign.startDate || campaign.endDate) && (
                 <>
                   {" "}
-                  • {formatDate(campaign.startDate)}
-                  {campaign.endDate && ` - ${formatDate(campaign.endDate)}`}
+                  • {campaign.startDate ? formatDate(campaign.startDate) : "No start date"}
+                  {` - ${campaign.endDate ? formatDate(campaign.endDate) : "Ongoing"}`}
                 </>
               )}
             </p>

@@ -178,18 +178,18 @@ export default async function CreatorPortalPage({ params }: Props) {
                   {(campaignCreator.deliverableCount || 1) > 1 ? "s" : ""} of content
                 </p>
               </div>
-              {campaign.endDate && (
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Campaign End Date</p>
-                  <p>
-                    {new Date(campaign.endDate).toLocaleDateString("en-US", {
-                      weekday: "long",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </p>
-                </div>
-              )}
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Campaign End Date</p>
+                <p>
+                  {campaign.endDate
+                    ? new Date(campaign.endDate).toLocaleDateString("en-US", {
+                        weekday: "long",
+                        month: "long",
+                        day: "numeric",
+                      })
+                    : "Ongoing"}
+                </p>
+              </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Status</p>
                 <Badge className={statusColors[campaignCreator.status] || ""}>

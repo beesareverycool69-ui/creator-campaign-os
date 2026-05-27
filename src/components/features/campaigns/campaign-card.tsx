@@ -59,10 +59,10 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
             <div className="text-right shrink-0">
               <div className="text-2xl font-bold">{campaign.creatorCount}</div>
               <div className="text-xs text-muted-foreground">creators</div>
-              {campaign.startDate && (
+              {(campaign.startDate || campaign.endDate) && (
                 <div className="text-xs text-muted-foreground mt-1">
-                  {formatDate(campaign.startDate)}
-                  {campaign.endDate && ` - ${formatDate(campaign.endDate)}`}
+                  {campaign.startDate ? formatDate(campaign.startDate) : "No start date"}
+                  {` - ${campaign.endDate ? formatDate(campaign.endDate) : "Ongoing"}`}
                 </div>
               )}
             </div>

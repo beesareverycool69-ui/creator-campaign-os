@@ -149,6 +149,10 @@ export async function createCampaign(input: CreateCampaignInput) {
     throw new Error("Brand not found");
   }
 
+  if (input.startDate && input.endDate && input.endDate <= input.startDate) {
+    throw new Error("End date must be after the start date");
+  }
+
   const [newCampaign] = await db
     .insert(campaigns)
     .values({
