@@ -49,6 +49,10 @@ export default async function CampaignPage({ params, searchParams }: Props) {
 
   const campaignNextStep = getCampaignNextStep(id, campaignCreators);
 
+  const contentHref = contentSummary.total > 0
+    ? `/campaigns/${id}#content-summary`
+    : `/campaigns/${id}#pipeline`;
+
   const commandCenterSteps = [
     {
       label: "Add accepted creators",
@@ -67,7 +71,7 @@ export default async function CampaignPage({ params, searchParams }: Props) {
       action: nextActionCreator ? "Open Creator" : "Review Pipeline",
       href: nextActionCreator
         ? `/campaigns/${id}/creators/${nextActionCreator.id}`
-        : `/campaigns/${id}`,
+        : `/campaigns/${id}#pipeline`,
     },
     {
       label: "Manage content",
@@ -81,7 +85,7 @@ export default async function CampaignPage({ params, searchParams }: Props) {
       action: nextActionCreator ? "Open Creator" : "Review Content",
       href: nextActionCreator
         ? `/campaigns/${id}/creators/${nextActionCreator.id}`
-        : `/campaigns/${id}`,
+        : contentHref,
     },
   ];
 
@@ -198,8 +202,7 @@ export default async function CampaignPage({ params, searchParams }: Props) {
       </div>
 
       {/* Content Summary */}
-      {contentSummary.total > 0 && (
-        <Card>
+      <Card id="content-summary">
           <CardHeader>
             <CardTitle>📹 Content Summary</CardTitle>
           </CardHeader>
@@ -230,10 +233,9 @@ export default async function CampaignPage({ params, searchParams }: Props) {
             </div>
           </CardContent>
         </Card>
-      )}
 
       {/* Pipeline board */}
-      <div>
+      <div id="pipeline">
         <h2 className="text-xl font-semibold mb-4">
           Pipeline ({campaign.totalCreators} creators)
         </h2>

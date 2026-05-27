@@ -68,7 +68,7 @@ export function AddCreatorToCampaignForm({
     }
   }
 
-  if (availableCreators.length === 0 && !isOpen) {
+  if (availableCreators.length === 0) {
     return (
       <div className="text-sm text-muted-foreground">
         No available creators.{" "}
