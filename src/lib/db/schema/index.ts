@@ -46,3 +46,4 @@ export * from "./agreements";
 export * from "./shipments";
 export * from "./content";
 export * from "./payments";
+export * from "./commerce";

@@ -1,7 +1,12 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { brands, brandCreators, type BrandAnalysis } from "@/lib/db/schema";
+import {
+  brands,
+  brandCreators,
+  brandCommerceIntegrations,
+  type BrandAnalysis,
+} from "@/lib/db/schema";
 import { requireOwnedBrand, requireUser } from "@/lib/auth/access";
 import { and, eq, count } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -10,6 +15,7 @@ import { matchCreators } from "@/lib/ai/match-creators";
 import type { CreatorForMatching, CreatorMatchResult } from "@/lib/ai/match-creators";
 import { discoverCreators, type DiscoveredCreator } from "@/lib/ai/discover-external";
 import { filterNewToBrandByIdentity, getBrandProcessedIdentitySet } from "@/lib/utils/brand-creator-dedupe";
+import { encryptSecret } from "@/lib/security/encryption";
 
 // =============================================================================
 // TYPES
@@ -20,6 +26,17 @@ export type CreateBrandInput = {
   industry?: string;
   logoUrl?: string;
   billingEmail?: string;
+};
+
+export type ShopifyIntegrationStatus = "not_connected" | "connected" | "missing_credentials";
+
+export type ShopifyIntegrationSettings = {
+  id: string | null;
+  shopDomain: string | null;
+  status: ShopifyIntegrationStatus;
+  hasAccessToken: boolean;
+  hasWebhookSecret: boolean;
+  updatedAt: Date | null;
 };
 
 // =============================================================================
@@ -87,6 +104,50 @@ export async function getBrandById(id: string) {
   };
 }
 
+export async function getShopifyIntegrationSettings(
+  brandId: string
+): Promise<ShopifyIntegrationSettings> {
+  await requireOwnedBrand(brandId);
+
+  const [integration] = await db
+    .select({
+      id: brandCommerceIntegrations.id,
+      shopDomain: brandCommerceIntegrations.shopDomain,
+      accessTokenEncrypted: brandCommerceIntegrations.accessTokenEncrypted,
+      webhookSecretEncrypted: brandCommerceIntegrations.webhookSecretEncrypted,
+      status: brandCommerceIntegrations.status,
+      updatedAt: brandCommerceIntegrations.updatedAt,
+    })
+    .from(brandCommerceIntegrations)
+    .where(
+      and(
+        eq(brandCommerceIntegrations.brandId, brandId),
+        eq(brandCommerceIntegrations.provider, "shopify")
+      )
+    )
+    .limit(1);
+
+  if (!integration) {
+    return {
+      id: null,
+      shopDomain: null,
+      status: "not_connected",
+      hasAccessToken: false,
+      hasWebhookSecret: false,
+      updatedAt: null,
+    };
+  }
+
+  return {
+    id: integration.id,
+    shopDomain: integration.shopDomain,
+    status: toShopifyIntegrationStatus(integration.status),
+    hasAccessToken: Boolean(integration.accessTokenEncrypted),
+    hasWebhookSecret: Boolean(integration.webhookSecretEncrypted),
+    updatedAt: integration.updatedAt,
+  };
+}
+
 // =============================================================================
 // MUTATIONS
 // =============================================================================
@@ -112,6 +173,106 @@ export async function createBrand(input: CreateBrandInput) {
   revalidatePath("/brands");
 
   return newBrand;
+}
+
+export async function updateShopifyIntegrationSettings(formData: FormData) {
+  const brandId = formData.get("brandId")?.toString();
+  const rawShopDomain = formData.get("shopDomain")?.toString() || "";
+  const rawAccessToken = formData.get("accessToken")?.toString() || "";
+  const rawWebhookSecret = formData.get("webhookSecret")?.toString() || "";
+
+  if (!brandId) {
+    throw new Error("Brand is required.");
+  }
+
+  await requireOwnedBrand(brandId);
+
+  const shopDomain = normalizeShopifyShopDomain(rawShopDomain);
+  const accessToken = rawAccessToken.trim();
+  const webhookSecret = rawWebhookSecret.trim();
+
+  const [existing] = await db
+    .select()
+    .from(brandCommerceIntegrations)
+    .where(
+      and(
+        eq(brandCommerceIntegrations.brandId, brandId),
+        eq(brandCommerceIntegrations.provider, "shopify")
+      )
+    )
+    .limit(1);
+
+  const accessTokenEncrypted = accessToken
+    ? encryptSecret(accessToken)
+    : existing?.accessTokenEncrypted ?? null;
+  const webhookSecretEncrypted = webhookSecret
+    ? encryptSecret(webhookSecret)
+    : existing?.webhookSecretEncrypted ?? null;
+  const status = getShopifyConnectionStatus({
+    shopDomain,
+    accessTokenEncrypted,
+    webhookSecretEncrypted,
+  });
+  const now = new Date();
+
+  if (existing) {
+    await db
+      .update(brandCommerceIntegrations)
+      .set({
+        shopDomain,
+        accessTokenEncrypted,
+        webhookSecretEncrypted,
+        status,
+        updatedAt: now,
+      })
+      .where(eq(brandCommerceIntegrations.id, existing.id));
+  } else {
+    await db.insert(brandCommerceIntegrations).values({
+      brandId,
+      provider: "shopify",
+      shopDomain,
+      accessTokenEncrypted,
+      webhookSecretEncrypted,
+      status,
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
+  revalidatePath(`/brands/${brandId}/settings`);
+}
+
+function normalizeShopifyShopDomain(value: string) {
+  const trimmed = value.trim().toLowerCase();
+  if (!trimmed) return null;
+
+  const withoutProtocol = trimmed.replace(/^https?:\/\//, "").replace(/\/$/, "");
+  const domain = withoutProtocol.split("/")[0];
+
+  if (!domain) return null;
+  if (domain.includes(".")) return domain;
+  return `${domain}.myshopify.com`;
+}
+
+function getShopifyConnectionStatus(input: {
+  shopDomain: string | null;
+  accessTokenEncrypted: string | null;
+  webhookSecretEncrypted: string | null;
+}): ShopifyIntegrationStatus {
+  if (!input.shopDomain && !input.accessTokenEncrypted && !input.webhookSecretEncrypted) {
+    return "not_connected";
+  }
+
+  if (input.shopDomain && input.accessTokenEncrypted && input.webhookSecretEncrypted) {
+    return "connected";
+  }
+
+  return "missing_credentials";
+}
+
+function toShopifyIntegrationStatus(status: string): ShopifyIntegrationStatus {
+  if (status === "connected" || status === "missing_credentials") return status;
+  return "not_connected";
 }
 
 // =============================================================================

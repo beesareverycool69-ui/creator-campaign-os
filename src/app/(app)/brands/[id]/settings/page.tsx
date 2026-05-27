@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ShopifySettingsCard } from "@/components/features/brands/shopify-settings-card";
 import { TemplateEditor } from "@/components/features/brands/template-editor";
-import { getBrandById } from "@/lib/actions/brands";
+import { getBrandById, getShopifyIntegrationSettings } from "@/lib/actions/brands";
 import { getTemplatesByBrand } from "@/lib/actions/outreach-templates";
 
 type Props = {
@@ -11,9 +12,10 @@ type Props = {
 export default async function BrandSettingsPage({ params }: Props) {
   const { id } = await params;
 
-  const [brand, templates] = await Promise.all([
+  const [brand, templates, shopifyIntegration] = await Promise.all([
     getBrandById(id),
     getTemplatesByBrand(id),
+    getShopifyIntegrationSettings(id),
   ]);
 
   if (!brand) {
@@ -42,6 +44,9 @@ export default async function BrandSettingsPage({ params }: Props) {
           Manage templates and preferences for {brand.name}
         </p>
       </div>
+
+      {/* Commerce Integrations */}
+      <ShopifySettingsCard brandId={id} integration={shopifyIntegration} />
 
       {/* Message Templates */}
       <TemplateEditor brandId={id} templates={templates} />

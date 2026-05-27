@@ -9,7 +9,8 @@ type EnvName =
   | "BRAVE_API_KEY"
   | "SHOPIFY_WEBHOOK_SECRET"
   | "CONVERSION_WEBHOOK_SECRET"
-  | "PORTAL_SECRET";
+  | "PORTAL_SECRET"
+  | "COMMERCE_CREDENTIAL_ENCRYPTION_KEY";
 
 function formatMissingEnvMessage(names: string[]) {
   return [
