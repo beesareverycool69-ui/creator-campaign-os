@@ -6,6 +6,40 @@ const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+const MAX_DM_CHARACTERS = 650;
+const BANNED_DM_PHRASES = [
+  "next-level",
+  "proprietary",
+  "science-first",
+  "convenience-driven",
+  "natural match",
+  "natural fit",
+  "community you've built",
+  "community you’ve built",
+  "would love to share more details",
+];
+
+function sanitizeOutreachDm(text: string) {
+  let cleaned = sanitizeGeneratedText(text);
+
+  for (const phrase of BANNED_DM_PHRASES) {
+    cleaned = cleaned.replace(new RegExp(phrase, "gi"), "").replace(/\s{2,}/g, " ").trim();
+  }
+
+  if (cleaned.length <= MAX_DM_CHARACTERS) return cleaned;
+
+  const sentences = cleaned.match(/[^.!?]+[.!?]+/g) ?? [cleaned];
+  let shortened = "";
+
+  for (const sentence of sentences) {
+    const next = `${shortened}${shortened ? " " : ""}${sentence.trim()}`;
+    if (next.length > MAX_DM_CHARACTERS) break;
+    shortened = next;
+  }
+
+  return shortened || `${cleaned.slice(0, MAX_DM_CHARACTERS - 1).trimEnd()}.`;
+}
+
 export type OutreachContext = {
   brand: {
     name: string;
@@ -40,7 +74,8 @@ export async function generateOutreachMessage(ctx: OutreachContext): Promise<str
 
   const brandContext = brand.analysis
     ? [
-        `Niche: ${brand.analysis.niche}`,
+        `Niche/category: ${brand.analysis.niche}`,
+        `Summary: ${brand.analysis.summary}`,
         `Tone: ${brand.analysis.toneOfVoice}`,
         `Target audience: ${brand.analysis.targetAudience}`,
       ].join("\n")
@@ -57,24 +92,32 @@ Name: ${creator.name}
 ${creator.bio ? `Bio: ${creator.bio}` : ""}
 Platforms: ${platformSummary || "not listed"}
 
-Write a short, personalized outreach DM (3-5 sentences). Requirements:
+Write a short, personalized outreach DM. Make it feel like a real Instagram DM, not a pitch email.
+
+Rules:
+- 3 to 5 sentences max
+- Keep it under ${MAX_DM_CHARACTERS} characters if possible
+- Plainspoken, casual, and human
 - Address the creator by first name
-- Reference something specific about their content or platform presence (use their bio or platform info)
-- Briefly introduce the brand and why there's a natural fit
-- End with a clear, low-pressure call to action (e.g. "Would love to share more details if you're open to it")
-- Tone must match the brand: ${brand.analysis?.toneOfVoice ?? "professional and friendly"}
+- Include one specific reason we like their content or platform presence
+- Include one simple sentence connecting ${brand.name} to what they already talk about
+- Describe ${brand.name} only using the supplied brand niche/category or summary above. Do not invent a product category, positioning, or claim. If the supplied brand context is thin, just say "we're ${brand.name}" without adding a category.
+- End with a soft CTA, like "Open to taking a look?" or "Would you be open to chatting?"
+- Do not over-explain the product
+- Do not sound like a press release
 - Write in plain text, no subject line, no sign-off, no placeholders in brackets
 - Do NOT use generic phrases like "I came across your profile" or "I love your content"
+- Do NOT use these phrases: ${BANNED_DM_PHRASES.join(", ")}
 - ${NO_DASH_COPY_RULE}
 
 Return ONLY the message text. Nothing else.`;
 
   const message = await client.messages.create({
     model: "claude-sonnet-4-6",
-    max_tokens: 512,
+    max_tokens: 220,
     messages: [{ role: "user", content: prompt }],
   });
 
   const text = message.content[0].type === "text" ? message.content[0].text : "";
-  return sanitizeGeneratedText(text);
+  return sanitizeOutreachDm(text);
 }
