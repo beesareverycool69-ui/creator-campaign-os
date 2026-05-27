@@ -85,7 +85,7 @@ export default async function AnalyticsPage() {
             ? `${pendingConversions.length} conversion${pendingConversions.length === 1 ? " needs" : "s need"} confirmation before revenue totals are final.`
             : "Use revenue, commissions, top creators, and campaign performance to decide who to reinvest in next."
         }
-        href={pendingConversions.length > 0 ? "/analytics" : "/campaigns"}
+        href={pendingConversions.length > 0 ? "#pending-conversions" : "/campaigns"}
         actionLabel={pendingConversions.length > 0 ? "Review Pending" : "View Campaigns"}
       />
 
@@ -164,7 +164,7 @@ export default async function AnalyticsPage() {
       </div>
 
       {/* Pending Conversions */}
-      <Card>
+      <Card id="pending-conversions">
         <CardHeader>
           <CardTitle>Pending Conversions</CardTitle>
           <CardDescription>Review webhook conversions before they count toward revenue totals.</CardDescription>

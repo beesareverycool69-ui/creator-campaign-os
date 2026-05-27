@@ -143,7 +143,7 @@ export default async function CampaignCreatorPage({ params }: Props) {
       <NextStepCard {...nextStep} />
 
       {/* Status mover */}
-      <Card>
+      <Card id="pipeline-status">
         <CardHeader>
           <CardTitle>Pipeline Status</CardTitle>
         </CardHeader>
@@ -536,7 +536,7 @@ function getCreatorNextStep({
   return {
     title: "Move Creator Forward",
     description: "Update the pipeline status when this creator is ready for the next campaign step.",
-    href: creatorHref,
+    href: `${creatorHref}#pipeline-status`,
     actionLabel: "Review Status",
   };
 }
