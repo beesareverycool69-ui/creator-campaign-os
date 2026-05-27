@@ -45,6 +45,10 @@ interface DiscoveredCreator {
 interface LeadDiscoveryProps {
   brandId: string;
   onAddCreators?: (creators: DiscoveredCreator[]) => void;
+  existingIdentityKeys?: {
+    platformHandles: string[];
+    profileUrls: string[];
+  };
   aiConfig?: {
     anthropic: boolean;
     brave: boolean;
@@ -53,7 +57,7 @@ interface LeadDiscoveryProps {
 
 type TabType = "external" | "csv" | "ocr";
 
-export function LeadDiscovery({ brandId, onAddCreators, aiConfig }: LeadDiscoveryProps) {
+export function LeadDiscovery({ brandId, onAddCreators, existingIdentityKeys, aiConfig }: LeadDiscoveryProps) {
   const { success, error } = useToast();
   const [activeTab, setActiveTab] = useState<TabType>("external");
   const [isLoading, setIsLoading] = useState(false);
@@ -93,6 +97,7 @@ export function LeadDiscovery({ brandId, onAddCreators, aiConfig }: LeadDiscover
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          brandId,
           keywords,
           platform,
           location: location || undefined,
@@ -104,10 +109,12 @@ export function LeadDiscovery({ brandId, onAddCreators, aiConfig }: LeadDiscover
 
       if (response.ok) {
         const data = await response.json();
-        setDiscoveredCreators(
-          data.creators.map((c: DiscoveredCreator) => ({ ...c, selected: true }))
+        const newCreators = filterExistingCreators(
+          data.creators.map((c: DiscoveredCreator) => ({ ...c, selected: true })),
+          existingIdentityKeys
         );
-        success("Discovery complete", `Found ${data.creators.length} creator${data.creators.length !== 1 ? "s" : ""}.`);
+        setDiscoveredCreators(newCreators);
+        success("Discovery complete", `Found ${newCreators.length} new creator${newCreators.length !== 1 ? "s" : ""}.`);
       } else {
         const result = await response.json();
         console.error("Discovery failed:", result);
@@ -154,8 +161,9 @@ export function LeadDiscovery({ brandId, onAddCreators, aiConfig }: LeadDiscover
         });
       }
 
-      setDiscoveredCreators(creators);
-      success("CSV parsed", `Found ${creators.length} creator${creators.length !== 1 ? "s" : ""}.`);
+      const newCreators = filterExistingCreators(creators, existingIdentityKeys);
+      setDiscoveredCreators(newCreators);
+      success("CSV parsed", `Found ${newCreators.length} new creator${newCreators.length !== 1 ? "s" : ""}.`);
     } catch (err) {
       console.error("CSV parse failed:", err);
       error("CSV parse failed", err instanceof Error ? err.message : "Please check the format and try again.");
@@ -186,10 +194,12 @@ export function LeadDiscovery({ brandId, onAddCreators, aiConfig }: LeadDiscover
 
       if (response.ok) {
         const data = await response.json();
-        setDiscoveredCreators(
-          data.creators.map((c: DiscoveredCreator) => ({ ...c, selected: true }))
+        const newCreators = filterExistingCreators(
+          data.creators.map((c: DiscoveredCreator) => ({ ...c, selected: true })),
+          existingIdentityKeys
         );
-        success("OCR complete", `Found ${data.creators.length} creator${data.creators.length !== 1 ? "s" : ""}.`);
+        setDiscoveredCreators(newCreators);
+        success("OCR complete", `Found ${newCreators.length} new creator${newCreators.length !== 1 ? "s" : ""}.`);
       } else {
         const result = await response.json();
         error("OCR failed", result.error || "Please try another screenshot.");
@@ -477,4 +487,51 @@ export function LeadDiscovery({ brandId, onAddCreators, aiConfig }: LeadDiscover
       </CardContent>
     </Card>
   );
+}
+
+
+function filterExistingCreators(
+  creators: DiscoveredCreator[],
+  existingIdentityKeys?: { platformHandles: string[]; profileUrls: string[] }
+) {
+  if (!existingIdentityKeys) return creators;
+  const platformHandles = new Set(existingIdentityKeys.platformHandles);
+  const profileUrls = new Set(existingIdentityKeys.profileUrls);
+
+  return creators.filter((creator) => {
+    const platformHandle = `${normalizePlatform(creator.platform)}:${normalizeHandle(creator.handle)}`;
+    const profileUrl = normalizeProfileUrl(creator.profileUrl);
+    return !platformHandles.has(platformHandle) && (!profileUrl || !profileUrls.has(profileUrl));
+  });
+}
+
+function normalizePlatform(platform?: string | null) {
+  const normalized = platform?.toLowerCase().trim();
+  if (!normalized) return "";
+  return ["x", "x_twitter", "twitter"].includes(normalized) ? "twitter" : normalized;
+}
+
+function normalizeHandle(handle?: string | null) {
+  return (handle || "")
+    .trim()
+    .replace(/^@+/, "")
+    .replace(/^https?:\/\/[^/]+\/@?/i, "")
+    .split(/[/?#]/)[0]
+    .toLowerCase();
+}
+
+function normalizeProfileUrl(profileUrl?: string | null) {
+  if (!profileUrl) return null;
+  try {
+    const url = new URL(profileUrl.startsWith("http") ? profileUrl : `https://${profileUrl}`);
+    return `${url.hostname.replace(/^www\./, "").toLowerCase()}${url.pathname.replace(/\/+$/, "").toLowerCase()}`;
+  } catch {
+    return profileUrl
+      .trim()
+      .replace(/^https?:\/\//i, "")
+      .replace(/^www\./i, "")
+      .replace(/[?#].*$/, "")
+      .replace(/\/+$/, "")
+      .toLowerCase();
+  }
 }

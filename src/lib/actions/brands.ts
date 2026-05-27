@@ -9,6 +9,7 @@ import { analyzeBrand } from "@/lib/ai/analyze-brand";
 import { matchCreators } from "@/lib/ai/match-creators";
 import type { CreatorForMatching, CreatorMatchResult } from "@/lib/ai/match-creators";
 import { discoverCreators, type DiscoveredCreator } from "@/lib/ai/discover-external";
+import { filterNewToBrandByIdentity, getBrandProcessedIdentitySet } from "@/lib/utils/brand-creator-dedupe";
 
 // =============================================================================
 // TYPES
@@ -482,8 +483,15 @@ export async function discoverAndScoreCreatorsAction(
     return { success: true, matches: [] };
   }
 
-  const candidates = discovered
-    .slice(0, Math.min(discovered.length, 80))
+  const brandIdentities = await getBrandProcessedIdentitySet(brandId);
+  const newDiscovered = filterNewToBrandByIdentity(brandIdentities, discovered);
+
+  if (newDiscovered.length === 0) {
+    return { success: true, matches: [] };
+  }
+
+  const candidates = newDiscovered
+    .slice(0, Math.min(newDiscovered.length, 80))
     .map(toCreatorForMatching);
   let results: CreatorMatchResult[];
   try {
@@ -493,7 +501,7 @@ export async function discoverAndScoreCreatorsAction(
     return { success: false, error: message };
   }
 
-  const creatorMap = new Map(discovered.map((creator) => [discoveredCreatorId(creator), creator]));
+  const creatorMap = new Map(newDiscovered.map((creator) => [discoveredCreatorId(creator), creator]));
   const enriched = results
     .filter((r) => r.fitScore >= MIN_MATCH_SCORE)
     .slice(0, limit)

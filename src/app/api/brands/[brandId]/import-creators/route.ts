@@ -4,6 +4,13 @@ import { db } from "@/lib/db";
 import { requireOwnedBrand } from "@/lib/auth/access";
 import { creators, creatorPlatforms, brandCreators } from "@/lib/db/schema";
 import { eq, and } from "drizzle-orm";
+import {
+  getBrandProcessedIdentitySet,
+  isProcessedByBrandIdentity,
+  normalizeHandle,
+  normalizePlatform,
+  normalizeProfileUrl,
+} from "@/lib/utils/brand-creator-dedupe";
 
 interface ImportedCreator {
   handle: string;
@@ -48,12 +55,22 @@ export async function POST(
       linked: 0,
       skipped: 0,
     };
+    const processedIdentities = await getBrandProcessedIdentitySet(brandId);
 
     for (const imported of importedCreators) {
       if (!imported.handle) continue;
 
       const handle = imported.handle.replace("@", "").toLowerCase();
       const platformId = imported.platform;
+
+      if (isProcessedByBrandIdentity(processedIdentities, {
+        platform: platformId,
+        handle,
+        profileUrl: imported.profileUrl,
+      })) {
+        results.skipped++;
+        continue;
+      }
 
       // Check if creator platform already exists
       const [existingPlatform] = await db
@@ -149,6 +166,16 @@ export async function POST(
           source: "import",
           sourceDetail: `Discovered via ${platformId}`,
         });
+        processedIdentities.creatorIds.add(creatorId);
+        const normalizedPlatform = normalizePlatform(platformId);
+        const normalizedHandle = normalizeHandle(handle);
+        if (normalizedPlatform && normalizedHandle) {
+          processedIdentities.platformHandles.add(`${normalizedPlatform}:${normalizedHandle}`);
+        }
+        const normalizedProfileUrl = normalizeProfileUrl(imported.profileUrl);
+        if (normalizedProfileUrl) {
+          processedIdentities.profileUrls.add(normalizedProfileUrl);
+        }
         results.linked++;
       }
     }

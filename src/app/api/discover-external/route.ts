@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireDiscoveryApiAccess } from "@/lib/api/discovery-auth";
 import { discoverCreators, type DiscoveryParams } from "@/lib/ai/discover-external";
+import { filterNewToBrandByIdentity, getBrandProcessedIdentitySet } from "@/lib/utils/brand-creator-dedupe";
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +17,8 @@ export async function POST(request: NextRequest) {
       minFollowers,
       maxFollowers,
       limit = 10,
-    } = body as Partial<DiscoveryParams> & { keywords?: string };
+      brandId,
+    } = body as Partial<DiscoveryParams> & { keywords?: string; brandId?: string };
 
     if (!keywords) {
       return NextResponse.json(
@@ -34,10 +36,14 @@ export async function POST(request: NextRequest) {
       limit: Math.min(limit, 25), // Cap at 25 to manage API costs
     });
 
+    const filteredCreators = brandId
+      ? filterNewToBrandByIdentity(await getBrandProcessedIdentitySet(brandId), creators)
+      : creators;
+
     return NextResponse.json({
       success: true,
-      count: creators.length,
-      creators,
+      count: filteredCreators.length,
+      creators: filteredCreators,
     });
   } catch (error) {
     console.error("External discovery error:", error);

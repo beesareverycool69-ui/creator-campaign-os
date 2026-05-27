@@ -21,6 +21,7 @@ import { getCreators } from "@/lib/actions/creators";
 import { getBrandProducts } from "@/lib/actions/shipments";
 import { getCampaigns } from "@/lib/actions/campaigns";
 import { isConfiguredEnv } from "@/lib/env";
+import { filterNewToBrandByIdentity, getBrandProcessedIdentitySet } from "@/lib/utils/brand-creator-dedupe";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -42,10 +43,9 @@ export default async function BrandPage({ params }: Props) {
     notFound();
   }
 
-  // Get creators not yet linked to this brand
-  const linkedCreatorIds = new Set(brandCreators.map((bc) => bc.creator.id));
-  const availableCreators = allCreators
-    .filter((c) => !linkedCreatorIds.has(c.id))
+  // Get creators not yet linked to this brand by ID, platform handle, or profile URL
+  const processedIdentities = await getBrandProcessedIdentitySet(id);
+  const availableCreators = filterNewToBrandByIdentity(processedIdentities, allCreators)
     .map((c) => ({ id: c.id, name: c.name, email: c.email }));
 
   // Status funnel order

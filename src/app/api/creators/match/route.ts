@@ -3,6 +3,7 @@ import { requireDiscoveryApiAccess } from "@/lib/api/discovery-auth";
 import { db } from "@/lib/db";
 import { creators, creatorPlatforms } from "@/lib/db/schema";
 import { sql, desc, or, ilike } from "drizzle-orm";
+import { filterNewToBrandByIdentity, getBrandProcessedIdentitySet } from "@/lib/utils/brand-creator-dedupe";
 import type { SearchKeywords } from "@/lib/types/discovery";
 
 /**
@@ -91,10 +92,14 @@ export async function POST(request: NextRequest) {
       }));
     }
 
+    const filteredCreators = brandId
+      ? filterNewToBrandByIdentity(await getBrandProcessedIdentitySet(brandId), matchedCreators)
+      : matchedCreators;
+
     return NextResponse.json({
       success: true,
-      count: matchedCreators.length,
-      creators: matchedCreators,
+      count: filteredCreators.length,
+      creators: filteredCreators,
       keywords_used: allKeywords.length,
     });
   } catch (error) {

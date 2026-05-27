@@ -3,6 +3,7 @@ import { requireDiscoveryApiAccess } from "@/lib/api/discovery-auth";
 import { NO_DASH_COPY_RULE, sanitizeGeneratedCopy } from "@/lib/utils/generated-copy";
 import Anthropic from "@anthropic-ai/sdk";
 import type { BrandProfile, SearchKeywords, DiscoveredCreator } from "@/lib/types/discovery";
+import { filterNewToBrandByIdentity, getBrandProcessedIdentitySet } from "@/lib/utils/brand-creator-dedupe";
 
 const client = new Anthropic();
 
@@ -153,10 +154,20 @@ export async function POST(request: NextRequest) {
       return true;
     });
 
+    const filteredCreators = brandId
+      ? filterNewToBrandByIdentity(
+          await getBrandProcessedIdentitySet(brandId),
+          uniqueCreators.map((creator) => ({
+            ...creator,
+            profileUrl: creator.profile_url,
+          }))
+        )
+      : uniqueCreators;
+
     return NextResponse.json({
       success: true,
-      count: uniqueCreators.length,
-      creators: uniqueCreators,
+      count: filteredCreators.length,
+      creators: filteredCreators,
       by_platform: {
         instagram: discoveries[0].length,
         tiktok: discoveries[1].length,

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireDiscoveryApiAccess } from "@/lib/api/discovery-auth";
 import { NO_DASH_COPY_RULE, sanitizeGeneratedCopy } from "@/lib/utils/generated-copy";
 import Anthropic from "@anthropic-ai/sdk";
+import { filterNewToBrandByIdentity, getBrandProcessedIdentitySet } from "@/lib/utils/brand-creator-dedupe";
 
 const anthropic = new Anthropic();
 
@@ -90,8 +91,11 @@ ${NO_DASH_COPY_RULE}`,
     }
 
     const creators = sanitizeGeneratedCopy(JSON.parse(jsonMatch[0]));
+    const filteredCreators = brandId
+      ? filterNewToBrandByIdentity(await getBrandProcessedIdentitySet(brandId), creators)
+      : creators;
 
-    return NextResponse.json({ creators });
+    return NextResponse.json({ creators: filteredCreators });
   } catch (error) {
     console.error("OCR error:", error);
     return NextResponse.json(
