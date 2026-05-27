@@ -9,6 +9,7 @@ import {
   AddCreatorToCampaignForm,
   MAIN_PIPELINE_STAGES,
 } from "@/components/features/campaigns";
+import { getCampaignCreatorNextAction } from "@/components/features/campaigns/pipeline-creator-card";
 import { getCampaignById } from "@/lib/actions/campaigns";
 import {
   getCampaignCreators,
@@ -42,9 +43,21 @@ export default async function CampaignPage({ params, searchParams }: Props) {
   );
 
   const nextActionCreator = campaignCreators.find((creator) =>
-    ["accepted", "onboarding", "ready", "shipped", "creating", "in_review", "approved", "posting"].includes(
-      creator.status
-    )
+    [
+      "shortlisted",
+      "invited",
+      "negotiating",
+      "accepted",
+      "onboarding",
+      "ready",
+      "shipped",
+      "creating",
+      "in_review",
+      "approved",
+      "posting",
+      "posted",
+      "completed",
+    ].includes(creator.status)
   );
 
   const campaignNextStep = getCampaignNextStep(id, campaignCreators);
@@ -277,9 +290,21 @@ function getCampaignNextStep(
   creators: { id: string; status: string }[]
 ) {
   const nextCreator = creators.find((creator) =>
-    ["accepted", "onboarding", "ready", "creating", "in_review", "approved", "posting", "posted"].includes(
-      creator.status
-    )
+    [
+      "shortlisted",
+      "invited",
+      "negotiating",
+      "accepted",
+      "onboarding",
+      "ready",
+      "shipped",
+      "creating",
+      "in_review",
+      "approved",
+      "posting",
+      "posted",
+      "completed",
+    ].includes(creator.status)
   );
 
   if (!nextCreator) {
@@ -291,59 +316,25 @@ function getCampaignNextStep(
     };
   }
 
-  const creatorHref = `/campaigns/${campaignId}/creators/${nextCreator.id}`;
+  const nextAction = getCampaignCreatorNextAction(
+    campaignId,
+    nextCreator.id,
+    nextCreator.status
+  );
 
-  switch (nextCreator.status) {
-    case "accepted":
-      return {
-        title: "Create Agreement",
-        description: "This creator is in the campaign. Create the agreement before shipment.",
-        href: `${creatorHref}/agreement`,
-        actionLabel: "Create Agreement",
-      };
-    case "onboarding":
-      return {
-        title: "Create Shipment",
-        description: "Agreement work is underway. Create or update the creator shipment.",
-        href: `${creatorHref}/shipment`,
-        actionLabel: "Create Shipment",
-      };
-    case "ready":
-    case "creating":
-      return {
-        title: "Send Portal Link",
-        description: "The creator is ready to upload content. Send their portal link and monitor submissions.",
-        href: `${creatorHref}/content`,
-        actionLabel: "View Content",
-      };
-    case "in_review":
-      return {
-        title: "Review Content",
-        description: "Content is waiting for approval, revision notes, or rejection.",
-        href: `${creatorHref}/content`,
-        actionLabel: "Review Content",
-      };
-    case "approved":
-    case "posting":
-      return {
-        title: "Mark Posted",
-        description: "Approved content is ready to be tracked once the creator publishes.",
-        href: `${creatorHref}/content`,
-        actionLabel: "Track Posting",
-      };
-    case "posted":
-      return {
-        title: "Review Analytics",
-        description: "Content is posted. Review conversions and revenue impact.",
-        href: "/analytics",
-        actionLabel: "Review Analytics",
-      };
-    default:
-      return {
-        title: "Open Creator",
-        description: "Open the next creator needing work in this campaign.",
-        href: creatorHref,
-        actionLabel: "Open Creator",
-      };
+  if (nextCreator.status === "shortlisted") {
+    return {
+      title: "Start creator onboarding",
+      description: "A shortlisted creator is already in this campaign. Open their record and move them into onboarding.",
+      href: nextAction.href,
+      actionLabel: "Open Creator",
+    };
   }
+
+  return {
+    title: nextAction.label,
+    description: "Open the next campaign creator and complete the next funnel action.",
+    href: nextAction.href,
+    actionLabel: nextAction.label,
+  };
 }
