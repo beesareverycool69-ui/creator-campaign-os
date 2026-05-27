@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,9 +39,13 @@ export function SendDMsQueue({ brandId, initialLeads, aiConfigured }: Props) {
   if (!currentLead) {
     return (
       <div className="rounded-lg border p-8 text-center">
-        <p className="text-muted-foreground">
-          All done! No more leads in the queue.
+        <p className="font-medium">All done! No more leads in the queue.</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          Next: Track Replies so you can log accepts and move creators into campaigns.
         </p>
+        <Link href={`/brands/${brandId}/track`}>
+          <Button className="mt-4" variant="outline">Track Replies →</Button>
+        </Link>
       </div>
     );
   }
@@ -83,7 +88,7 @@ export function SendDMsQueue({ brandId, initialLeads, aiConfigured }: Props) {
       try {
         await markDMSentAction(currentLead.id, generatedMessage || undefined);
         setDmSent(true);
-        success("DM marked sent", "Lead moved forward in outreach.");
+        success("DM marked sent", "Next: Track Replies when the creator responds.");
       } catch (err) {
         error("Failed to mark DM sent", err instanceof Error ? err.message : "Please try again.");
       }

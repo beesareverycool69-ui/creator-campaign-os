@@ -5,6 +5,7 @@ import { getBrandCreators, getLeadStatusCounts } from "@/lib/actions/brand-creat
 import { TrackList } from "@/components/features/outreach/track-list";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
+import { NextStepCard } from "@/components/ui/next-step-card";
 import { getCampaigns } from "@/lib/actions/campaigns";
 
 type Props = {
@@ -90,6 +91,22 @@ export default async function TrackPage({ params, searchParams }: Props) {
           <strong>How it works:</strong> When a lead responds, tap <strong>Accepted</strong> or <strong>Declined</strong>. Accepted leads are ready to add to a campaign, where they become campaign creators before onboarding.
         </p>
       </div>
+
+      {acceptedCount > 0 ? (
+        <NextStepCard
+          title="Add to Campaign"
+          description="Accepted creators are ready to move into campaign onboarding."
+          href={firstCampaign ? `/campaigns/${firstCampaign.id}` : `/campaigns/new?brandId=${id}`}
+          actionLabel={firstCampaign ? "Open Campaign" : "Create Campaign"}
+        />
+      ) : pendingCount > 0 ? (
+        <NextStepCard
+          title="Keep Tracking Replies"
+          description="When a creator replies, mark them accepted or declined here."
+          href={`/brands/${id}/track?tab=pending`}
+          actionLabel="Review Pending"
+        />
+      ) : null}
 
       {acceptedCount > 0 && (
         <div className="rounded-lg border p-4 flex items-center justify-between gap-4">

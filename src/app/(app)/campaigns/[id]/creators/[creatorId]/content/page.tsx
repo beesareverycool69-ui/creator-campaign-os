@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { NextStepCard } from "@/components/ui/next-step-card";
 import { ContentCard, ContentStatusBadge } from "@/components/features/content";
 import { getCampaignCreatorById } from "@/lib/actions/campaign-creators";
 import { getContent, getContentStats } from "@/lib/actions/content";
@@ -24,6 +25,37 @@ export default async function ContentListPage({ params }: Props) {
 
   const { campaign, brandCreator } = campaignCreator;
   const { creator } = brandCreator;
+  const submittedContent = contentList.find((content) =>
+    ["submitted", "in_review"].includes(content.status)
+  );
+  const approvedContent = contentList.find((content) => content.status === "approved");
+  const contentNextStep = submittedContent
+    ? {
+        title: "Review Content",
+        description: "New content is waiting for approval, revision notes, or rejection.",
+        href: `/campaigns/${campaignId}/creators/${creatorId}/content/${submittedContent.id}`,
+        actionLabel: "Review Content",
+      }
+    : approvedContent
+      ? {
+          title: "Mark Posted",
+          description: "Approved content is ready to be marked posted after it goes live.",
+          href: `/campaigns/${campaignId}/creators/${creatorId}/content/${approvedContent.id}`,
+          actionLabel: "Track Posting",
+        }
+      : stats.posted > 0
+        ? {
+            title: "Review Analytics",
+            description: "Posted content is ready for conversion and revenue review.",
+            href: "/analytics",
+            actionLabel: "Review Analytics",
+          }
+        : {
+            title: "Send Portal Link",
+            description: "Ask the creator to upload content through their portal link, or add an internal upload manually.",
+            href: `/campaigns/${campaignId}/creators/${creatorId}/content/new`,
+            actionLabel: "Internal Upload",
+          };
 
   return (
     <div className="space-y-6">
@@ -60,6 +92,8 @@ export default async function ContentListPage({ params }: Props) {
           <Button>+ Internal Upload</Button>
         </Link>
       </div>
+
+      <NextStepCard {...contentNextStep} />
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">

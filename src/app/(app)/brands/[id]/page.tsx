@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { NextStepCard } from "@/components/ui/next-step-card";
 import {
   LeadRow,
   LeadStatusBadge,
@@ -58,9 +59,47 @@ export default async function BrandPage({ params }: Props) {
   ] as const;
   const acceptedCount = statusCounts["active"] || 0;
   const firstCampaign = campaigns[0];
+  const hasProducts = products.length > 0;
+  const hasCreators = brandCreators.length > 0;
+  const readyForDmCount =
+    (statusCounts["discovered"] || 0) + (statusCounts["qualified"] || 0);
   const anthropicConfigured = isConfiguredEnv("ANTHROPIC_API_KEY");
   const discoveryConfigured = anthropicConfigured && isConfiguredEnv("BRAVE_API_KEY");
   const suggestedCreatorSearchTerms = buildSuggestedCreatorSearchTerms(brand.brandAnalysis);
+  const nextStep = !hasProducts
+    ? {
+        title: "Add Product",
+        description: "Add the product creators will receive or promote before outreach.",
+        href: `/brands/${id}#products`,
+        actionLabel: "Add Product",
+      }
+    : !hasCreators
+      ? {
+          title: "Discover Creators",
+          description: "Build the lead list for this brand from matching or discovery.",
+          href: `/brands/${id}/leads`,
+          actionLabel: "Find Creators",
+        }
+      : readyForDmCount > 0
+        ? {
+            title: "Send DM",
+            description: `${readyForDmCount} creator${readyForDmCount === 1 ? " is" : "s are"} ready for outreach.`,
+            href: `/brands/${id}/send-dms`,
+            actionLabel: "Send DMs",
+          }
+        : acceptedCount > 0
+          ? {
+              title: "Add to Campaign",
+              description: "Accepted creators are ready to move into campaign onboarding.",
+              href: firstCampaign ? `/campaigns/${firstCampaign.id}` : `/campaigns/new?brandId=${id}`,
+              actionLabel: firstCampaign ? "Open Campaign" : "Create Campaign",
+            }
+          : {
+              title: "Track Replies",
+              description: "Check contacted creators and log accepted or declined replies.",
+              href: `/brands/${id}/track`,
+              actionLabel: "Track Replies",
+            };
 
   return (
     <div className="space-y-6">
@@ -200,6 +239,8 @@ export default async function BrandPage({ params }: Props) {
           </Card>
         </Link>
       </div>
+
+      <NextStepCard {...nextStep} />
 
       {/* Lead Funnel Stats */}
       <div className="grid grid-cols-6 gap-4">

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { NextStepCard } from "@/components/ui/next-step-card";
 import {
   LeadList,
   LeadStatusBadge,
@@ -64,6 +65,8 @@ export default async function BrandLeadsPage({ params, searchParams }: Props) {
     (sum, count) => sum + count,
     0
   );
+  const readyForDmCount =
+    (statusCounts["discovered"] || 0) + (statusCounts["qualified"] || 0);
 
   return (
     <div className="space-y-6">
@@ -101,6 +104,17 @@ export default async function BrandLeadsPage({ params, searchParams }: Props) {
           anthropic: isConfiguredEnv("ANTHROPIC_API_KEY"),
           brave: isConfiguredEnv("BRAVE_API_KEY"),
         }}
+      />
+
+      <NextStepCard
+        title={readyForDmCount > 0 ? "Send DM" : "Discover or Add Creators"}
+        description={
+          readyForDmCount > 0
+            ? `${readyForDmCount} creator${readyForDmCount === 1 ? " is" : "s are"} ready for outreach.`
+            : "Add more creators or run discovery until you have leads ready for outreach."
+        }
+        href={readyForDmCount > 0 ? `/brands/${id}/send-dms` : `/brands/${id}/leads`}
+        actionLabel={readyForDmCount > 0 ? "Send DMs" : "Find Creators"}
       />
 
       {/* Status filter tabs */}

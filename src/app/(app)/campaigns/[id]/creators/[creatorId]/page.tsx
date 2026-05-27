@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { NextStepCard } from "@/components/ui/next-step-card";
 import {
   PipelineStatusBadge,
   StatusMover,
@@ -15,6 +16,7 @@ import { getCampaignCreatorById } from "@/lib/actions/campaign-creators";
 import { getAgreement } from "@/lib/actions/agreements";
 import { getShipment } from "@/lib/actions/shipments";
 import { getContentStats } from "@/lib/actions/content";
+import { getPortalUrl } from "@/lib/actions/creator-portal";
 
 type Props = {
   params: Promise<{ id: string; creatorId: string }>;
@@ -48,11 +50,22 @@ export default async function CampaignCreatorPage({ params }: Props) {
   const showShipment = SHOW_SHIPMENT_STATUSES.includes(campaignCreator.status);
   const showContent = SHOW_CONTENT_STATUSES.includes(campaignCreator.status);
 
-  const [agreement, shipment, contentStats] = await Promise.all([
+  const [agreement, shipment, contentStats, portalUrl] = await Promise.all([
     showAgreement ? getAgreement(creatorId) : Promise.resolve(null),
     showShipment ? getShipment(creatorId) : Promise.resolve(null),
     showContent ? getContentStats(creatorId) : Promise.resolve(null),
+    getPortalUrl(creatorId),
   ]);
+
+  const nextStep = getCreatorNextStep({
+    campaignId,
+    creatorId,
+    status: campaignCreator.status,
+    hasAgreement: !!agreement,
+    hasShipment: !!shipment,
+    contentStats,
+    portalUrl,
+  });
 
   // Calculate days in campaign
   const daysInCampaign = Math.floor(
@@ -126,6 +139,8 @@ export default async function CampaignCreatorPage({ params }: Props) {
           View Full Profile →
         </Link>
       </div>
+
+      <NextStepCard {...nextStep} />
 
       {/* Status mover */}
       <Card>
@@ -440,4 +455,88 @@ function getFlagEmoji(countryCode: string): string {
     .split("")
     .map((char) => 127397 + char.charCodeAt(0));
   return String.fromCodePoint(...codePoints);
+}
+
+
+type CreatorNextStepInput = {
+  campaignId: string;
+  creatorId: string;
+  status: string;
+  hasAgreement: boolean;
+  hasShipment: boolean;
+  contentStats: Awaited<ReturnType<typeof getContentStats>> | null;
+  portalUrl: string;
+};
+
+function getCreatorNextStep({
+  campaignId,
+  creatorId,
+  status,
+  hasAgreement,
+  hasShipment,
+  contentStats,
+  portalUrl,
+}: CreatorNextStepInput) {
+  const creatorHref = `/campaigns/${campaignId}/creators/${creatorId}`;
+
+  if (!hasAgreement && ["accepted", "onboarding", "ready", "active", "completed"].includes(status)) {
+    return {
+      title: "Create Agreement",
+      description: "Lock in deliverables, rate, usage rights, and terms before shipping product.",
+      href: `${creatorHref}/agreement`,
+      actionLabel: "Create Agreement",
+    };
+  }
+
+  if (!hasShipment && ["onboarding", "ready", "active", "completed"].includes(status)) {
+    return {
+      title: "Create Shipment",
+      description: "Create the shipment record so product delivery is tracked before content creation.",
+      href: `${creatorHref}/shipment`,
+      actionLabel: "Create Shipment",
+    };
+  }
+
+  if ((contentStats?.submitted || 0) > 0) {
+    return {
+      title: "Review Content",
+      description: "New content is waiting for approval, revision notes, or rejection.",
+      href: `${creatorHref}/content`,
+      actionLabel: "Review Content",
+    };
+  }
+
+  if ((contentStats?.approved || 0) > 0) {
+    return {
+      title: "Mark Posted",
+      description: "Approved content is ready to be marked posted once it goes live.",
+      href: `${creatorHref}/content`,
+      actionLabel: "Track Posting",
+    };
+  }
+
+  if ((contentStats?.posted || 0) > 0 || ["posted", "completed"].includes(status)) {
+    return {
+      title: "Review Analytics",
+      description: "Content has been posted. Review conversions and revenue impact.",
+      href: "/analytics",
+      actionLabel: "Review Analytics",
+    };
+  }
+
+  if (hasShipment || ["ready", "creating"].includes(status)) {
+    return {
+      title: "Send Portal Link",
+      description: "Send the creator portal link so content can be submitted for review.",
+      href: portalUrl,
+      actionLabel: "Open Portal Link",
+    };
+  }
+
+  return {
+    title: "Move Creator Forward",
+    description: "Update the pipeline status when this creator is ready for the next campaign step.",
+    href: creatorHref,
+    actionLabel: "Review Status",
+  };
 }

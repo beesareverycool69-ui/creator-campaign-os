@@ -4,6 +4,7 @@ import { getBrandById } from "@/lib/actions/brands";
 import { getLeadsForOutreach } from "@/lib/actions/outreach";
 import { SendDMsQueue } from "@/components/features/outreach/send-dms-queue";
 import { EmptyState } from "@/components/ui/empty-state";
+import { NextStepCard } from "@/components/ui/next-step-card";
 import { isConfiguredEnv } from "@/lib/env";
 
 type Props = {
@@ -78,6 +79,15 @@ export default async function SendDMsPage({ params }: Props) {
           <strong>Commented</strong>. Hit <strong>Skip</strong> if they're not a fit.
         </p>
       </div>
+
+      {leads.length > 0 && (
+        <NextStepCard
+          title="Track Replies"
+          description="After each DM is marked sent, check Track to log accepted or declined replies."
+          href={`/brands/${id}/track`}
+          actionLabel="Track Replies"
+        />
+      )}
 
       {/* Queue */}
       {leads.length === 0 ? (

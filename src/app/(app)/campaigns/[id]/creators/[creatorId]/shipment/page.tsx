@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ShipmentForm, ShipmentDetail } from "@/components/features/shipments";
+import { NextStepCard } from "@/components/ui/next-step-card";
 import { getCampaignCreatorById } from "@/lib/actions/campaign-creators";
 import {
   getShipment,
   getCreatorAddresses,
   getBrandProducts,
 } from "@/lib/actions/shipments";
+import { getPortalUrl } from "@/lib/actions/creator-portal";
 
 type Props = {
   params: Promise<{ id: string; creatorId: string }>;
@@ -24,10 +26,11 @@ export default async function ShipmentPage({ params }: Props) {
   const { campaign, brandCreator } = campaignCreator;
   const { creator } = brandCreator;
 
-  const [shipment, addresses, products] = await Promise.all([
+  const [shipment, addresses, products, portalUrl] = await Promise.all([
     getShipment(creatorId),
     getCreatorAddresses(creator.id),
     getBrandProducts(campaign.brand.id),
+    getPortalUrl(creatorId),
   ]);
 
   return (
@@ -59,6 +62,15 @@ export default async function ShipmentPage({ params }: Props) {
           {creator.name} • {campaign.name}
         </p>
       </div>
+
+      {shipment && (
+        <NextStepCard
+          title="Send Portal Link"
+          description="Shipment is created. Send the creator portal link so they can upload content when ready."
+          href={portalUrl}
+          actionLabel="Open Portal Link"
+        />
+      )}
 
       {/* Content */}
       {shipment ? (

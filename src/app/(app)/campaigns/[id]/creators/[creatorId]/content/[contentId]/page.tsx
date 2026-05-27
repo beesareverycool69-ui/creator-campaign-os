@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { NextStepCard } from "@/components/ui/next-step-card";
 import {
   ContentStatusBadge,
   ContentReview,
@@ -36,6 +37,7 @@ export default async function ContentDetailPage({ params }: Props) {
       (latestMetrics.shares || 0) +
       (latestMetrics.saves || 0)
     : 0;
+  const nextStep = getContentNextStep(content.status);
 
   return (
     <div className="space-y-6">
@@ -86,6 +88,8 @@ export default async function ContentDetailPage({ params }: Props) {
           </p>
         </div>
       </div>
+
+      <NextStepCard {...nextStep} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main content area */}
@@ -271,4 +275,42 @@ export default async function ContentDetailPage({ params }: Props) {
       </div>
     </div>
   );
+}
+
+
+function getContentNextStep(status: string) {
+  if (["submitted", "in_review"].includes(status)) {
+    return {
+      title: "Review Content",
+      description: "Approve this content, request revisions, or reject it so the creator knows what to do next.",
+    };
+  }
+
+  if (status === "revision_requested") {
+    return {
+      title: "Wait for Revision",
+      description: "A revision was requested. Review the updated submission when the creator sends it back.",
+    };
+  }
+
+  if (status === "approved") {
+    return {
+      title: "Mark Posted",
+      description: "Once the creator publishes, add the post URL and mark this content posted.",
+    };
+  }
+
+  if (["posted", "live", "completed"].includes(status)) {
+    return {
+      title: "Review Analytics",
+      description: "Posted content is ready for performance, conversion, and revenue review.",
+      href: "/analytics",
+      actionLabel: "Review Analytics",
+    };
+  }
+
+  return {
+    title: "Review Content",
+    description: "Check this content status and move it to the next appropriate step.",
+  };
 }

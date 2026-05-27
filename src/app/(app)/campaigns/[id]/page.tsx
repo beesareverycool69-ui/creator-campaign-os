@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { NextStepCard } from "@/components/ui/next-step-card";
 import {
   CampaignStatusBadge,
   PipelineBoard,
@@ -45,6 +46,8 @@ export default async function CampaignPage({ params, searchParams }: Props) {
       creator.status
     )
   );
+
+  const campaignNextStep = getCampaignNextStep(id, campaignCreators);
 
   const commandCenterSteps = [
     {
@@ -144,6 +147,8 @@ export default async function CampaignPage({ params, searchParams }: Props) {
           defaultOpen={addCreator === "1"}
         />
       </div>
+
+      <NextStepCard {...campaignNextStep} />
 
       {/* Campaign command center */}
       <Card>
@@ -262,4 +267,81 @@ function formatDate(dateStr: string): string {
     day: "numeric",
     year: "numeric",
   });
+}
+
+
+function getCampaignNextStep(
+  campaignId: string,
+  creators: { id: string; status: string }[]
+) {
+  const nextCreator = creators.find((creator) =>
+    ["accepted", "onboarding", "ready", "creating", "in_review", "approved", "posting", "posted"].includes(
+      creator.status
+    )
+  );
+
+  if (!nextCreator) {
+    return {
+      title: "Add to Campaign",
+      description: "Add accepted brand leads so you can start agreement and shipment onboarding.",
+      href: `/campaigns/${campaignId}?addCreator=1`,
+      actionLabel: "Add Creator",
+    };
+  }
+
+  const creatorHref = `/campaigns/${campaignId}/creators/${nextCreator.id}`;
+
+  switch (nextCreator.status) {
+    case "accepted":
+      return {
+        title: "Create Agreement",
+        description: "This creator is in the campaign. Create the agreement before shipment.",
+        href: `${creatorHref}/agreement`,
+        actionLabel: "Create Agreement",
+      };
+    case "onboarding":
+      return {
+        title: "Create Shipment",
+        description: "Agreement work is underway. Create or update the creator shipment.",
+        href: `${creatorHref}/shipment`,
+        actionLabel: "Create Shipment",
+      };
+    case "ready":
+    case "creating":
+      return {
+        title: "Send Portal Link",
+        description: "The creator is ready to upload content. Send their portal link and monitor submissions.",
+        href: `${creatorHref}/content`,
+        actionLabel: "View Content",
+      };
+    case "in_review":
+      return {
+        title: "Review Content",
+        description: "Content is waiting for approval, revision notes, or rejection.",
+        href: `${creatorHref}/content`,
+        actionLabel: "Review Content",
+      };
+    case "approved":
+    case "posting":
+      return {
+        title: "Mark Posted",
+        description: "Approved content is ready to be tracked once the creator publishes.",
+        href: `${creatorHref}/content`,
+        actionLabel: "Track Posting",
+      };
+    case "posted":
+      return {
+        title: "Review Analytics",
+        description: "Content is posted. Review conversions and revenue impact.",
+        href: "/analytics",
+        actionLabel: "Review Analytics",
+      };
+    default:
+      return {
+        title: "Open Creator",
+        description: "Open the next creator needing work in this campaign.",
+        href: creatorHref,
+        actionLabel: "Open Creator",
+      };
+  }
 }

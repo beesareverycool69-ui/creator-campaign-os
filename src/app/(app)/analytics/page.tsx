@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { NextStepCard } from "@/components/ui/next-step-card";
 import {
   getOverallStats,
   getTopCreators,
@@ -76,6 +77,17 @@ export default async function AnalyticsPage() {
           </p>
         </div>
       </div>
+
+      <NextStepCard
+        title={pendingConversions.length > 0 ? "Confirm Conversions" : "Review Campaign Performance"}
+        description={
+          pendingConversions.length > 0
+            ? `${pendingConversions.length} conversion${pendingConversions.length === 1 ? " needs" : "s need"} confirmation before revenue totals are final.`
+            : "Use revenue, commissions, top creators, and campaign performance to decide who to reinvest in next."
+        }
+        href={pendingConversions.length > 0 ? "/analytics" : "/campaigns"}
+        actionLabel={pendingConversions.length > 0 ? "Review Pending" : "View Campaigns"}
+      />
 
       {/* Top Stats */}
       <div className="grid gap-4 md:grid-cols-4">

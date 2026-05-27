@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AgreementForm, AgreementDetail } from "@/components/features/agreements";
+import { NextStepCard } from "@/components/ui/next-step-card";
 import { getCampaignCreatorById } from "@/lib/actions/campaign-creators";
 import { getAgreement } from "@/lib/actions/agreements";
 
@@ -52,6 +53,15 @@ export default async function AgreementPage({ params }: Props) {
           {creator.name} • {campaign.name}
         </p>
       </div>
+
+      {agreement && (
+        <NextStepCard
+          title="Create Shipment"
+          description="Agreement is created. Next, create the product shipment for this creator."
+          href={`/campaigns/${campaignId}/creators/${creatorId}/shipment`}
+          actionLabel="Create Shipment"
+        />
+      )}
 
       {/* Content */}
       {agreement ? (

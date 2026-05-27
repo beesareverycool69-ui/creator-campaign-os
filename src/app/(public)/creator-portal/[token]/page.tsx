@@ -29,6 +29,23 @@ export default async function CreatorPortalPage({ params }: Props) {
     posted: "bg-secondary text-primary",
   };
 
+  const hasSubmittedContent = contents.length > 0;
+  const hasApprovedContent = contents.some((c) => c.status === "approved" || c.status === "posted");
+  const creatorNextStep = !hasSubmittedContent
+    ? {
+        title: "Upload Content",
+        description: "Submit your content for brand review when it is ready.",
+      }
+    : hasApprovedContent
+      ? {
+          title: "Post Approved Content",
+          description: "Your content is approved. Post it, then share the live URL with the brand.",
+        }
+      : {
+          title: "Wait for Review",
+          description: "Your content was submitted. The brand will approve it or request changes.",
+        };
+
   const steps = [
     {
       icon: Package,
@@ -104,6 +121,13 @@ export default async function CreatorPortalPage({ params }: Props) {
                 </div>
               ))}
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-sm font-semibold text-primary">Next: {creatorNextStep.title}</p>
+            <p className="text-sm text-muted-foreground mt-1">{creatorNextStep.description}</p>
           </CardContent>
         </Card>
 
