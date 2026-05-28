@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import {
   campaignCreators,
   brandCreators,
+  brandCommerceIntegrations,
   creators,
   creatorPlatforms,
   campaigns,
@@ -16,6 +17,9 @@ import {
 } from "@/lib/auth/access";
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { decryptSecret } from "@/lib/security/encryption";
+import { createBasicDiscountCode } from "@/lib/shopify/admin";
+import { generatePromoCode } from "@/lib/utils/promo-codes";
 
 // =============================================================================
 // TYPES
@@ -54,6 +58,9 @@ export type AddCreatorToCampaignInput = {
   deliverableCount?: number;
   notes?: string;
 };
+
+const DEFAULT_SHOPIFY_DISCOUNT_PERCENTAGE = 15;
+const MAX_PROMO_CODE_ATTEMPTS = 5;
 
 export type CampaignCreatorWithDetails = {
   id: string;
@@ -306,6 +313,145 @@ export async function addCreatorToCampaign(input: AddCreatorToCampaignInput) {
   revalidatePath(`/brands/${brandCreator.brandId}/track`);
 
   return newCampaignCreator;
+}
+
+/**
+ * Update campaign creator status (move through pipeline)
+ */
+export async function createShopifyDiscountCodeForCampaignCreator(
+  campaignCreatorId: string
+) {
+  await requireOwnedCampaignCreator(campaignCreatorId);
+
+  const campaignCreator = await db.query.campaignCreators.findFirst({
+    where: eq(campaignCreators.id, campaignCreatorId),
+    with: {
+      campaign: {
+        with: {
+          brand: true,
+        },
+      },
+      brandCreator: {
+        with: {
+          creator: true,
+        },
+      },
+    },
+  });
+
+  if (!campaignCreator) {
+    throw new Error("Campaign creator not found.");
+  }
+
+  if (campaignCreator.affiliateCode) {
+    return campaignCreator;
+  }
+
+  const { campaign, brandCreator } = campaignCreator;
+  const { brand } = campaign;
+  const { creator } = brandCreator;
+
+  const [integration] = await db
+    .select()
+    .from(brandCommerceIntegrations)
+    .where(
+      and(
+        eq(brandCommerceIntegrations.brandId, brand.id),
+        eq(brandCommerceIntegrations.provider, "shopify")
+      )
+    )
+    .limit(1);
+
+  if (
+    !integration ||
+    integration.status !== "connected" ||
+    !integration.shopDomain ||
+    !integration.accessTokenEncrypted
+  ) {
+    throw new Error(
+      "Shopify is not connected for this brand. Connect Shopify in Brand Settings before creating discount codes."
+    );
+  }
+
+  const accessToken = decryptSecret(integration.accessTokenEncrypted);
+  const percentage = DEFAULT_SHOPIFY_DISCOUNT_PERCENTAGE;
+  let lastUserError: string | null = null;
+
+  for (let attempt = 0; attempt < MAX_PROMO_CODE_ATTEMPTS; attempt += 1) {
+    const code = await generateUniqueCampaignCreatorPromoCode(
+      creator.name,
+      brand.name
+    );
+
+    const result = await createBasicDiscountCode({
+      shopDomain: integration.shopDomain,
+      accessToken,
+      code,
+      title: `${creator.name} ${percentage}% off`,
+      percentage,
+      startsAt: new Date(),
+    });
+
+    if (result.userErrors.length > 0) {
+      const message = result.userErrors
+        .map((error) => error.message)
+        .join("; ");
+
+      if (isDuplicateDiscountCodeError(message)) {
+        lastUserError = message;
+        continue;
+      }
+
+      throw new Error(`Shopify could not create the discount code: ${message}`);
+    }
+
+    const [updated] = await db
+      .update(campaignCreators)
+      .set({
+        affiliateCode: code,
+        affiliateRate: percentage.toString(),
+        updatedAt: new Date(),
+      })
+      .where(eq(campaignCreators.id, campaignCreatorId))
+      .returning();
+
+    revalidatePath(`/campaigns/${campaign.id}`);
+    revalidatePath(`/campaigns/${campaign.id}/creators/${campaignCreatorId}`);
+
+    return updated;
+  }
+
+  throw new Error(
+    `Shopify could not create a unique discount code after ${MAX_PROMO_CODE_ATTEMPTS} attempts.${
+      lastUserError ? ` Last error: ${lastUserError}` : ""
+    }`
+  );
+}
+
+async function generateUniqueCampaignCreatorPromoCode(
+  creatorName: string,
+  brandName: string
+) {
+  for (let attempt = 0; attempt < MAX_PROMO_CODE_ATTEMPTS; attempt += 1) {
+    const code = generatePromoCode(creatorName, brandName, "simple")
+      .replace(/[^A-Z0-9]/g, "")
+      .slice(0, 50)
+      .toUpperCase();
+
+    const existing = await db.query.campaignCreators.findFirst({
+      where: eq(campaignCreators.affiliateCode, code),
+      columns: { id: true },
+    });
+
+    if (!existing) return code;
+  }
+
+  throw new Error("Could not generate a unique promo code.");
+}
+
+function isDuplicateDiscountCodeError(message: string) {
+  const normalized = message.toLowerCase();
+  return normalized.includes("already") || normalized.includes("taken");
 }
 
 /**

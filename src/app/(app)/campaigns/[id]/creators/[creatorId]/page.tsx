@@ -12,11 +12,15 @@ import {
 import { PlatformBadge } from "@/components/features/creators";
 import { AgreementStatusBadge } from "@/components/features/agreements";
 import { ShipmentStatusBadge } from "@/components/features/shipments";
-import { getCampaignCreatorById } from "@/lib/actions/campaign-creators";
+import {
+  createShopifyDiscountCodeForCampaignCreator,
+  getCampaignCreatorById,
+} from "@/lib/actions/campaign-creators";
 import { getAgreement } from "@/lib/actions/agreements";
 import { getShipment } from "@/lib/actions/shipments";
 import { getContentStats } from "@/lib/actions/content";
 import { getPortalUrl } from "@/lib/actions/creator-portal";
+import { getShopifyIntegrationSettings } from "@/lib/actions/brands";
 
 type Props = {
   params: Promise<{ id: string; creatorId: string }>;
@@ -50,12 +54,18 @@ export default async function CampaignCreatorPage({ params }: Props) {
   const showShipment = SHOW_SHIPMENT_STATUSES.includes(campaignCreator.status);
   const showContent = SHOW_CONTENT_STATUSES.includes(campaignCreator.status);
 
-  const [agreement, shipment, contentStats, portalUrl] = await Promise.all([
+  const [agreement, shipment, contentStats, portalUrl, shopifyIntegration] = await Promise.all([
     showAgreement ? getAgreement(creatorId) : Promise.resolve(null),
     showShipment ? getShipment(creatorId) : Promise.resolve(null),
     showContent ? getContentStats(creatorId) : Promise.resolve(null),
     getPortalUrl(creatorId),
+    getShopifyIntegrationSettings(campaign.brand.id),
   ]);
+
+  const createShopifyCodeAction = async () => {
+    "use server";
+    await createShopifyDiscountCodeForCampaignCreator(creatorId);
+  };
 
   const nextStep = getCreatorNextStep({
     campaignId,
@@ -153,6 +163,50 @@ export default async function CampaignCreatorPage({ params }: Props) {
             currentStatus={campaignCreator.status as PipelineStatus}
             variant="both"
           />
+        </CardContent>
+      </Card>
+
+      {/* Affiliate / Discount Code */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Affiliate / Discount Code</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {campaignCreator.affiliateCode ? (
+            <div className="flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="text-2xl font-bold tracking-wide">
+                  {campaignCreator.affiliateCode}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Affiliate rate: {campaignCreator.affiliateRate ? `${campaignCreator.affiliateRate}%` : "—"}
+                </p>
+              </div>
+              <Badge>Ready for Shopify tracking</Badge>
+            </div>
+          ) : shopifyIntegration.status === "connected" ? (
+            <div className="flex items-center justify-between gap-4">
+              <p className="text-sm text-muted-foreground">
+                Create a unique Shopify discount code for this creator.
+              </p>
+              <form action={createShopifyCodeAction}>
+                <Button type="submit" size="sm">
+                  Create Shopify Code
+                </Button>
+              </form>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between gap-4">
+              <p className="text-sm text-muted-foreground">
+                Connect Shopify for this brand before creating creator discount codes.
+              </p>
+              <Link href={`/brands/${campaign.brand.id}/settings`}>
+                <Button variant="outline" size="sm">
+                  Connect Shopify
+                </Button>
+              </Link>
+            </div>
+          )}
         </CardContent>
       </Card>
 
