@@ -113,7 +113,7 @@ function PipelineCard({
   const handle = primaryPlatform?.handle;
 
   const tierColors = {
-    gold: "bg-accent/20 text-primary border-yellow-500/30",
+    gold: "bg-[hsl(var(--loading-track))] text-primary border-yellow-500/30",
     silver: "bg-gray-400/20 text-gray-400 border-gray-400/30",
     bronze: "bg-orange-700/20 text-primary border-orange-700/30",
   };
@@ -186,7 +186,7 @@ function PipelineCard({
               {uploadUrl ? "Copy Upload Link" : "No Upload Link"}
             </Button>
             {showUploadLink && uploadUrl && (
-              <div className="flex items-center gap-1 p-2 bg-muted rounded text-xs">
+              <div className="flex items-center gap-1 p-2 bg-[hsl(var(--loading-track))] rounded text-xs">
                 <code className="flex-1 truncate">{uploadUrl}</code>
                 <Button 
                   size="sm" 
@@ -204,7 +204,7 @@ function PipelineCard({
         {stage === "review" && (
           <div className="space-y-2">
             {/* Video thumbnail placeholder */}
-            <div className="aspect-video bg-muted rounded flex items-center justify-center">
+            <div className="aspect-video bg-[hsl(var(--loading))] rounded flex items-center justify-center">
               <Play className="h-8 w-8 text-muted-foreground" />
             </div>
             <p className="text-xs text-muted-foreground">+7 more files</p>

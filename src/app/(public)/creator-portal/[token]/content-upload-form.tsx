@@ -265,7 +265,7 @@ export function ContentUploadForm({ token }: ContentUploadFormProps) {
             <span>Uploading...</span>
             <span>{uploadProgress}%</span>
           </div>
-          <div className="h-2 bg-card/70 rounded-full overflow-hidden">
+          <div className="h-2 bg-[hsl(var(--loading-track))] rounded-full overflow-hidden">
             <div
               className="h-full bg-primary transition-all duration-300"
               style={{ width: `${uploadProgress}%` }}

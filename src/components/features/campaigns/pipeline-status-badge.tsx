@@ -42,22 +42,22 @@ const STATUS_CONFIG: Record<
   },
   invited: {
     label: "Invited",
-    className: "bg-secondary text-primary border-primary/30",
+    className: "bg-[hsl(var(--loading-track))] text-primary border-primary/30",
     emoji: "✉️",
   },
   reminded: {
     label: "Reminded",
-    className: "bg-secondary/60 text-primary border-primary/30",
+    className: "bg-[hsl(var(--loading))] text-primary border-primary/30",
     emoji: "🔔",
   },
   negotiating: {
     label: "Negotiating",
-    className: "bg-secondary text-primary border-border",
+    className: "bg-[hsl(var(--loading-track))] text-primary border-border",
     emoji: "💬",
   },
   accepted: {
     label: "Accepted",
-    className: "bg-secondary text-primary border-primary/30",
+    className: "bg-[hsl(var(--loading-track))] text-primary border-primary/30",
     emoji: "✅",
   },
   declined: {
@@ -73,18 +73,18 @@ const STATUS_CONFIG: Record<
   // Onboarding
   onboarding: {
     label: "Onboarding",
-    className: "bg-secondary text-primary border-primary/30",
+    className: "bg-[hsl(var(--loading-track))] text-primary border-primary/30",
     emoji: "📝",
   },
   ready: {
     label: "Ready",
-    className: "bg-secondary text-primary border-primary/30",
+    className: "bg-[hsl(var(--loading-track))] text-primary border-primary/30",
     emoji: "🚀",
   },
   // Execution
   shipped: {
     label: "Shipped",
-    className: "bg-secondary text-primary border-border",
+    className: "bg-[hsl(var(--loading-track))] text-primary border-border",
     emoji: "📦",
   },
   creating: {
@@ -94,12 +94,12 @@ const STATUS_CONFIG: Record<
   },
   in_review: {
     label: "In Review",
-    className: "bg-accent/30 text-primary border-border",
+    className: "bg-[hsl(var(--loading-track))] text-primary border-border",
     emoji: "👀",
   },
   revision: {
     label: "Revision",
-    className: "bg-secondary text-primary border-primary/30",
+    className: "bg-[hsl(var(--loading-track))] text-primary border-primary/30",
     emoji: "🔄",
   },
   approved: {
@@ -109,7 +109,7 @@ const STATUS_CONFIG: Record<
   },
   posting: {
     label: "Posting",
-    className: "bg-secondary text-primary border-primary/30",
+    className: "bg-[hsl(var(--loading-track))] text-primary border-primary/30",
     emoji: "📤",
   },
   posted: {

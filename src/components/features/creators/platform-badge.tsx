@@ -25,7 +25,7 @@ function getPlatformColor(platformId: string): string {
     twitter: "bg-sky-500 text-white border-0",
     twitch: "bg-primary text-white border-0",
   };
-  return colors[platformId] || "bg-secondary";
+  return colors[platformId] || "bg-[hsl(var(--loading-track))]";
 }
 
 function getPlatformIcon(platformId: string): string {

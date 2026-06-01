@@ -26,12 +26,12 @@ type CreatorCardProps = {
 function getTierColor(tier: string | null): string {
   const colors: Record<string, string> = {
     nano: "bg-gray-100 text-gray-800",
-    micro: "bg-secondary text-primary",
+    micro: "bg-[hsl(var(--loading-track))] text-primary",
     mid: "bg-primary/10 text-primary",
-    macro: "bg-secondary text-primary",
-    mega: "bg-secondary text-primary",
+    macro: "bg-[hsl(var(--loading-track))] text-primary",
+    mega: "bg-[hsl(var(--loading-track))] text-primary",
   };
-  return tier ? colors[tier] || "bg-secondary" : "bg-secondary";
+  return tier ? colors[tier] || "bg-[hsl(var(--loading-track))]" : "bg-[hsl(var(--loading-track))]";
 }
 
 export function CreatorCard({ creator }: CreatorCardProps) {

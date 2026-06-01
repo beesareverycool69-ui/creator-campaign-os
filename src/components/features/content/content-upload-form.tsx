@@ -181,7 +181,7 @@ export function ContentUploadForm({
               {uploading ? (
                 <div className="space-y-2">
                   <p className="text-muted-foreground">Uploading...</p>
-                  <div className="w-full bg-card/70 rounded-full h-2">
+                  <div className="w-full bg-[hsl(var(--loading-track))] rounded-full h-2">
                     <div
                       className="bg-primary h-2 rounded-full transition-all"
                       style={{ width: `${uploadProgress}%` }}
@@ -207,7 +207,7 @@ export function ContentUploadForm({
                 {uploadedFiles.map((file, index) => (
                   <div
                     key={index}
-                    className="relative group aspect-square bg-muted rounded-lg overflow-hidden"
+                    className="relative group aspect-square bg-[hsl(var(--loading))] rounded-lg overflow-hidden"
                   >
                     {file.type.startsWith("video/") ? (
                       <video

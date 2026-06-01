@@ -66,7 +66,7 @@ export function ContentCard({
       <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
         <CardContent className="p-0">
           {/* Thumbnail/Preview */}
-          <div className="aspect-video bg-muted relative overflow-hidden rounded-t-lg">
+          <div className="aspect-video bg-[hsl(var(--loading))] relative overflow-hidden rounded-t-lg">
             {previewUrl ? (
               isVideo ? (
                 <video

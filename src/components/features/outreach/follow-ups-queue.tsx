@@ -111,7 +111,7 @@ function FollowUpCard({
   const getBadgeColor = () => {
     if (lead.daysSinceContact <= 3) return "bg-card/70 text-primary border-border";
     if (lead.daysSinceContact <= 7) return "bg-card/70 text-primary border-border";
-    return "bg-secondary text-primary border-primary/30";
+    return "bg-[hsl(var(--loading-track))] text-primary border-primary/30";
   };
 
   return (

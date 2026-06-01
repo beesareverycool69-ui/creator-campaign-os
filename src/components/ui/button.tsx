@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils/cn";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-sm text-sm font-semibold tracking-[-0.01em] ring-offset-background transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2 active:translate-y-px disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none disabled:active:translate-y-0",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-sm text-sm font-semibold tracking-[-0.01em] ring-offset-background transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2 active:translate-y-px disabled:pointer-events-none disabled:!border-[hsl(var(--disabled-border))] disabled:!bg-[hsl(var(--disabled))] disabled:!text-[hsl(var(--disabled-foreground))] disabled:shadow-none disabled:active:translate-y-0",
   {
     variants: {
       variant: {
@@ -12,11 +12,11 @@ const buttonVariants = cva(
         destructive:
           "border border-destructive/80 bg-destructive text-destructive-foreground shadow-[inset_0_1px_0_hsl(var(--destructive-foreground)/0.14),0_1px_2px_hsl(var(--background)/0.35)] hover:bg-destructive/90 active:shadow-[inset_0_1px_2px_hsl(var(--background)/0.35)]",
         outline:
-          "border border-input bg-background/70 shadow-[inset_0_1px_0_hsl(var(--foreground)/0.04)] hover:border-foreground/24 hover:bg-accent/70 hover:text-accent-foreground active:bg-accent/55",
+          "border border-input bg-background/70 shadow-[inset_0_1px_0_hsl(var(--foreground)/0.04)] hover:border-foreground/24 hover:bg-[hsl(var(--interactive-hover))] hover:text-foreground active:bg-[hsl(var(--loading-track))]",
         secondary:
-          "border border-border bg-secondary text-secondary-foreground shadow-[inset_0_1px_0_hsl(var(--foreground)/0.06),0_1px_2px_hsl(var(--background)/0.25)] hover:bg-secondary/86 active:shadow-[inset_0_1px_2px_hsl(var(--background)/0.25)]",
+          "border border-border bg-[hsl(var(--loading-track))] text-secondary-foreground shadow-[inset_0_1px_0_hsl(var(--foreground)/0.06),0_1px_2px_hsl(var(--background)/0.25)] hover:bg-[hsl(var(--interactive-hover))] active:shadow-[inset_0_1px_2px_hsl(var(--background)/0.25)]",
         ghost:
-          "hover:bg-accent/70 hover:text-accent-foreground active:bg-accent/55",
+          "hover:bg-[hsl(var(--interactive-hover))] hover:text-foreground active:bg-[hsl(var(--loading-track))]",
         link: "text-primary underline-offset-4 hover:underline active:translate-y-0",
       },
       size: {

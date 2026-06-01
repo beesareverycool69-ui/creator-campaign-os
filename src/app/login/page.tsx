@@ -114,7 +114,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50"
+              className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:border disabled:border-[hsl(var(--disabled-border))] disabled:bg-[hsl(var(--disabled))] disabled:text-[hsl(var(--disabled-foreground))]"
             >
               {loading ? "Loading..." : "Sign In"}
             </button>
@@ -123,7 +123,7 @@ export default function LoginPage() {
               type="button"
               onClick={handleSignUp}
               disabled={loading}
-              className="w-full py-2 px-4 border border-input rounded-md hover:bg-card disabled:opacity-50"
+              className="w-full py-2 px-4 border border-input rounded-md hover:bg-[hsl(var(--interactive-hover))] disabled:border-[hsl(var(--disabled-border))] disabled:bg-[hsl(var(--disabled))] disabled:text-[hsl(var(--disabled-foreground))]"
             >
               Create Account
             </button>

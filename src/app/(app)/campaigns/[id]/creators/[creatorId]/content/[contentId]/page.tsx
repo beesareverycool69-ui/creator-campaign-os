@@ -105,7 +105,7 @@ export default async function ContentDetailPage({ params }: Props) {
                   {content.fileUrls.map((url, index) => {
                     const isVideo = url.match(/\.(mp4|mov|webm|avi)$/i);
                     return (
-                      <div key={index} className="rounded-lg overflow-hidden bg-muted">
+                      <div key={index} className="rounded-lg overflow-hidden bg-[hsl(var(--loading))]">
                         {isVideo ? (
                           <video
                             src={url}

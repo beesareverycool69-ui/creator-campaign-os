@@ -23,12 +23,12 @@ const STATUS_CONFIG: Record<
   },
   sent: {
     label: "Sent",
-    className: "bg-secondary text-primary border-primary/30",
+    className: "bg-[hsl(var(--loading-track))] text-primary border-primary/30",
     emoji: "✉️",
   },
   signed: {
     label: "Signed",
-    className: "bg-secondary text-primary border-border",
+    className: "bg-[hsl(var(--loading-track))] text-primary border-border",
     emoji: "✍️",
   },
   countersigned: {

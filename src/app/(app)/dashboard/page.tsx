@@ -47,8 +47,8 @@ export default async function DashboardPage() {
     discovered: "bg-card/70 text-muted-foreground",
     researching: "bg-yellow-100 text-primary",
     qualified: "bg-blue-100 text-primary",
-    contacted: "bg-secondary text-primary",
-    engaged: "bg-secondary text-primary",
+    contacted: "bg-[hsl(var(--loading-track))] text-primary",
+    engaged: "bg-[hsl(var(--loading-track))] text-primary",
     active: "bg-green-100 text-primary",
   };
 
@@ -277,7 +277,7 @@ export default async function DashboardPage() {
                       <span className="font-medium">{step.label}</span>
                       <span className="text-muted-foreground">{value}</span>
                     </div>
-                    <div className="h-3 bg-card/70 rounded-full overflow-hidden">
+                    <div className="h-3 bg-[hsl(var(--loading-track))] rounded-full overflow-hidden">
                       <div
                         className={`h-full ${step.color} rounded-full transition-all`}
                         style={{ width: `${width}%` }}

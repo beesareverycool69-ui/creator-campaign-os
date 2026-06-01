@@ -35,8 +35,8 @@ type Props = {
 
 function scoreColor(score: number) {
   if (score >= 75) return "bg-primary/10 text-primary";
-  if (score >= 50) return "bg-secondary text-primary";
-  return "bg-secondary text-primary";
+  if (score >= 50) return "bg-[hsl(var(--loading-track))] text-primary";
+  return "bg-[hsl(var(--loading-track))] text-primary";
 }
 
 function MatchRow({ match, brandId }: { match: Match; brandId: string }) {

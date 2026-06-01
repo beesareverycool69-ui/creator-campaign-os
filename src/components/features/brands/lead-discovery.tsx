@@ -396,7 +396,7 @@ export function LeadDiscovery({ brandId, onAddCreators, existingIdentityKeys, ai
             </div>
             {ocrPreview && (
               <div className="relative rounded-lg overflow-hidden border">
-                <img src={ocrPreview} alt="Preview" className="max-h-48 w-full object-contain bg-muted" />
+                <img src={ocrPreview} alt="Preview" className="max-h-48 w-full object-contain bg-[hsl(var(--loading))]" />
                 <Button
                   variant="ghost"
                   size="icon"

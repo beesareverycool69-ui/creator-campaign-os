@@ -22,12 +22,12 @@ export default async function CreatorPortalPage({ params }: Props) {
   const { campaign, brand, creator, campaignCreator, contents, shippingAddress } = data;
 
   const statusColors: Record<string, string> = {
-    pending: "bg-secondary text-primary",
-    in_review: "bg-secondary text-primary",
+    pending: "bg-[hsl(var(--loading-track))] text-primary",
+    in_review: "bg-[hsl(var(--loading-track))] text-primary",
     approved: "bg-primary/10 text-primary",
-    revision_requested: "bg-accent/30 text-primary",
+    revision_requested: "bg-[hsl(var(--loading-track))] text-primary",
     rejected: "bg-red-100 text-red-800",
-    posted: "bg-secondary text-primary",
+    posted: "bg-[hsl(var(--loading-track))] text-primary",
   };
 
   const hasSubmittedContent = contents.length > 0;

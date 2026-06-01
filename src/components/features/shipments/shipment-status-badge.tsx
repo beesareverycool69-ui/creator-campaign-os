@@ -23,12 +23,12 @@ const STATUS_CONFIG: Record<
   },
   shipped: {
     label: "Shipped",
-    className: "bg-secondary text-primary border-primary/30",
+    className: "bg-[hsl(var(--loading-track))] text-primary border-primary/30",
     emoji: "🚚",
   },
   in_transit: {
     label: "In Transit",
-    className: "bg-secondary text-primary border-border",
+    className: "bg-[hsl(var(--loading-track))] text-primary border-border",
     emoji: "🛫",
   },
   delivered: {

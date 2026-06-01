@@ -23,11 +23,11 @@ const STATUS_CONFIG: Record<
   },
   approved: {
     label: "Approved",
-    className: "bg-secondary text-primary border-primary/30",
+    className: "bg-[hsl(var(--loading-track))] text-primary border-primary/30",
   },
   recruiting: {
     label: "Recruiting",
-    className: "bg-secondary text-primary border-primary/30",
+    className: "bg-[hsl(var(--loading-track))] text-primary border-primary/30",
   },
   active: {
     label: "Active",
