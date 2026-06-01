@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
-import { PlatformBadge } from "@/components/features/creators/platform-badge";
 import {
   LeadStatusBadge,
   LeadStatus,
@@ -40,6 +39,7 @@ type LeadRowProps = {
         id: string;
         platformId: string;
         handle: string;
+        profileUrl: string | null;
         followerCount: number | null;
       }[];
     };
@@ -243,18 +243,18 @@ export function LeadRow({
                 <span className="text-sm">{getFlagEmoji(creator.country)}</span>
               )}
             </div>
-            <div className="flex items-center gap-2 mt-1">
-              {creator.platforms.slice(0, 2).map((platform) => (
-                <PlatformBadge
+            <div className="flex items-center gap-1.5 mt-1">
+              {creator.platforms.slice(0, 3).map((platform) => (
+                <SocialIconLink
                   key={platform.id}
                   platformId={platform.platformId}
                   handle={platform.handle}
-                  followerCount={platform.followerCount}
+                  profileUrl={platform.profileUrl}
                 />
               ))}
-              {creator.platforms.length > 2 && (
+              {creator.platforms.length > 3 && (
                 <span className="text-xs text-muted-foreground">
-                  +{creator.platforms.length - 2} more
+                  +{creator.platforms.length - 3} more
                 </span>
               )}
             </div>
@@ -395,6 +395,64 @@ export function LeadRow({
       )}
     </div>
   );
+}
+
+function SocialIconLink({
+  platformId,
+  handle,
+  profileUrl,
+}: {
+  platformId: string;
+  handle: string;
+  profileUrl: string | null;
+}) {
+  const label = `${getPlatformLabel(platformId)} @${handle}`;
+  const className = "inline-flex h-7 w-7 items-center justify-center rounded-full border border-border bg-background text-sm transition-colors";
+
+  if (!profileUrl) {
+    return (
+      <span className={`${className} opacity-45 grayscale`} title={label} aria-label={label}>
+        {getPlatformIcon(platformId)}
+      </span>
+    );
+  }
+
+  return (
+    <a
+      href={profileUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`${className} hover:border-primary hover:bg-card hover:text-primary`}
+      title={`Open ${label}`}
+      aria-label={`Open ${label}`}
+    >
+      {getPlatformIcon(platformId)}
+    </a>
+  );
+}
+
+function getPlatformIcon(platformId: string): string {
+  const icons: Record<string, string> = {
+    instagram: "📸",
+    tiktok: "🎵",
+    youtube: "▶️",
+    twitter: "🐦",
+    x: "𝕏",
+    twitch: "🎮",
+  };
+  return icons[platformId] || "🌐";
+}
+
+function getPlatformLabel(platformId: string): string {
+  const labels: Record<string, string> = {
+    instagram: "Instagram",
+    tiktok: "TikTok",
+    youtube: "YouTube",
+    twitter: "Twitter/X",
+    x: "X",
+    twitch: "Twitch",
+  };
+  return labels[platformId] || platformId;
 }
 
 function formatDate(date: Date): string {

@@ -51,6 +51,7 @@ export type BrandCreatorWithDetails = {
       id: string;
       platformId: string;
       handle: string;
+      profileUrl: string | null;
       followerCount: number | null;
     }[];
   };
@@ -110,6 +111,7 @@ export async function getBrandCreators(
         id: p.id,
         platformId: p.platformId,
         handle: p.handle,
+        profileUrl: p.profileUrl,
         followerCount: p.followerCount,
       })),
     },
