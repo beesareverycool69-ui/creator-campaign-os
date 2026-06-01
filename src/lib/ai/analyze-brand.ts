@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { BrandAnalysis } from "@/lib/db/schema";
 import { NO_DASH_COPY_RULE, sanitizeGeneratedCopy } from "@/lib/utils/generated-copy";
+import { normalizeWebsiteUrl, WEBSITE_ACCESS_ERROR } from "@/lib/utils/website-url";
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -8,15 +9,21 @@ const client = new Anthropic({
 
 // Fetch the brand website and extract readable text
 async function fetchBrandContent(url: string): Promise<string> {
-  const normalized = url.startsWith("http") ? url : `https://${url}`;
+  const normalized = normalizeWebsiteUrl(url)!;
 
-  const response = await fetch(normalized, {
-    headers: { "User-Agent": "Mozilla/5.0 (compatible; BrandAnalyzer/1.0)" },
-    signal: AbortSignal.timeout(10000),
-  });
+  let response: Response;
+  try {
+    response = await fetch(normalized, {
+      headers: { "User-Agent": "Mozilla/5.0 (compatible; BrandAnalyzer/1.0)" },
+      redirect: "follow",
+      signal: AbortSignal.timeout(10000),
+    });
+  } catch {
+    throw new Error(WEBSITE_ACCESS_ERROR);
+  }
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch ${normalized}: ${response.status}`);
+    throw new Error(WEBSITE_ACCESS_ERROR);
   }
 
   const html = await response.text();

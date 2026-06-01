@@ -16,6 +16,7 @@ import type { CreatorForMatching, CreatorMatchResult } from "@/lib/ai/match-crea
 import { discoverCreators, type DiscoveredCreator } from "@/lib/ai/discover-external";
 import { filterNewToBrandByIdentity, getBrandProcessedIdentitySet } from "@/lib/utils/brand-creator-dedupe";
 import { encryptSecret } from "@/lib/security/encryption";
+import { normalizeWebsiteUrl } from "@/lib/utils/website-url";
 
 // =============================================================================
 // TYPES
@@ -158,12 +159,14 @@ export async function getShopifyIntegrationSettings(
 export async function createBrand(input: CreateBrandInput) {
   const user = await requireUser();
 
+  const website = normalizeWebsiteUrl(input.website);
+
   const [newBrand] = await db
     .insert(brands)
     .values({
       userId: user.id,
       name: input.name,
-      website: input.website || null,
+      website,
       industry: input.industry || null,
       logoUrl: input.logoUrl || null,
       billingEmail: input.billingEmail || null,
@@ -297,7 +300,7 @@ export async function analyzeBrandAction(
 
   let analysis;
   try {
-    analysis = await analyzeBrand(brand.website);
+    analysis = await analyzeBrand(normalizeWebsiteUrl(brand.website)!);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return { success: false, error: message };

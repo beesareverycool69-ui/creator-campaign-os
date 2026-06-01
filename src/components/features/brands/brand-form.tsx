@@ -78,8 +78,9 @@ export function BrandForm() {
             <Input
               id="website"
               name="website"
-              type="url"
-              placeholder="https://example.com"
+              type="text"
+              inputMode="url"
+              placeholder="example.com or https://example.com"
             />
           </div>
 

@@ -3,6 +3,7 @@ import { requireDiscoveryApiAccess } from "@/lib/api/discovery-auth";
 import { NO_DASH_COPY_RULE, sanitizeGeneratedCopy } from "@/lib/utils/generated-copy";
 import Anthropic from "@anthropic-ai/sdk";
 import type { BrandProfile } from "@/lib/types/discovery";
+import { normalizeWebsiteUrl } from "@/lib/utils/website-url";
 
 const client = new Anthropic();
 
@@ -20,6 +21,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const normalizedUrl = normalizeWebsiteUrl(url);
+
     // Call Claude with web_search tool enabled
     const response = await client.messages.create({
       model: "claude-sonnet-4-20250514",
@@ -34,7 +37,7 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: "user",
-          content: `Visit this website and analyze the brand: ${url}
+          content: `Visit this website and analyze the brand: ${normalizedUrl}
 
 Extract a comprehensive brand profile by visiting the site and analyzing their content, messaging, products, and positioning.
 
@@ -115,7 +118,7 @@ If the URL is blocked or inaccessible, search for the brand name instead and bui
     return NextResponse.json({
       success: true,
       profile: brandProfile,
-      url,
+      url: normalizedUrl,
     });
   } catch (error) {
     console.error("Brand analysis error:", error);
