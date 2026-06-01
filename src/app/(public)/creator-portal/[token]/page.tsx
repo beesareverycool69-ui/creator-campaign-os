@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { getPortalData } from "@/lib/actions/creator-portal";
 import { ContentUploadForm } from "./content-upload-form";
 import { ContentList } from "./content-list";
+import { ShippingAddressForm } from "./shipping-address-form";
 import { CheckCircle2, Package, FileText, Upload, Clock } from "lucide-react";
 
 type Props = {
@@ -18,7 +19,7 @@ export default async function CreatorPortalPage({ params }: Props) {
     notFound();
   }
 
-  const { campaign, brand, creator, campaignCreator, contents } = data;
+  const { campaign, brand, creator, campaignCreator, contents, shippingAddress } = data;
 
   const statusColors: Record<string, string> = {
     pending: "bg-secondary text-primary",
@@ -128,6 +129,21 @@ export default async function CreatorPortalPage({ params }: Props) {
           <CardContent className="p-4">
             <p className="text-sm font-semibold text-primary">Next: {creatorNextStep.title}</p>
             <p className="text-sm text-muted-foreground mt-1">{creatorNextStep.description}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5" />
+              Shipping Address
+            </CardTitle>
+            <CardDescription>
+              Add the address where {brand.name} should send campaign product. No login required.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ShippingAddressForm token={token} address={shippingAddress} />
           </CardContent>
         </Card>
 
