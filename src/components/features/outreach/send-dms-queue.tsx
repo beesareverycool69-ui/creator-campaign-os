@@ -44,7 +44,7 @@ export function SendDMsQueue({ brandId, initialLeads, aiConfigured }: Props) {
           Next: Track Replies so you can log accepts and move creators into campaigns.
         </p>
         <Link href={`/brands/${brandId}/track`}>
-          <Button className="mt-4" variant="outline">Track Replies →</Button>
+          <Button className="mt-4">Track Replies →</Button>
         </Link>
       </div>
     );
@@ -190,16 +190,14 @@ export function SendDMsQueue({ brandId, initialLeads, aiConfigured }: Props) {
               </div>
             </div>
             {profileUrl ? (
-              <a 
-                href={profileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-primary hover:underline"
-              >
-                Open Profile →
+              <a href={profileUrl} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" size="sm" type="button">
+                  <ExternalLink className="h-4 w-4 mr-2" />
+                  Open Profile
+                </Button>
               </a>
             ) : (
-              <span className="text-sm text-muted-foreground">No profile linked</span>
+              <Button variant="outline" size="sm" type="button" disabled>No profile linked</Button>
             )}
           </div>
 
@@ -219,7 +217,7 @@ export function SendDMsQueue({ brandId, initialLeads, aiConfigured }: Props) {
                 <p className="text-xs text-muted-foreground">Personalization requires Anthropic. If unavailable, write or paste a DM manually.</p>
               </div>
               <Button 
-                variant="outline" 
+                variant="ghost" 
                 size="sm" 
                 onClick={handlePersonalize}
                 disabled={isGenerating || !aiConfigured}
@@ -248,7 +246,7 @@ export function SendDMsQueue({ brandId, initialLeads, aiConfigured }: Props) {
                 />
                 <div className="flex gap-2">
                   <Button 
-                    variant="outline" 
+                    variant="ghost" 
                     size="sm"
                     onClick={() => handleCopy("dm")}
                   >
@@ -299,7 +297,7 @@ export function SendDMsQueue({ brandId, initialLeads, aiConfigured }: Props) {
               className="resize-none mb-2"
             />
             <Button 
-              variant="outline" 
+              variant="ghost" 
               size="sm"
               onClick={() => handleCopy("comment")}
             >
@@ -318,62 +316,77 @@ export function SendDMsQueue({ brandId, initialLeads, aiConfigured }: Props) {
           </div>
 
           {/* Action buttons */}
-          <div className="flex items-center gap-3 pt-4 border-t">
-            <Button 
-              onClick={handleDMSent}
-              disabled={dmSent || isPending}
-              variant={dmSent ? "secondary" : "default"}
-              className="flex-1"
-            >
-              {dmSent ? (
-                <>
-                  <Check className="h-4 w-4 mr-2" />
-                  DM Sent
-                </>
+          <div className="space-y-3 pt-4 border-t">
+            <div className="grid gap-2 md:grid-cols-[1fr_auto]">
+              <Button 
+                onClick={handleDMSent}
+                disabled={dmSent || isPending}
+                variant={dmSent ? "secondary" : "default"}
+                size="lg"
+              >
+                {dmSent ? (
+                  <>
+                    <Check className="h-4 w-4 mr-2" />
+                    DM Sent
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4 mr-2" />
+                    Mark DM Sent
+                  </>
+                )}
+              </Button>
+              {profileUrl ? (
+                <a href={profileUrl} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="lg" type="button" className="w-full md:w-auto">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Open Profile
+                  </Button>
+                </a>
               ) : (
-                <>
-                  <Send className="h-4 w-4 mr-2" />
-                  DM Sent
-                </>
+                <Button variant="outline" size="lg" type="button" disabled>No profile linked</Button>
               )}
-            </Button>
-            
-            <Button 
-              onClick={handleCommented}
-              disabled={commented || isPending}
-              variant={commented ? "secondary" : "outline"}
-              className="flex-1"
-            >
-              {commented ? (
-                <>
-                  <Check className="h-4 w-4 mr-2" />
-                  Commented
-                </>
-              ) : (
-                <>
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Commented
-                </>
-              )}
-            </Button>
+            </div>
 
-            <Button 
-              onClick={handleSubmit}
-              disabled={!dmSent || isPending}
-              variant="default"
-              className="flex-1"
-            >
-              Submit →
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button 
+                onClick={handleCommented}
+                disabled={commented || isPending}
+                variant={commented ? "secondary" : "outline"}
+                size="sm"
+              >
+                {commented ? (
+                  <>
+                    <Check className="h-4 w-4 mr-2" />
+                    Commented
+                  </>
+                ) : (
+                  <>
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Commented
+                  </>
+                )}
+              </Button>
 
-            <Button 
-              onClick={handleSkip}
-              disabled={isPending}
-              variant="ghost"
-            >
-              <X className="h-4 w-4 mr-2" />
-              Skip
-            </Button>
+              <Button 
+                onClick={handleSubmit}
+                disabled={!dmSent || isPending}
+                variant="outline"
+                size="sm"
+              >
+                Next Lead →
+              </Button>
+
+              <Button 
+                onClick={handleSkip}
+                disabled={isPending}
+                variant="ghost"
+                size="sm"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Skip
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

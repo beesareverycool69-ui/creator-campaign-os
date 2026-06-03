@@ -141,16 +141,56 @@ export default async function CampaignCreatorPage({ params }: Props) {
           </div>
         </div>
 
-        {/* Quick link to global creator profile */}
-        <Link
-          href={`/creators/${creator.id}`}
-          className="text-sm text-muted-foreground hover:text-foreground"
-        >
-          View Full Profile →
+        {/* Secondary action */}
+        <Link href={`/creators/${creator.id}`}>
+          <Button variant="outline" size="sm">View Full Profile</Button>
         </Link>
       </div>
 
-      <NextStepCard {...nextStep} />
+      <NextStepCard {...nextStep} primary />
+
+      {/* Stats row */}
+      <div className="grid grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold">{daysInCampaign}</div>
+            <p className="text-sm text-muted-foreground">Days in campaign</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold">
+              {campaignCreator.rate
+                ? `$${parseFloat(campaignCreator.rate).toLocaleString()}`
+                : "—"}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Rate {campaignCreator.rateType && `(${campaignCreator.rateType})`}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold">
+              {campaignCreator.deliverableCount || "—"}
+            </div>
+            <p className="text-sm text-muted-foreground">Deliverables</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold capitalize">
+              {brandCreator.status}
+            </div>
+            <p className="text-sm text-muted-foreground">Lead status</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="pt-2">
+        <h2 className="text-lg font-semibold">Details & tools</h2>
+        <p className="text-sm text-muted-foreground">Use these when the primary next step requires a status update, code, agreement, shipment, portal, or content action.</p>
+      </div>
 
       {/* Status mover */}
       <Card id="pipeline-status">
@@ -190,7 +230,7 @@ export default async function CampaignCreatorPage({ params }: Props) {
                 Create a unique Shopify discount code for this creator.
               </p>
               <form action={createShopifyCodeAction}>
-                <Button type="submit" size="sm">
+                <Button type="submit" variant="outline" size="sm">
                   Create Shopify Code
                 </Button>
               </form>
@@ -209,44 +249,6 @@ export default async function CampaignCreatorPage({ params }: Props) {
           )}
         </CardContent>
       </Card>
-
-      {/* Stats row */}
-      <div className="grid grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{daysInCampaign}</div>
-            <p className="text-sm text-muted-foreground">Days in campaign</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">
-              {campaignCreator.rate
-                ? `$${parseFloat(campaignCreator.rate).toLocaleString()}`
-                : "—"}
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Rate {campaignCreator.rateType && `(${campaignCreator.rateType})`}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">
-              {campaignCreator.deliverableCount || "—"}
-            </div>
-            <p className="text-sm text-muted-foreground">Deliverables</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold capitalize">
-              {brandCreator.status}
-            </div>
-            <p className="text-sm text-muted-foreground">Lead status</p>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Agreement Section */}
       {showAgreement && (
@@ -288,7 +290,7 @@ export default async function CampaignCreatorPage({ params }: Props) {
                 <Link
                   href={`/campaigns/${campaignId}/creators/${creatorId}/agreement`}
                 >
-                  <Button size="sm">Create Agreement</Button>
+                  <Button variant="outline" size="sm">Create Agreement</Button>
                 </Link>
               </div>
             )}
@@ -341,7 +343,7 @@ export default async function CampaignCreatorPage({ params }: Props) {
                 <Link
                   href={`/campaigns/${campaignId}/creators/${creatorId}/shipment`}
                 >
-                  <Button size="sm">Create Shipment</Button>
+                  <Button variant="outline" size="sm">Create Shipment</Button>
                 </Link>
               </div>
             )}
@@ -395,7 +397,7 @@ export default async function CampaignCreatorPage({ params }: Props) {
                   <Link
                     href={`/campaigns/${campaignId}/creators/${creatorId}/content/new`}
                   >
-                    <Button size="sm">+ Internal Upload</Button>
+                    <Button variant="outline" size="sm">+ Internal Upload</Button>
                   </Link>
                 </div>
               </div>
@@ -407,7 +409,7 @@ export default async function CampaignCreatorPage({ params }: Props) {
                 <Link
                   href={`/campaigns/${campaignId}/creators/${creatorId}/content/new`}
                 >
-                  <Button size="sm">Internal Upload</Button>
+                  <Button variant="outline" size="sm">Internal Upload</Button>
                 </Link>
               </div>
             )}

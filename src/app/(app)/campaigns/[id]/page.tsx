@@ -157,6 +157,11 @@ export default async function CampaignPage({ params, searchParams }: Props) {
           </div>
         </div>
 
+      </div>
+
+      <NextStepCard {...campaignNextStep} primary />
+
+      <div className="flex justify-end">
         <AddCreatorToCampaignForm
           campaignId={id}
           availableCreators={availableCreators}
@@ -164,8 +169,6 @@ export default async function CampaignPage({ params, searchParams }: Props) {
           defaultOpen={addCreator === "1"}
         />
       </div>
-
-      <NextStepCard {...campaignNextStep} />
 
       {/* Campaign command center */}
       <Card>
@@ -175,18 +178,18 @@ export default async function CampaignPage({ params, searchParams }: Props) {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-3">
             {commandCenterSteps.map((step) => (
-              <div key={step.label} className="rounded-lg border p-4 space-y-3">
+              <div key={step.label} className="rounded-lg border bg-card/50 p-4 space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="font-medium">{step.label}</p>
+                    <p className="text-sm font-medium">{step.label}</p>
                     <p className="text-sm text-muted-foreground mt-1">
                       {step.description}
                     </p>
                   </div>
-                  <div className="text-2xl font-bold">{step.count}</div>
+                  <div className="text-2xl font-bold text-muted-foreground">{step.count}</div>
                 </div>
                 <Link href={step.href}>
-                  <Button variant="outline" size="sm">{step.action}</Button>
+                  <Button variant="ghost" size="sm">{step.action}</Button>
                 </Link>
               </div>
             ))}

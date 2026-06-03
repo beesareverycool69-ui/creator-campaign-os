@@ -148,99 +148,16 @@ export default async function BrandPage({ params }: Props) {
           )}
         </div>
 
+      </div>
+
+      <NextStepCard {...nextStep} primary />
+
+      {/* Secondary action */}
+      <div className="flex justify-end">
         <Link href={`/brands/${id}/leads`}>
-          <Button variant="outline">View All Leads</Button>
+          <Button variant="outline">View Leads</Button>
         </Link>
       </div>
-
-      {/* Outreach Navigation */}
-      <div className="grid grid-cols-5 gap-4">
-        <Link href={`/brands/${id}/send-dms`} className="block">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-            <CardContent className="pt-4 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-card/70 border border-border flex items-center justify-center">
-                  <span className="text-primary text-lg">✉️</span>
-                </div>
-                <div>
-                  <p className="font-medium">Send DMs</p>
-                  <p className="text-xs text-muted-foreground">
-                    {statusCounts["discovered"] || 0} ready
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href={`/brands/${id}/follow-ups`} className="block">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-            <CardContent className="pt-4 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-card/70 border border-border flex items-center justify-center">
-                  <span className="text-primary text-lg">🔄</span>
-                </div>
-                <div>
-                  <p className="font-medium">Follow-ups</p>
-                  <p className="text-xs text-muted-foreground">Auto-scheduled</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href={`/brands/${id}/track`} className="block">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-            <CardContent className="pt-4 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                  <span className="text-green-500 text-lg">📊</span>
-                </div>
-                <div>
-                  <p className="font-medium">Track</p>
-                  <p className="text-xs text-muted-foreground">
-                    {statusCounts["contacted"] || 0} pending
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href={firstCampaign ? `/campaigns/${firstCampaign.id}` : `/campaigns/new?brandId=${id}`} className="block">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-            <CardContent className="pt-4 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <span className="text-primary text-lg">🚀</span>
-                </div>
-                <div>
-                  <p className="font-medium">Campaigns</p>
-                  <p className="text-xs text-muted-foreground">Onboarding & content</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-
-        <Link href={`/brands/${id}/settings`} className="block">
-          <Card className="hover:border-primary/50 transition-colors cursor-pointer">
-            <CardContent className="pt-4 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-gray-500/10 flex items-center justify-center">
-                  <span className="text-gray-500 text-lg">⚙️</span>
-                </div>
-                <div>
-                  <p className="font-medium">Settings</p>
-                  <p className="text-xs text-muted-foreground">Templates & Config</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
-      </div>
-
-      <NextStepCard {...nextStep} />
 
       {/* Lead Funnel Stats */}
       <div className="grid grid-cols-6 gap-4">
@@ -273,6 +190,32 @@ export default async function BrandPage({ params }: Props) {
         </div>
       )}
 
+      {/* More actions */}
+      <Card className="bg-card/50">
+        <CardHeader>
+          <CardTitle className="text-base">More actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            <Link href={`/brands/${id}/send-dms`}>
+              <Button variant="ghost" size="sm">Send DMs ({statusCounts["discovered"] || 0} ready)</Button>
+            </Link>
+            <Link href={`/brands/${id}/follow-ups`}>
+              <Button variant="ghost" size="sm">Follow-ups</Button>
+            </Link>
+            <Link href={`/brands/${id}/track`}>
+              <Button variant="ghost" size="sm">Track ({statusCounts["contacted"] || 0} pending)</Button>
+            </Link>
+            <Link href={firstCampaign ? `/campaigns/${firstCampaign.id}` : `/campaigns/new?brandId=${id}`}>
+              <Button variant="ghost" size="sm">Campaigns</Button>
+            </Link>
+            <Link href={`/brands/${id}/settings`}>
+              <Button variant="ghost" size="sm">Settings</Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
       {acceptedCount > 0 && (
         <Card>
           <CardHeader>
@@ -287,7 +230,7 @@ export default async function BrandPage({ params }: Props) {
                 <Button variant="outline">Add to Campaign</Button>
               </Link>
               <Link href={`/campaigns/new?brandId=${id}`}>
-                <Button>Create Campaign</Button>
+                <Button variant="outline">Create Campaign</Button>
               </Link>
             </div>
           </CardContent>

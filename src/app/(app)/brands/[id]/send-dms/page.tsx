@@ -3,8 +3,7 @@ import { notFound } from "next/navigation";
 import { getBrandById } from "@/lib/actions/brands";
 import { getLeadsForOutreach } from "@/lib/actions/outreach";
 import { SendDMsQueue } from "@/components/features/outreach/send-dms-queue";
-import { EmptyState } from "@/components/ui/empty-state";
-import { NextStepCard } from "@/components/ui/next-step-card";
+import { Button } from "@/components/ui/button";
 import { isConfiguredEnv } from "@/lib/env";
 
 type Props = {
@@ -74,29 +73,38 @@ export default async function SendDMsPage({ params }: Props) {
       {/* How it works */}
       <div className="rounded-lg border p-4 bg-card/70">
         <p className="text-sm">
-          <strong>How it works:</strong> Copy the DM, send it on Instagram, then tap{" "}
-          <strong>DM Sent</strong>. Comment on their latest post and tap{" "}
-          <strong>Commented</strong>. Hit <strong>Skip</strong> if they're not a fit.
+          <strong>Primary action:</strong> open the creator profile, send the DM, then tap{" "}
+          <strong>Mark DM Sent</strong>. Personalizing, copying, commenting, and skipping are supporting controls.
         </p>
       </div>
 
       {leads.length > 0 && (
-        <NextStepCard
-          title="Track Replies"
-          description="After each DM is marked sent, check Track to log accepted or declined replies."
-          href={`/brands/${id}/track`}
-          actionLabel="Track Replies"
-        />
+        <div className="flex justify-end text-sm">
+          <Link
+            href={`/brands/${id}/track`}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            Next: Track replies after sending →
+          </Link>
+        </div>
       )}
 
       {/* Queue */}
       {leads.length === 0 ? (
-        <EmptyState
-          title="No DMs ready"
-          description="Add or qualify creators for this brand, then come back to send outreach."
-          actionHref={`/brands/${id}/leads`}
-          actionLabel="View Leads"
-        />
+        <div className="rounded-lg border bg-card/70 p-8 text-center">
+          <h3 className="mb-2 text-lg font-semibold">No DMs ready</h3>
+          <p className="mx-auto mb-5 max-w-md text-sm text-muted-foreground">
+            If outreach is complete, Track Replies is the next place to log accepts or declines. Otherwise, view leads to qualify more creators.
+          </p>
+          <div className="flex justify-center gap-2">
+            <Link href={`/brands/${id}/track`}>
+              <Button>Track Replies →</Button>
+            </Link>
+            <Link href={`/brands/${id}/leads`}>
+              <Button variant="outline">View Leads</Button>
+            </Link>
+          </div>
+        </div>
       ) : (
         <SendDMsQueue
           brandId={id}
