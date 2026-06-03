@@ -158,13 +158,57 @@ export default async function BrandPage({ params }: Props) {
             <CardTitle className="text-base">What happens next</CardTitle>
           </CardHeader>
           <CardContent>
-            <ol className="space-y-2 text-sm text-muted-foreground">
-              <li><span className="font-medium text-foreground">1.</span> Add product</li>
-              <li><span className="font-medium text-foreground">2.</span> Find creators</li>
-              <li><span className="font-medium text-foreground">3.</span> Send DMs</li>
-              <li><span className="font-medium text-foreground">4.</span> Track replies</li>
-              <li><span className="font-medium text-foreground">5.</span> Add accepted creators to a campaign</li>
-            </ol>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-background/60 p-3">
+                <div>
+                  <p className="text-sm font-medium">1. Add product</p>
+                  <p className="text-xs text-muted-foreground">Add what creators will receive or promote.</p>
+                </div>
+                <Link href="#products" className="shrink-0">
+                  <Button variant="outline" size="sm">Add Product</Button>
+                </Link>
+              </div>
+
+              <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-background/60 p-3">
+                <div>
+                  <p className="text-sm font-medium">2. Find creators</p>
+                  <p className="text-xs text-muted-foreground">Build the first lead list for this brand.</p>
+                </div>
+                <Link href={`/brands/${id}/leads`} className="shrink-0">
+                  <Button variant="outline" size="sm">Find Creators</Button>
+                </Link>
+              </div>
+
+              <div className="flex items-center justify-between gap-4 rounded-lg border border-border/70 bg-background/40 p-3 opacity-75">
+                <div>
+                  <p className="text-sm font-medium">3. Send DMs</p>
+                  <p className="text-xs text-muted-foreground">After creators are added.</p>
+                </div>
+                <Link href={`/brands/${id}/send-dms`} className="shrink-0">
+                  <Button variant="ghost" size="sm">Send DMs</Button>
+                </Link>
+              </div>
+
+              <div className="flex items-center justify-between gap-4 rounded-lg border border-border/70 bg-background/40 p-3 opacity-75">
+                <div>
+                  <p className="text-sm font-medium">4. Track replies</p>
+                  <p className="text-xs text-muted-foreground">After DMs are sent.</p>
+                </div>
+                <Link href={`/brands/${id}/track`} className="shrink-0">
+                  <Button variant="ghost" size="sm">Track Replies</Button>
+                </Link>
+              </div>
+
+              <div className="flex items-center justify-between gap-4 rounded-lg border border-border/70 bg-background/40 p-3 opacity-75">
+                <div>
+                  <p className="text-sm font-medium">5. Add accepted creators to a campaign</p>
+                  <p className="text-xs text-muted-foreground">After creators accept your outreach.</p>
+                </div>
+                <Link href={firstCampaign ? `/campaigns/${firstCampaign.id}` : `/campaigns/new?brandId=${id}`} className="shrink-0">
+                  <Button variant="ghost" size="sm">Campaign</Button>
+                </Link>
+              </div>
+            </div>
           </CardContent>
         </Card>
       ) : (
