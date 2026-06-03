@@ -148,57 +148,33 @@ export function SendDMsQueue({ brandId, initialLeads, aiConfigured }: Props) {
       <Card>
         <CardContent className="p-6">
           {/* Creator header */}
-          <div className="flex items-start justify-between mb-6">
-            <div className="flex items-center gap-4">
-              {currentLead.creator.avatarUrl ? (
-                <img 
-                  src={currentLead.creator.avatarUrl} 
-                  alt={currentLead.creator.name}
-                  className="w-16 h-16 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-16 h-16 rounded-full bg-card/70 border border-border flex items-center justify-center text-2xl font-bold">
-                  {currentLead.creator.name[0]}
-                </div>
-              )}
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-xl font-semibold">{handle ? `@${handle}` : currentLead.creator.name}</h3>
-                  {profileUrl && (
-                    <a 
-                      href={profileUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground">{currentLead.creator.name}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  {primaryPlatform && (
-                    <Badge variant="secondary">{primaryPlatform.platformId}</Badge>
-                  )}
-                  {followerCount && (
-                    <Badge variant="outline">{formatFollowers(followerCount)} followers</Badge>
-                  )}
-                  {currentLead.creator.tier && (
-                    <Badge variant="outline">{currentLead.creator.tier}</Badge>
-                  )}
-                </div>
+          <div className="mb-6 flex items-center gap-4">
+            {currentLead.creator.avatarUrl ? (
+              <img 
+                src={currentLead.creator.avatarUrl} 
+                alt={currentLead.creator.name}
+                className="w-16 h-16 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-card/70 border border-border flex items-center justify-center text-2xl font-bold">
+                {currentLead.creator.name[0]}
+              </div>
+            )}
+            <div>
+              <h3 className="text-xl font-semibold">{handle ? `@${handle}` : currentLead.creator.name}</h3>
+              <p className="text-sm text-muted-foreground">{currentLead.creator.name}</p>
+              <div className="flex items-center gap-2 mt-1">
+                {primaryPlatform && (
+                  <Badge variant="secondary">{primaryPlatform.platformId}</Badge>
+                )}
+                {followerCount && (
+                  <Badge variant="outline">{formatFollowers(followerCount)} followers</Badge>
+                )}
+                {currentLead.creator.tier && (
+                  <Badge variant="outline">{currentLead.creator.tier}</Badge>
+                )}
               </div>
             </div>
-            {profileUrl ? (
-              <a href={profileUrl} target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" size="sm" type="button">
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Open Profile
-                </Button>
-              </a>
-            ) : (
-              <Button variant="outline" size="sm" type="button" disabled>No profile linked</Button>
-            )}
           </div>
 
           {/* Bio */}
@@ -209,13 +185,44 @@ export function SendDMsQueue({ brandId, initialLeads, aiConfigured }: Props) {
             </div>
           )}
 
-          {/* DM Message section */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-2">
-              <div>
-                <p className="text-sm font-medium">1. DM Message</p>
-                <p className="text-xs text-muted-foreground">Personalization requires Anthropic. If unavailable, write or paste a DM manually.</p>
-              </div>
+          {/* Guided DM task */}
+          <div className="mb-6 space-y-4 rounded-lg border border-border bg-card/50 p-4">
+            <div>
+              <p className="text-sm font-medium">Send this DM manually</p>
+              <p className="text-xs text-muted-foreground">
+                Open the profile, copy the DM, send it, then mark it sent.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {profileUrl ? (
+                <a href={profileUrl} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="sm" type="button">
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    1. Open Profile
+                  </Button>
+                </a>
+              ) : (
+                <Button variant="outline" size="sm" type="button" disabled>1. No profile linked</Button>
+              )}
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => handleCopy("dm")}
+                disabled={!generatedMessage}
+              >
+                {copied === "dm" ? (
+                  <>
+                    <Check className="h-4 w-4 mr-2" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4 mr-2" />
+                    2. Copy DM
+                  </>
+                )}
+              </Button>
               <Button 
                 variant="ghost" 
                 size="sm" 
@@ -230,129 +237,101 @@ export function SendDMsQueue({ brandId, initialLeads, aiConfigured }: Props) {
                 ) : (
                   <>
                     <Sparkles className="h-4 w-4 mr-2" />
-                    {aiConfigured ? "Personalize" : "AI Not Configured"}
+                    {aiConfigured ? "Personalize DM" : "AI Not Configured"}
                   </>
                 )}
               </Button>
             </div>
-            
-            {generatedMessage ? (
-              <div className="space-y-2">
-                <Textarea 
-                  value={generatedMessage}
-                  onChange={(e) => setGeneratedMessage(e.target.value)}
-                  rows={5}
-                  className="resize-none"
-                />
-                <div className="flex gap-2">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => handleCopy("dm")}
-                  >
-                    {copied === "dm" ? (
-                      <>
-                        <Check className="h-4 w-4 mr-2" />
-                        Copied!
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="h-4 w-4 mr-2" />
-                        Copy DM
-                      </>
-                    )}
-                  </Button>
-                  {profileUrl ? (
-                    <a href={profileUrl} target="_blank" rel="noopener noreferrer">
-                      <Button variant="outline" size="sm" type="button">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Open Profile
-                      </Button>
-                    </a>
-                  ) : (
-                    <Button variant="outline" size="sm" type="button" disabled>
-                      No profile linked
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <Textarea
-                value={generatedMessage || ""}
-                onChange={(e) => setGeneratedMessage(e.target.value)}
-                rows={5}
-                className="resize-none"
-                placeholder="Write or paste the DM here. AI personalization is optional."
-              />
-            )}
+
+            <Textarea
+              value={generatedMessage || ""}
+              onChange={(e) => setGeneratedMessage(e.target.value)}
+              rows={5}
+              className="resize-none bg-background"
+              placeholder="Write or paste the DM here. AI personalization is optional."
+            />
           </div>
 
-          {/* Comment section */}
-          <div className="mb-6">
-            <p className="text-sm font-medium mb-2">2. Comment on Post</p>
+          {/* Primary completion action */}
+          <div className="space-y-3 border-t pt-4">
+            <Button 
+              onClick={handleDMSent}
+              disabled={dmSent || isPending}
+              variant={dmSent ? "secondary" : "default"}
+              size="lg"
+              className="w-full"
+            >
+              {dmSent ? (
+                <>
+                  <Check className="h-4 w-4 mr-2" />
+                  DM Sent
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-2" />
+                  Mark DM Sent
+                </>
+              )}
+            </Button>
+            <p className="text-center text-xs text-muted-foreground">
+              Only mark sent after you have sent the DM on the creator&apos;s profile.
+            </p>
+
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <Button 
+                onClick={handleSubmit}
+                disabled={!dmSent || isPending}
+                variant="outline"
+                size="sm"
+              >
+                Next Lead →
+              </Button>
+              <Button 
+                onClick={handleSkip}
+                disabled={isPending}
+                variant="ghost"
+                size="sm"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Skip
+              </Button>
+            </div>
+          </div>
+
+          {/* Optional comment */}
+          <div className="mt-6 rounded-lg border border-border/70 bg-background/40 p-4">
+            <div className="mb-2">
+              <p className="text-sm font-medium">Optional: comment on a post</p>
+              <p className="text-xs text-muted-foreground">Use this only if commenting is part of your outreach process.</p>
+            </div>
             <Textarea 
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               rows={2}
               className="resize-none mb-2"
             />
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => handleCopy("comment")}
-            >
-              {copied === "comment" ? (
-                <>
-                  <Check className="h-4 w-4 mr-2" />
-                  Copied!
-                </>
-              ) : (
-                <>
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy
-                </>
-              )}
-            </Button>
-          </div>
-
-          {/* Action buttons */}
-          <div className="space-y-3 pt-4 border-t">
-            <div className="grid gap-2 md:grid-cols-[1fr_auto]">
+            <div className="flex flex-wrap gap-2">
               <Button 
-                onClick={handleDMSent}
-                disabled={dmSent || isPending}
-                variant={dmSent ? "secondary" : "default"}
-                size="lg"
+                variant="ghost" 
+                size="sm"
+                onClick={() => handleCopy("comment")}
               >
-                {dmSent ? (
+                {copied === "comment" ? (
                   <>
                     <Check className="h-4 w-4 mr-2" />
-                    DM Sent
+                    Copied!
                   </>
                 ) : (
                   <>
-                    <Send className="h-4 w-4 mr-2" />
-                    Mark DM Sent
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy Comment
                   </>
                 )}
               </Button>
-              {profileUrl ? (
-                <a href={profileUrl} target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" size="lg" type="button" className="w-full md:w-auto">
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Open Profile
-                  </Button>
-                </a>
-              ) : (
-                <Button variant="outline" size="lg" type="button" disabled>No profile linked</Button>
-              )}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
               <Button 
                 onClick={handleCommented}
                 disabled={commented || isPending}
-                variant={commented ? "secondary" : "outline"}
+                variant={commented ? "secondary" : "ghost"}
                 size="sm"
               >
                 {commented ? (
@@ -363,28 +342,9 @@ export function SendDMsQueue({ brandId, initialLeads, aiConfigured }: Props) {
                 ) : (
                   <>
                     <MessageSquare className="h-4 w-4 mr-2" />
-                    Commented
+                    Mark Commented
                   </>
                 )}
-              </Button>
-
-              <Button 
-                onClick={handleSubmit}
-                disabled={!dmSent || isPending}
-                variant="outline"
-                size="sm"
-              >
-                Next Lead →
-              </Button>
-
-              <Button 
-                onClick={handleSkip}
-                disabled={isPending}
-                variant="ghost"
-                size="sm"
-              >
-                <X className="h-4 w-4 mr-2" />
-                Skip
               </Button>
             </div>
           </div>
