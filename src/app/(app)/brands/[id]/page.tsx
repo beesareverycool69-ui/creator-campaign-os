@@ -152,69 +152,88 @@ export default async function BrandPage({ params }: Props) {
 
       <NextStepCard {...nextStep} primary />
 
-      {/* Secondary action */}
-      <div className="flex justify-end">
-        <Link href={`/brands/${id}/leads`}>
-          <Button variant="outline">View Leads</Button>
-        </Link>
-      </div>
-
-      {/* Lead Funnel Stats */}
-      <div className="grid grid-cols-6 gap-4">
-        {funnelStatuses.map((status) => (
-          <Card key={status}>
-            <CardContent className="pt-4 pb-4 text-center">
-              <div className="text-2xl font-bold">
-                {statusCounts[status] || 0}
-              </div>
-              <LeadStatusBadge status={status} className="mt-1" />
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {/* Other status counts */}
-      {(statusCounts["paused"] ||
-        statusCounts["churned"] ||
-        statusCounts["blacklisted"]) && (
-        <div className="flex gap-4 text-sm text-muted-foreground">
-          {statusCounts["paused"] && (
-            <span>Paused: {statusCounts["paused"]}</span>
-          )}
-          {statusCounts["churned"] && (
-            <span>Churned: {statusCounts["churned"]}</span>
-          )}
-          {statusCounts["blacklisted"] && (
-            <span>Blacklisted: {statusCounts["blacklisted"]}</span>
-          )}
-        </div>
-      )}
-
-      {/* More actions */}
-      <Card className="bg-card/50">
-        <CardHeader>
-          <CardTitle className="text-base">More actions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
-            <Link href={`/brands/${id}/send-dms`}>
-              <Button variant="ghost" size="sm">Send DMs ({statusCounts["discovered"] || 0} ready)</Button>
-            </Link>
-            <Link href={`/brands/${id}/follow-ups`}>
-              <Button variant="ghost" size="sm">Follow-ups</Button>
-            </Link>
-            <Link href={`/brands/${id}/track`}>
-              <Button variant="ghost" size="sm">Track ({statusCounts["contacted"] || 0} pending)</Button>
-            </Link>
-            <Link href={firstCampaign ? `/campaigns/${firstCampaign.id}` : `/campaigns/new?brandId=${id}`}>
-              <Button variant="ghost" size="sm">Campaigns</Button>
-            </Link>
-            <Link href={`/brands/${id}/settings`}>
-              <Button variant="ghost" size="sm">Settings</Button>
+      {!hasCreators ? (
+        <Card className="bg-card/50">
+          <CardHeader>
+            <CardTitle className="text-base">What happens next</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ol className="space-y-2 text-sm text-muted-foreground">
+              <li><span className="font-medium text-foreground">1.</span> Add product</li>
+              <li><span className="font-medium text-foreground">2.</span> Find creators</li>
+              <li><span className="font-medium text-foreground">3.</span> Send DMs</li>
+              <li><span className="font-medium text-foreground">4.</span> Track replies</li>
+              <li><span className="font-medium text-foreground">5.</span> Add accepted creators to a campaign</li>
+            </ol>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          {/* Secondary action */}
+          <div className="flex justify-end">
+            <Link href={`/brands/${id}/leads`}>
+              <Button variant="outline">View Leads</Button>
             </Link>
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Lead Funnel Stats */}
+          <div className="grid grid-cols-6 gap-4">
+            {funnelStatuses.map((status) => (
+              <Card key={status}>
+                <CardContent className="pt-4 pb-4 text-center">
+                  <div className="text-2xl font-bold">
+                    {statusCounts[status] || 0}
+                  </div>
+                  <LeadStatusBadge status={status} className="mt-1" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Other status counts */}
+          {(statusCounts["paused"] ||
+            statusCounts["churned"] ||
+            statusCounts["blacklisted"]) && (
+            <div className="flex gap-4 text-sm text-muted-foreground">
+              {statusCounts["paused"] && (
+                <span>Paused: {statusCounts["paused"]}</span>
+              )}
+              {statusCounts["churned"] && (
+                <span>Churned: {statusCounts["churned"]}</span>
+              )}
+              {statusCounts["blacklisted"] && (
+                <span>Blacklisted: {statusCounts["blacklisted"]}</span>
+              )}
+            </div>
+          )}
+
+          {/* More actions */}
+          <Card className="bg-card/50">
+            <CardHeader>
+              <CardTitle className="text-base">More actions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                <Link href={`/brands/${id}/send-dms`}>
+                  <Button variant="ghost" size="sm">Send DMs ({statusCounts["discovered"] || 0} ready)</Button>
+                </Link>
+                <Link href={`/brands/${id}/follow-ups`}>
+                  <Button variant="ghost" size="sm">Follow-ups</Button>
+                </Link>
+                <Link href={`/brands/${id}/track`}>
+                  <Button variant="ghost" size="sm">Track ({statusCounts["contacted"] || 0} pending)</Button>
+                </Link>
+                <Link href={firstCampaign ? `/campaigns/${firstCampaign.id}` : `/campaigns/new?brandId=${id}`}>
+                  <Button variant="ghost" size="sm">Campaigns</Button>
+                </Link>
+                <Link href={`/brands/${id}/settings`}>
+                  <Button variant="ghost" size="sm">Settings</Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      )}
 
       {acceptedCount > 0 && (
         <Card>
