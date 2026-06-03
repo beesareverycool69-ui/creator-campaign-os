@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { getPortalData } from "@/lib/actions/creator-portal";
 import { ContentUploadForm } from "./content-upload-form";
 import { ContentList } from "./content-list";
@@ -30,22 +31,36 @@ export default async function CreatorPortalPage({ params }: Props) {
     posted: "bg-[hsl(var(--loading-track))] text-primary",
   };
 
+  const hasShippingAddress = !!shippingAddress;
   const hasSubmittedContent = contents.length > 0;
   const hasApprovedContent = contents.some((c) => c.status === "approved" || c.status === "posted");
-  const creatorNextStep = !hasSubmittedContent
+  const creatorNextStep = !hasShippingAddress
     ? {
-        title: "Upload Content",
-        description: "Submit your content for brand review when it is ready.",
+        title: "Save Shipping Address",
+        description: "Add your shipping address first so the brand can send campaign product.",
+        href: "#shipping-address",
+        actionLabel: "Save Address",
       }
-    : hasApprovedContent
+    : !hasSubmittedContent
       ? {
-          title: "Post Approved Content",
-          description: "Your content is approved. Post it, then share the live URL with the brand.",
+          title: "Submit Content",
+          description: "Submit your content for brand review when it is ready.",
+          href: "#content-upload",
+          actionLabel: "Submit Content",
         }
-      : {
-          title: "Wait for Review",
-          description: "Your content was submitted. The brand will approve it or request changes.",
-        };
+      : hasApprovedContent
+        ? {
+            title: "Post Approved Content",
+            description: "Your content is approved. Post it, then share the live URL with the brand.",
+            href: "#submitted-content",
+            actionLabel: "View Status",
+          }
+        : {
+            title: "Wait for Review",
+            description: "Your content was submitted. The brand will approve it or request changes.",
+            href: "#submitted-content",
+            actionLabel: "View Status",
+          };
 
   const steps = [
     {
@@ -125,14 +140,19 @@ export default async function CreatorPortalPage({ params }: Props) {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-sm font-semibold text-primary">Next: {creatorNextStep.title}</p>
-            <p className="text-sm text-muted-foreground mt-1">{creatorNextStep.description}</p>
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-primary">Next: {creatorNextStep.title}</p>
+              <p className="text-sm text-muted-foreground mt-1">{creatorNextStep.description}</p>
+            </div>
+            <a href={creatorNextStep.href} className="shrink-0">
+              <Button size="sm">{creatorNextStep.actionLabel} →</Button>
+            </a>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card id="shipping-address">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Package className="h-5 w-5" />
@@ -217,7 +237,7 @@ export default async function CreatorPortalPage({ params }: Props) {
         </div>
 
         {/* Content Upload */}
-        <Card>
+        <Card id="content-upload">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Upload className="h-5 w-5" />
@@ -234,7 +254,7 @@ export default async function CreatorPortalPage({ params }: Props) {
 
         {/* Submitted Content */}
         {contents.length > 0 && (
-          <Card>
+          <Card id="submitted-content" className="bg-card/50">
             <CardHeader>
               <CardTitle>Your Submissions ({contents.length})</CardTitle>
             </CardHeader>

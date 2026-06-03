@@ -87,6 +87,7 @@ export default async function AnalyticsPage() {
         }
         href={pendingConversions.length > 0 ? "#pending-conversions" : "/campaigns"}
         actionLabel={pendingConversions.length > 0 ? "Review Pending" : "View Campaigns"}
+        primary
       />
 
       {/* Top Stats */}
@@ -216,7 +217,7 @@ export default async function AnalyticsPage() {
                     <form action={updateConversionStatus}>
                       <input type="hidden" name="id" value={conversion.id} />
                       <input type="hidden" name="status" value="rejected" />
-                      <Button size="sm" variant="outline" type="submit">Reject</Button>
+                      <Button size="sm" variant="ghost" className="text-muted-foreground hover:text-destructive" type="submit">Reject</Button>
                     </form>
                   </div>
                 </div>

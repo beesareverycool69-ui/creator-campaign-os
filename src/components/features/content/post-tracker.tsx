@@ -180,7 +180,7 @@ export function PostTracker({
           <>
             {!showMetricsForm ? (
               <Button
-                variant="outline"
+                variant="ghost"
                 onClick={() => setShowMetricsForm(true)}
               >
                 📊 Add Metrics
@@ -258,7 +258,7 @@ export function PostTracker({
                   </Button>
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="ghost"
                     onClick={() => setShowMetricsForm(false)}
                   >
                     Cancel

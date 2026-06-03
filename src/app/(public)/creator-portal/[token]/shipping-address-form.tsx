@@ -67,7 +67,7 @@ export function ShippingAddressForm({ token, address }: ShippingAddressFormProps
         </div>
         <div className="flex items-center justify-between gap-3">
           <p className="text-sm text-primary">Shipping address saved ✓</p>
-          <Button type="button" variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+          <Button type="button" variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
             Edit Address
           </Button>
         </div>

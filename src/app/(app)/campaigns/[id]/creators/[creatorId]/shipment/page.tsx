@@ -63,12 +63,39 @@ export default async function ShipmentPage({ params }: Props) {
         </p>
       </div>
 
-      {shipment && (
+      {shipment ? (
+        shipment.trackingNumber ? (
+          <NextStepCard
+            title="Send Portal Link"
+            description="Shipment is tracked. Send the creator portal link so they can upload content when ready."
+            href={portalUrl}
+            actionLabel="Open Portal Link"
+            primary
+          />
+        ) : (
+          <NextStepCard
+            title="Add Tracking"
+            description="Shipment is created. Add tracking so product delivery is visible before content starts."
+            href="#tracking"
+            actionLabel="Add Tracking"
+            primary
+          />
+        )
+      ) : addresses.length === 0 ? (
         <NextStepCard
-          title="Send Portal Link"
-          description="Shipment is created. Send the creator portal link so they can upload content when ready."
+          title="Send Portal Link for Address"
+          description="This creator has no shipping address yet. Send the portal link so they can save one."
           href={portalUrl}
           actionLabel="Open Portal Link"
+          primary
+        />
+      ) : (
+        <NextStepCard
+          title="Create Shipment"
+          description="Use the saved address to create the shipment record."
+          href="#create-shipment"
+          actionLabel="Create Shipment"
+          primary
         />
       )}
 
@@ -76,12 +103,14 @@ export default async function ShipmentPage({ params }: Props) {
       {shipment ? (
         <ShipmentDetail shipment={shipment} />
       ) : (
-        <ShipmentForm
-          campaignCreatorId={creatorId}
+        <div id="create-shipment">
+          <ShipmentForm
+            campaignCreatorId={creatorId}
           campaignId={campaignId}
           addresses={addresses}
-          products={products}
-        />
+            products={products}
+          />
+        </div>
       )}
     </div>
   );

@@ -98,18 +98,20 @@ export default async function TrackPage({ params, searchParams }: Props) {
           description="Accepted creators are ready to move into campaign onboarding."
           href={firstCampaign ? `/campaigns/${firstCampaign.id}` : `/campaigns/new?brandId=${id}`}
           actionLabel={firstCampaign ? "Open Campaign" : "Create Campaign"}
+          primary
         />
       ) : pendingCount > 0 ? (
         <NextStepCard
-          title="Keep Tracking Replies"
-          description="When a creator replies, mark them accepted or declined here."
+          title="Mark Accepted"
+          description="When a creator replies positively, mark them accepted. Decline stays available as a secondary action."
           href={`/brands/${id}/track?tab=pending`}
           actionLabel="Review Pending"
+          primary
         />
       ) : null}
 
       {acceptedCount > 0 && (
-        <div className="rounded-lg border p-4 flex items-center justify-between gap-4">
+        <div className="rounded-lg border bg-card/50 p-4 flex items-center justify-between gap-4">
           <div>
             <p className="font-medium">Ready for campaign onboarding</p>
             <p className="text-sm text-muted-foreground">
@@ -121,7 +123,7 @@ export default async function TrackPage({ params, searchParams }: Props) {
               <Button variant="outline">Add to Campaign</Button>
             </Link>
             <Link href={`/campaigns/new?brandId=${id}`}>
-              <Button>Create Campaign</Button>
+              <Button variant="outline">Create Campaign</Button>
             </Link>
           </div>
         </div>

@@ -257,7 +257,7 @@ export function LeadDiscovery({ brandId, onAddCreators, existingIdentityKeys, ai
   };
 
   return (
-    <Card>
+    <Card id="discover-creators">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-primary" />
@@ -268,13 +268,17 @@ export function LeadDiscovery({ brandId, onAddCreators, existingIdentityKeys, ai
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {/* Tab buttons */}
-        <div className="flex gap-1 p-1 bg-card/70 border border-border rounded-lg mb-4">
+        {/* Discovery/import options */}
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <p className="text-sm font-medium">Primary: Find creators with web search</p>
+          <p className="text-xs text-muted-foreground">More actions: CSV import or screenshot OCR</p>
+        </div>
+        <div className="flex gap-1 p-1 bg-card/50 border border-border rounded-lg mb-4">
           <button
             onClick={() => setActiveTab("external")}
             className={cn(
               "flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-              activeTab === "external" ? "bg-background/85 shadow-sm" : "hover:bg-background/60"
+              activeTab === "external" ? "bg-background/85 shadow-sm" : "text-muted-foreground hover:bg-background/60"
             )}
           >
             <Globe className="h-4 w-4" />
@@ -284,7 +288,7 @@ export function LeadDiscovery({ brandId, onAddCreators, existingIdentityKeys, ai
             onClick={() => setActiveTab("csv")}
             className={cn(
               "flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-              activeTab === "csv" ? "bg-background/85 shadow-sm" : "hover:bg-background/60"
+              activeTab === "csv" ? "bg-background/85 shadow-sm" : "text-muted-foreground hover:bg-background/60"
             )}
           >
             <Upload className="h-4 w-4" />
@@ -294,7 +298,7 @@ export function LeadDiscovery({ brandId, onAddCreators, existingIdentityKeys, ai
             onClick={() => setActiveTab("ocr")}
             className={cn(
               "flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors",
-              activeTab === "ocr" ? "bg-background/85 shadow-sm" : "hover:bg-background/60"
+              activeTab === "ocr" ? "bg-background/85 shadow-sm" : "text-muted-foreground hover:bg-background/60"
             )}
           >
             <Image className="h-4 w-4" />
@@ -380,7 +384,7 @@ export function LeadDiscovery({ brandId, onAddCreators, existingIdentityKeys, ai
             <p className="text-xs text-muted-foreground">
               Format: handle, platform (optional), name (optional), followers (optional), location (optional)
             </p>
-            <Button onClick={handleCSVParse} disabled={isLoading || !csvText.trim()} className="w-full">
+            <Button onClick={handleCSVParse} disabled={isLoading || !csvText.trim()} className="w-full" variant="outline">
               <Upload className="h-4 w-4 mr-2" />
               Parse CSV
             </Button>
@@ -410,7 +414,7 @@ export function LeadDiscovery({ brandId, onAddCreators, existingIdentityKeys, ai
             <p className="text-xs text-muted-foreground">
               Upload a screenshot from Instagram, TikTok, or any social platform. Requires Anthropic; use CSV Import if AI is not configured.
             </p>
-            <Button onClick={handleOCRProcess} disabled={isLoading || !ocrFile || !ocrConfigured} className="w-full">
+            <Button onClick={handleOCRProcess} disabled={isLoading || !ocrFile || !ocrConfigured} className="w-full" variant="outline">
               {isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
               {isLoading ? "Processing..." : ocrConfigured ? "Extract Creators" : "AI OCR Not Configured"}
             </Button>
@@ -428,7 +432,7 @@ export function LeadDiscovery({ brandId, onAddCreators, existingIdentityKeys, ai
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button variant="outline" size="sm" onClick={() => setDiscoveredCreators([])}>
+                <Button variant="ghost" size="sm" onClick={() => setDiscoveredCreators([])}>
                   Clear All
                 </Button>
                 <Button size="sm" onClick={handleAddSelected} disabled={selectedCount === 0 || isLoading}>

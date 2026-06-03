@@ -193,18 +193,16 @@ function TrackCard({
                 <Button 
                   onClick={handleAccept}
                   disabled={isPending}
-                  variant="outline"
-                  className="text-primary border-primary/30 hover:bg-primary/10"
                 >
-                  Accepted
+                  Mark Accepted
                 </Button>
                 <Button 
                   onClick={handleDecline}
                   disabled={isPending}
-                  variant="outline"
-                  className="text-muted-foreground hover:text-red-500 hover:border-red-500/30"
+                  variant="ghost"
+                  className="text-muted-foreground hover:text-red-500"
                 >
-                  Declined
+                  Decline
                 </Button>
               </div>
             )}
@@ -213,11 +211,10 @@ function TrackCard({
               <div className="flex gap-2">
                 <Button
                   onClick={() => router.push(campaignHref)}
-                  variant="outline"
                 >
                   Add to Campaign
                 </Button>
-                <Button onClick={() => router.push("/campaigns/new")}>
+                <Button onClick={() => router.push("/campaigns/new")} variant="outline">
                   Create Campaign
                 </Button>
               </div>

@@ -96,15 +96,15 @@ export function AgreementDetail({ agreement }: AgreementDetailProps) {
   return (
     <div className="space-y-6">
       {/* Status Card */}
-      <Card>
+      <Card className="bg-card/50">
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Agreement Status</span>
+          <CardTitle className="flex items-center justify-between text-base">
+            <span>Agreement tools</span>
             <AgreementStatusBadge status={status} />
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-3">
             <Select
               value={status}
               onChange={(e) =>
@@ -121,7 +121,7 @@ export function AgreementDetail({ agreement }: AgreementDetailProps) {
             </Select>
 
             <Button
-              variant="outline"
+              variant="ghost"
               onClick={handleGeneratePDF}
               disabled={generating}
             >
@@ -134,7 +134,7 @@ export function AgreementDetail({ agreement }: AgreementDetailProps) {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Button variant="outline">📥 Download</Button>
+                <Button variant="ghost">📥 Download</Button>
               </a>
             )}
           </div>

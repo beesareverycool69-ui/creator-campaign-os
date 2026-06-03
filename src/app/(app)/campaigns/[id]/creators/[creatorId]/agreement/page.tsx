@@ -54,12 +54,21 @@ export default async function AgreementPage({ params }: Props) {
         </p>
       </div>
 
-      {agreement && (
+      {agreement ? (
         <NextStepCard
           title="Create Shipment"
           description="Agreement is created. Next, create the product shipment for this creator."
           href={`/campaigns/${campaignId}/creators/${creatorId}/shipment`}
           actionLabel="Create Shipment"
+          primary
+        />
+      ) : (
+        <NextStepCard
+          title="Create Agreement"
+          description="Create the agreement first. Generate, download, and status controls come after the agreement exists."
+          href="#create-agreement"
+          actionLabel="Create Agreement"
+          primary
         />
       )}
 
@@ -67,14 +76,16 @@ export default async function AgreementPage({ params }: Props) {
       {agreement ? (
         <AgreementDetail agreement={agreement} />
       ) : (
-        <AgreementForm
-          campaignCreatorId={creatorId}
+        <div id="create-agreement">
+          <AgreementForm
+            campaignCreatorId={creatorId}
           campaignId={campaignId}
           defaultRate={
             campaignCreator.rate ? parseFloat(campaignCreator.rate) : undefined
           }
-          defaultRateType={campaignCreator.rateType || undefined}
-        />
+            defaultRateType={campaignCreator.rateType || undefined}
+          />
+        </div>
       )}
     </div>
   );

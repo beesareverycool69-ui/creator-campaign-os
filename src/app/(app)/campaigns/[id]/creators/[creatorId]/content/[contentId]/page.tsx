@@ -89,7 +89,7 @@ export default async function ContentDetailPage({ params }: Props) {
         </div>
       </div>
 
-      <NextStepCard {...nextStep} />
+      <NextStepCard {...nextStep} primary />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main content area */}

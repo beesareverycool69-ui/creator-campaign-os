@@ -128,7 +128,7 @@ export function ContentReview({ contentId, currentStatus }: ContentReviewProps) 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Review Actions</CardTitle>
+        <CardTitle>Primary review action</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Feedback form */}
@@ -152,7 +152,7 @@ export function ContentReview({ contentId, currentStatus }: ContentReviewProps) 
                 <Button
                   onClick={handleRequestRevision}
                   disabled={loading || !feedback.trim()}
-                  variant="default"
+                  variant="outline"
                 >
                   {loading ? "Sending..." : "Send Revision Request"}
                 </Button>
@@ -176,16 +176,6 @@ export function ContentReview({ contentId, currentStatus }: ContentReviewProps) 
         {/* Action buttons */}
         {!showFeedback && (
           <div className="flex flex-wrap gap-3">
-            {currentStatus === "submitted" && (
-              <Button
-                variant="secondary"
-                onClick={handleMarkInReview}
-                disabled={loading}
-              >
-                👀 Mark as In Review
-              </Button>
-            )}
-
             {canApprove && (
               <Button
                 variant="default"
@@ -199,7 +189,7 @@ export function ContentReview({ contentId, currentStatus }: ContentReviewProps) 
 
             {canRequestRevision && (
               <Button
-                variant="secondary"
+                variant="outline"
                 onClick={() => openFeedbackForm("revision")}
                 disabled={loading}
               >
@@ -207,11 +197,22 @@ export function ContentReview({ contentId, currentStatus }: ContentReviewProps) 
               </Button>
             )}
 
+            {currentStatus === "submitted" && (
+              <Button
+                variant="ghost"
+                onClick={handleMarkInReview}
+                disabled={loading}
+              >
+                👀 Mark as In Review
+              </Button>
+            )}
+
             {canReject && (
               <Button
-                variant="destructive"
+                variant="ghost"
                 onClick={() => openFeedbackForm("reject")}
                 disabled={loading}
+                className="text-muted-foreground hover:text-destructive"
               >
                 ❌ Reject
               </Button>

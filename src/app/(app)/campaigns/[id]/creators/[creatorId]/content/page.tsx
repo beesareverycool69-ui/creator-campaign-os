@@ -89,11 +89,11 @@ export default async function ContentListPage({ params }: Props) {
         </div>
 
         <Link href={`/campaigns/${campaignId}/creators/${creatorId}/content/new`}>
-          <Button>+ Internal Upload</Button>
+          <Button variant="outline">+ Internal Upload</Button>
         </Link>
       </div>
 
-      <NextStepCard {...contentNextStep} />
+      <NextStepCard {...contentNextStep} primary />
 
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -128,7 +128,7 @@ export default async function ContentListPage({ params }: Props) {
             Send the creator their portal link for uploads, or add content manually with internal upload.
           </p>
           <Link href={`/campaigns/${campaignId}/creators/${creatorId}/content/new`}>
-            <Button>Internal Upload</Button>
+            <Button variant="outline">Internal Upload</Button>
           </Link>
         </div>
       ) : (

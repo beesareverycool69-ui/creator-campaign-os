@@ -101,13 +101,22 @@ export default async function BrandLeadsPage({ params, searchParams }: Props) {
       </div>
 
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Leads</h1>
-          <p className="text-muted-foreground mt-1">
-            {totalCount} creators linked to {brand.name}
-          </p>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold">Leads</h1>
+        <p className="text-muted-foreground mt-1">
+          {totalCount} creators linked to {brand.name}
+        </p>
+      </div>
+
+      <NextStepCard
+        title="Find Creators"
+        description="Start by finding creators for this brand. CSV import and manual add stay available as secondary paths."
+        href="#discover-creators"
+        actionLabel="Find Creators"
+        primary
+      />
+
+      <div className="flex justify-end">
         <AddCreatorToBrandForm
           brandId={id}
           availableCreators={availableCreators}
@@ -115,9 +124,10 @@ export default async function BrandLeadsPage({ params, searchParams }: Props) {
       </div>
 
       {/* Discovery section */}
-      <LeadDiscovery
-        brandId={id}
-        existingIdentityKeys={{
+      <div>
+        <LeadDiscovery
+          brandId={id}
+          existingIdentityKeys={{
           platformHandles: Array.from(processedIdentities.platformHandles),
           profileUrls: Array.from(processedIdentities.profileUrls),
         }}
@@ -125,7 +135,8 @@ export default async function BrandLeadsPage({ params, searchParams }: Props) {
           anthropic: isConfiguredEnv("ANTHROPIC_API_KEY"),
           brave: isConfiguredEnv("BRAVE_API_KEY"),
         }}
-      />
+        />
+      </div>
 
       <NextStepCard {...nextStep} />
 

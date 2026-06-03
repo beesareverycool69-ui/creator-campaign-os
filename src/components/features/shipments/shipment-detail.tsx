@@ -127,10 +127,10 @@ export function ShipmentDetail({ shipment }: ShipmentDetailProps) {
   return (
     <div className="space-y-6">
       {/* Status Card */}
-      <Card>
+      <Card className="bg-card/50">
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Shipment Status</span>
+          <CardTitle className="flex items-center justify-between text-base">
+            <span>Shipment status tools</span>
             <ShipmentStatusBadge status={status} />
           </CardTitle>
         </CardHeader>
@@ -189,13 +189,12 @@ export function ShipmentDetail({ shipment }: ShipmentDetailProps) {
       </Card>
 
       {/* Tracking Card */}
-      <Card>
+      <Card id="tracking">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>Tracking Information</span>
             {!showTrackingForm && !shipment.trackingNumber && (
               <Button
-                variant="outline"
                 size="sm"
                 onClick={() => setShowTrackingForm(true)}
               >

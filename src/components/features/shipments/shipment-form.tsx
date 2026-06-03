@@ -121,7 +121,7 @@ export function ShipmentForm({
 
   if (addresses.length === 0) {
     return (
-      <Card>
+      <Card id="create-shipment">
         <CardContent className="py-8 text-center">
           <p className="text-muted-foreground mb-4">
             This creator has no saved addresses.
@@ -213,7 +213,7 @@ export function ShipmentForm({
                   </Button>
                 </div>
               ))}
-              <Button type="button" variant="outline" size="sm" onClick={addProduct}>
+              <Button type="button" variant="ghost" size="sm" onClick={addProduct}>
                 + Add Product
               </Button>
             </div>
@@ -250,7 +250,7 @@ export function ShipmentForm({
             </Button>
             <Button
               type="button"
-              variant="outline"
+              variant="ghost"
               onClick={() => router.back()}
             >
               Cancel
